@@ -1,0 +1,113 @@
+[0.541s] Invoking command in '/home/absolutezeno/Auto-BT-Generation/src/py_trees_ros': PS1=\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ PYTHONPATH=/home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/prefix_override:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base ../../build/py_trees_ros build --build-base /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build install --record /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/install.log --single-version-externally-managed
+[0.676s] running egg_info
+[0.676s] creating ../../build/py_trees_ros/py_trees_ros.egg-info
+[0.676s] writing ../../build/py_trees_ros/py_trees_ros.egg-info/PKG-INFO
+[0.676s] writing dependency_links to ../../build/py_trees_ros/py_trees_ros.egg-info/dependency_links.txt
+[0.676s] writing entry points to ../../build/py_trees_ros/py_trees_ros.egg-info/entry_points.txt
+[0.676s] writing top-level names to ../../build/py_trees_ros/py_trees_ros.egg-info/top_level.txt
+[0.676s] writing manifest file '../../build/py_trees_ros/py_trees_ros.egg-info/SOURCES.txt'
+[0.677s] reading manifest file '../../build/py_trees_ros/py_trees_ros.egg-info/SOURCES.txt'
+[0.677s] adding license file 'LICENSE'
+[0.678s] writing manifest file '../../build/py_trees_ros/py_trees_ros.egg-info/SOURCES.txt'
+[0.678s] running build
+[0.678s] running build_py
+[0.678s] creating /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build
+[0.678s] creating /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib
+[0.678s] creating /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros
+[0.678s] copying py_trees_ros/actions.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros
+[0.678s] copying py_trees_ros/exceptions.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros
+[0.678s] copying py_trees_ros/battery.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros
+[0.678s] copying py_trees_ros/conversions.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros
+[0.678s] copying py_trees_ros/transforms.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros
+[0.678s] copying py_trees_ros/subscribers.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros
+[0.678s] copying py_trees_ros/version.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros
+[0.678s] copying py_trees_ros/action_clients.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros
+[0.678s] copying py_trees_ros/blackboard.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros
+[0.678s] copying py_trees_ros/utilities.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros
+[0.678s] copying py_trees_ros/visitors.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros
+[0.679s] copying py_trees_ros/__init__.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros
+[0.679s] copying py_trees_ros/service_clients.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros
+[0.679s] copying py_trees_ros/publishers.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros
+[0.679s] copying py_trees_ros/trees.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros
+[0.679s] creating /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/programs
+[0.679s] copying py_trees_ros/programs/echo.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/programs
+[0.679s] copying py_trees_ros/programs/tree_watcher.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/programs
+[0.679s] copying py_trees_ros/programs/multi_talker.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/programs
+[0.679s] copying py_trees_ros/programs/__init__.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/programs
+[0.679s] copying py_trees_ros/programs/blackboard_watcher.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/programs
+[0.679s] creating /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/mock
+[0.679s] copying py_trees_ros/mock/actions.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/mock
+[0.679s] copying py_trees_ros/mock/set_bool.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/mock
+[0.679s] copying py_trees_ros/mock/services.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/mock
+[0.679s] copying py_trees_ros/mock/__init__.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/mock
+[0.679s] copying py_trees_ros/mock/dock.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/mock
+[0.679s] running install
+[0.683s] /usr/lib/python3/dist-packages/setuptools/command/install.py:34: SetuptoolsDeprecationWarning: setup.py install is deprecated. Use build and pip and other standards-based tools.
+[0.683s]   warnings.warn(
+[0.683s] running install_lib
+[0.683s] creating /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros
+[0.683s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/actions.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros
+[0.683s] creating /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/programs
+[0.683s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/programs/echo.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/programs
+[0.683s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/programs/tree_watcher.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/programs
+[0.683s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/programs/multi_talker.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/programs
+[0.683s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/programs/__init__.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/programs
+[0.684s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/programs/blackboard_watcher.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/programs
+[0.684s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/exceptions.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros
+[0.684s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/battery.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros
+[0.684s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/conversions.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros
+[0.684s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/transforms.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros
+[0.684s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/subscribers.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros
+[0.684s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/version.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros
+[0.684s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/action_clients.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros
+[0.684s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/blackboard.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros
+[0.684s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/utilities.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros
+[0.684s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/visitors.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros
+[0.684s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/__init__.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros
+[0.684s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/service_clients.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros
+[0.684s] creating /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/mock
+[0.684s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/mock/actions.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/mock
+[0.684s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/mock/set_bool.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/mock
+[0.684s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/mock/services.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/mock
+[0.684s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/mock/__init__.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/mock
+[0.684s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/mock/dock.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/mock
+[0.684s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/publishers.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros
+[0.684s] copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build/lib/py_trees_ros/trees.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros
+[0.684s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/actions.py to actions.cpython-310.pyc
+[0.684s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/programs/echo.py to echo.cpython-310.pyc
+[0.685s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/programs/tree_watcher.py to tree_watcher.cpython-310.pyc
+[0.686s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/programs/multi_talker.py to multi_talker.cpython-310.pyc
+[0.686s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/programs/__init__.py to __init__.cpython-310.pyc
+[0.686s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/programs/blackboard_watcher.py to blackboard_watcher.cpython-310.pyc
+[0.687s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/exceptions.py to exceptions.cpython-310.pyc
+[0.687s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/battery.py to battery.cpython-310.pyc
+[0.687s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/conversions.py to conversions.cpython-310.pyc
+[0.688s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/transforms.py to transforms.cpython-310.pyc
+[0.688s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/subscribers.py to subscribers.cpython-310.pyc
+[0.689s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/version.py to version.cpython-310.pyc
+[0.689s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/action_clients.py to action_clients.cpython-310.pyc
+[0.690s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/blackboard.py to blackboard.cpython-310.pyc
+[0.691s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/utilities.py to utilities.cpython-310.pyc
+[0.692s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/visitors.py to visitors.cpython-310.pyc
+[0.692s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/__init__.py to __init__.cpython-310.pyc
+[0.692s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/service_clients.py to service_clients.cpython-310.pyc
+[0.693s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/mock/actions.py to actions.cpython-310.pyc
+[0.693s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/mock/set_bool.py to set_bool.cpython-310.pyc
+[0.693s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/mock/services.py to services.cpython-310.pyc
+[0.693s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/mock/__init__.py to __init__.cpython-310.pyc
+[0.693s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/mock/dock.py to dock.cpython-310.pyc
+[0.694s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/publishers.py to publishers.cpython-310.pyc
+[0.694s] byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros/trees.py to trees.cpython-310.pyc
+[0.696s] running install_data
+[0.697s] copying package.xml -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/share/py_trees_ros
+[0.697s] creating /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/share/ament_index
+[0.697s] creating /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/share/ament_index/resource_index
+[0.697s] creating /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/share/ament_index/resource_index/packages
+[0.697s] copying resources/py_trees_ros -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/share/ament_index/resource_index/packages
+[0.697s] running install_egg_info
+[0.698s] Copying ../../build/py_trees_ros/py_trees_ros.egg-info to /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages/py_trees_ros-2.2.2-py3.10.egg-info
+[0.698s] running install_scripts
+[0.710s] Installing py-trees-blackboard-watcher script to /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/bin
+[0.710s] Installing py-trees-tree-watcher script to /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/bin
+[0.710s] writing list of installed files to '/home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/install.log'
+[0.724s] Invoked command in '/home/absolutezeno/Auto-BT-Generation/src/py_trees_ros' returned '0': PS1=\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ PYTHONPATH=/home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/prefix_override:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base ../../build/py_trees_ros build --build-base /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/build install --record /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros/install.log --single-version-externally-managed

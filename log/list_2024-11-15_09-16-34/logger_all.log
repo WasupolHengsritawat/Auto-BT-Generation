@@ -1,0 +1,343 @@
+[0.621s] DEBUG:colcon:Command line arguments: ['/usr/bin/colcon', 'list', '-p', '--base-paths', '/home/absolutezeno/Auto-BT-Generation']
+[0.621s] DEBUG:colcon:Parsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='list', build_base='build', ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['/home/absolutezeno/Auto-BT-Generation'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=None, packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, allow_overriding=[], topological_order=False, names_only=False, paths_only=True, topological_graph=False, topological_graph_dot=False, topological_graph_density=False, topological_graph_legend=False, topological_graph_dot_cluster=False, topological_graph_dot_include_skipped=False, verb_parser=<colcon_defaults.argument_parser.defaults.DefaultArgumentsDecorator object at 0x7c6ae3adb700>, verb_extension=<colcon_package_information.verb.list.ListVerb object at 0x7c6ae3d7a3b0>, main=<bound method ListVerb.main of <colcon_package_information.verb.list.ListVerb object at 0x7c6ae3d7a3b0>>)
+[0.654s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) check parameters
+[0.654s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) check parameters
+[0.654s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) check parameters
+[0.654s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) check parameters
+[0.654s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) discover
+[0.654s] INFO:colcon.colcon_core.package_discovery:Crawling recursively for packages in '/home/absolutezeno/Auto-BT-Generation'
+[0.654s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation) by extensions ['ignore', 'ignore_ament_install']
+[0.654s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation) by extension 'ignore'
+[0.654s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation) by extension 'ignore_ament_install'
+[0.654s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation) by extensions ['colcon_pkg']
+[0.654s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation) by extension 'colcon_pkg'
+[0.654s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation) by extensions ['colcon_meta']
+[0.654s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation) by extension 'colcon_meta'
+[0.654s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation) by extensions ['ros']
+[0.654s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation) by extension 'ros'
+[0.661s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation) by extensions ['cmake', 'python']
+[0.661s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation) by extension 'cmake'
+[0.661s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation) by extension 'python'
+[0.661s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation) by extensions ['python_setup_py']
+[0.661s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation) by extension 'python_setup_py'
+[0.662s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/build) by extensions ['ignore', 'ignore_ament_install']
+[0.662s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/build) by extension 'ignore'
+[0.662s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/build) ignored
+[0.662s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/install) by extensions ['ignore', 'ignore_ament_install']
+[0.662s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/install) by extension 'ignore'
+[0.662s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/install) ignored
+[0.662s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/log) by extensions ['ignore', 'ignore_ament_install']
+[0.662s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/log) by extension 'ignore'
+[0.662s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/log) ignored
+[0.662s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/py_trees_ros_tutorials) by extensions ['ignore', 'ignore_ament_install']
+[0.662s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/py_trees_ros_tutorials) by extension 'ignore'
+[0.662s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/py_trees_ros_tutorials) by extension 'ignore_ament_install'
+[0.662s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/py_trees_ros_tutorials) by extensions ['colcon_pkg']
+[0.662s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/py_trees_ros_tutorials) by extension 'colcon_pkg'
+[0.662s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/py_trees_ros_tutorials) by extensions ['colcon_meta']
+[0.662s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/py_trees_ros_tutorials) by extension 'colcon_meta'
+[0.662s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/py_trees_ros_tutorials) by extensions ['ros']
+[0.662s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/py_trees_ros_tutorials) by extension 'ros'
+[0.665s] DEBUG:colcon.colcon_core.package_identification:Package '/home/absolutezeno/Auto-BT-Generation/py_trees_ros_tutorials' with type 'ros.ament_python' and name 'py_trees_ros_tutorials'
+[0.665s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/py_trees_ros_viewer) by extensions ['ignore', 'ignore_ament_install']
+[0.665s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/py_trees_ros_viewer) by extension 'ignore'
+[0.665s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/py_trees_ros_viewer) by extension 'ignore_ament_install'
+[0.665s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/py_trees_ros_viewer) by extensions ['colcon_pkg']
+[0.665s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/py_trees_ros_viewer) by extension 'colcon_pkg'
+[0.665s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/py_trees_ros_viewer) by extensions ['colcon_meta']
+[0.665s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/py_trees_ros_viewer) by extension 'colcon_meta'
+[0.665s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/py_trees_ros_viewer) by extensions ['ros']
+[0.665s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/py_trees_ros_viewer) by extension 'ros'
+[0.665s] DEBUG:colcon.colcon_core.package_identification:Package '/home/absolutezeno/Auto-BT-Generation/py_trees_ros_viewer' with type 'ros.ament_python' and name 'py_trees_ros_viewer'
+[0.665s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src) by extensions ['ignore', 'ignore_ament_install']
+[0.665s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src) by extension 'ignore'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src) by extension 'ignore_ament_install'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src) by extensions ['colcon_pkg']
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src) by extension 'colcon_pkg'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src) by extensions ['colcon_meta']
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src) by extension 'colcon_meta'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src) by extensions ['ros']
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src) by extension 'ros'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src) by extensions ['cmake', 'python']
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src) by extension 'cmake'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src) by extension 'python'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src) by extensions ['python_setup_py']
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src) by extension 'python_setup_py'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT) by extensions ['ignore', 'ignore_ament_install']
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT) by extension 'ignore'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT) by extension 'ignore_ament_install'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT) by extensions ['colcon_pkg']
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT) by extension 'colcon_pkg'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT) by extensions ['colcon_meta']
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT) by extension 'colcon_meta'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT) by extensions ['ros']
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT) by extension 'ros'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT) by extensions ['cmake', 'python']
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT) by extension 'cmake'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT) by extension 'python'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT) by extensions ['python_setup_py']
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT) by extension 'python_setup_py'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/docker) by extensions ['ignore', 'ignore_ament_install']
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/docker) by extension 'ignore'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/docker) by extension 'ignore_ament_install'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/docker) by extensions ['colcon_pkg']
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/docker) by extension 'colcon_pkg'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/docker) by extensions ['colcon_meta']
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/docker) by extension 'colcon_meta'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/docker) by extensions ['ros']
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/docker) by extension 'ros'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/docker) by extensions ['cmake', 'python']
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/docker) by extension 'cmake'
+[0.666s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/docker) by extension 'python'
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/docker) by extensions ['python_setup_py']
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/docker) by extension 'python_setup_py'
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts) by extensions ['ignore', 'ignore_ament_install']
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts) by extension 'ignore'
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts) by extension 'ignore_ament_install'
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts) by extensions ['colcon_pkg']
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts) by extension 'colcon_pkg'
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts) by extensions ['colcon_meta']
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts) by extension 'colcon_meta'
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts) by extensions ['ros']
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts) by extension 'ros'
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts) by extensions ['cmake', 'python']
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts) by extension 'cmake'
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts) by extension 'python'
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts) by extensions ['python_setup_py']
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts) by extension 'python_setup_py'
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts/autogen_bt) by extensions ['ignore', 'ignore_ament_install']
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts/autogen_bt) by extension 'ignore'
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts/autogen_bt) by extension 'ignore_ament_install'
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts/autogen_bt) by extensions ['colcon_pkg']
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts/autogen_bt) by extension 'colcon_pkg'
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts/autogen_bt) by extensions ['colcon_meta']
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts/autogen_bt) by extension 'colcon_meta'
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts/autogen_bt) by extensions ['ros']
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts/autogen_bt) by extension 'ros'
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts/autogen_bt) by extensions ['cmake', 'python']
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts/autogen_bt) by extension 'cmake'
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts/autogen_bt) by extension 'python'
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts/autogen_bt) by extensions ['python_setup_py']
+[0.667s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts/autogen_bt) by extension 'python_setup_py'
+[0.875s] DEBUG:colcon.colcon_core.package_identification:Package '/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts/autogen_bt' with type 'python' and name 'autogen_bt'
+[0.875s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs) by extensions ['ignore', 'ignore_ament_install']
+[0.875s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs) by extension 'ignore'
+[0.875s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs) by extension 'ignore_ament_install'
+[0.876s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs) by extensions ['colcon_pkg']
+[0.876s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs) by extension 'colcon_pkg'
+[0.876s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs) by extensions ['colcon_meta']
+[0.876s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs) by extension 'colcon_meta'
+[0.876s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs) by extensions ['ros']
+[0.876s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs) by extension 'ros'
+[0.876s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs) by extensions ['cmake', 'python']
+[0.876s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs) by extension 'cmake'
+[0.876s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs) by extension 'python'
+[0.876s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs) by extensions ['python_setup_py']
+[0.876s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs) by extension 'python_setup_py'
+[0.876s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl) by extensions ['ignore', 'ignore_ament_install']
+[0.876s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl) by extension 'ignore'
+[0.876s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl) by extension 'ignore_ament_install'
+[0.876s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl) by extensions ['colcon_pkg']
+[0.876s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl) by extension 'colcon_pkg'
+[0.877s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl) by extensions ['colcon_meta']
+[0.877s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl) by extension 'colcon_meta'
+[0.877s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl) by extensions ['ros']
+[0.877s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl) by extension 'ros'
+[0.877s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl) by extensions ['cmake', 'python']
+[0.877s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl) by extension 'cmake'
+[0.877s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl) by extension 'python'
+[0.877s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl) by extensions ['python_setup_py']
+[0.877s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl) by extension 'python_setup_py'
+[0.877s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough) by extensions ['ignore', 'ignore_ament_install']
+[0.877s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough) by extension 'ignore'
+[0.877s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough) by extension 'ignore_ament_install'
+[0.877s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough) by extensions ['colcon_pkg']
+[0.877s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough) by extension 'colcon_pkg'
+[0.877s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough) by extensions ['colcon_meta']
+[0.878s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough) by extension 'colcon_meta'
+[0.878s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough) by extensions ['ros']
+[0.878s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough) by extension 'ros'
+[0.878s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough) by extensions ['cmake', 'python']
+[0.878s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough) by extension 'cmake'
+[0.878s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough) by extension 'python'
+[0.878s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough) by extensions ['python_setup_py']
+[0.878s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough) by extension 'python_setup_py'
+[0.878s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16) by extensions ['ignore', 'ignore_ament_install']
+[0.878s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16) by extension 'ignore'
+[0.878s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16) by extension 'ignore_ament_install'
+[0.878s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16) by extensions ['colcon_pkg']
+[0.878s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16) by extension 'colcon_pkg'
+[0.878s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16) by extensions ['colcon_meta']
+[0.878s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16) by extension 'colcon_meta'
+[0.878s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16) by extensions ['ros']
+[0.879s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16) by extension 'ros'
+[0.879s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16) by extensions ['cmake', 'python']
+[0.879s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16) by extension 'cmake'
+[0.879s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16) by extension 'python'
+[0.879s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16) by extensions ['python_setup_py']
+[0.879s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16) by extension 'python_setup_py'
+[0.879s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16/params) by extensions ['ignore', 'ignore_ament_install']
+[0.879s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16/params) by extension 'ignore'
+[0.879s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16/params) by extension 'ignore_ament_install'
+[0.879s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16/params) by extensions ['colcon_pkg']
+[0.879s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16/params) by extension 'colcon_pkg'
+[0.879s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16/params) by extensions ['colcon_meta']
+[0.879s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16/params) by extension 'colcon_meta'
+[0.879s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16/params) by extensions ['ros']
+[0.879s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16/params) by extension 'ros'
+[0.880s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16/params) by extensions ['cmake', 'python']
+[0.880s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16/params) by extension 'cmake'
+[0.880s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16/params) by extension 'python'
+[0.880s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16/params) by extensions ['python_setup_py']
+[0.880s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-09-16/params) by extension 'python_setup_py'
+[0.880s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44) by extensions ['ignore', 'ignore_ament_install']
+[0.880s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44) by extension 'ignore'
+[0.880s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44) by extension 'ignore_ament_install'
+[0.880s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44) by extensions ['colcon_pkg']
+[0.880s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44) by extension 'colcon_pkg'
+[0.880s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44) by extensions ['colcon_meta']
+[0.880s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44) by extension 'colcon_meta'
+[0.880s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44) by extensions ['ros']
+[0.880s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44) by extension 'ros'
+[0.880s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44) by extensions ['cmake', 'python']
+[0.880s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44) by extension 'cmake'
+[0.880s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44) by extension 'python'
+[0.881s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44) by extensions ['python_setup_py']
+[0.881s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44) by extension 'python_setup_py'
+[0.881s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/git) by extensions ['ignore', 'ignore_ament_install']
+[0.881s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/git) by extension 'ignore'
+[0.881s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/git) by extension 'ignore_ament_install'
+[0.881s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/git) by extensions ['colcon_pkg']
+[0.881s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/git) by extension 'colcon_pkg'
+[0.881s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/git) by extensions ['colcon_meta']
+[0.881s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/git) by extension 'colcon_meta'
+[0.881s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/git) by extensions ['ros']
+[0.881s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/git) by extension 'ros'
+[0.881s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/git) by extensions ['cmake', 'python']
+[0.881s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/git) by extension 'cmake'
+[0.881s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/git) by extension 'python'
+[0.881s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/git) by extensions ['python_setup_py']
+[0.881s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/git) by extension 'python_setup_py'
+[0.882s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/params) by extensions ['ignore', 'ignore_ament_install']
+[0.882s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/params) by extension 'ignore'
+[0.882s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/params) by extension 'ignore_ament_install'
+[0.882s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/params) by extensions ['colcon_pkg']
+[0.882s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/params) by extension 'colcon_pkg'
+[0.882s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/params) by extensions ['colcon_meta']
+[0.882s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/params) by extension 'colcon_meta'
+[0.882s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/params) by extensions ['ros']
+[0.882s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/params) by extension 'ros'
+[0.882s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/params) by extensions ['cmake', 'python']
+[0.882s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/params) by extension 'cmake'
+[0.882s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/params) by extension 'python'
+[0.882s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/params) by extensions ['python_setup_py']
+[0.882s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/logs/rsl_rl/anymal_d_rough/2024-11-07_21-27-44/params) by extension 'python_setup_py'
+[0.882s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs) by extensions ['ignore', 'ignore_ament_install']
+[0.883s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs) by extension 'ignore'
+[0.883s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs) by extension 'ignore_ament_install'
+[0.883s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs) by extensions ['colcon_pkg']
+[0.883s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs) by extension 'colcon_pkg'
+[0.883s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs) by extensions ['colcon_meta']
+[0.883s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs) by extension 'colcon_meta'
+[0.883s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs) by extensions ['ros']
+[0.883s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs) by extension 'ros'
+[0.883s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs) by extensions ['cmake', 'python']
+[0.883s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs) by extension 'cmake'
+[0.883s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs) by extension 'python'
+[0.883s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs) by extensions ['python_setup_py']
+[0.883s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs) by extension 'python_setup_py'
+[0.883s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07) by extensions ['ignore', 'ignore_ament_install']
+[0.883s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07) by extension 'ignore'
+[0.883s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07) by extension 'ignore_ament_install'
+[0.883s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07) by extensions ['colcon_pkg']
+[0.883s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07) by extension 'colcon_pkg'
+[0.884s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07) by extensions ['colcon_meta']
+[0.884s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07) by extension 'colcon_meta'
+[0.884s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07) by extensions ['ros']
+[0.884s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07) by extension 'ros'
+[0.884s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07) by extensions ['cmake', 'python']
+[0.884s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07) by extension 'cmake'
+[0.884s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07) by extension 'python'
+[0.884s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07) by extensions ['python_setup_py']
+[0.884s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07) by extension 'python_setup_py'
+[0.884s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-09-16) by extensions ['ignore', 'ignore_ament_install']
+[0.884s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-09-16) by extension 'ignore'
+[0.884s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-09-16) by extension 'ignore_ament_install'
+[0.884s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-09-16) by extensions ['colcon_pkg']
+[0.884s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-09-16) by extension 'colcon_pkg'
+[0.884s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-09-16) by extensions ['colcon_meta']
+[0.884s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-09-16) by extension 'colcon_meta'
+[0.884s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-09-16) by extensions ['ros']
+[0.885s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-09-16) by extension 'ros'
+[0.885s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-09-16) by extensions ['cmake', 'python']
+[0.885s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-09-16) by extension 'cmake'
+[0.885s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-09-16) by extension 'python'
+[0.885s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-09-16) by extensions ['python_setup_py']
+[0.885s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-09-16) by extension 'python_setup_py'
+[0.885s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-27-44) by extensions ['ignore', 'ignore_ament_install']
+[0.885s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-27-44) by extension 'ignore'
+[0.885s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-27-44) by extension 'ignore_ament_install'
+[0.885s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-27-44) by extensions ['colcon_pkg']
+[0.885s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-27-44) by extension 'colcon_pkg'
+[0.885s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-27-44) by extensions ['colcon_meta']
+[0.885s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-27-44) by extension 'colcon_meta'
+[0.885s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-27-44) by extensions ['ros']
+[0.885s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-27-44) by extension 'ros'
+[0.885s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-27-44) by extensions ['cmake', 'python']
+[0.885s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-27-44) by extension 'cmake'
+[0.886s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-27-44) by extension 'python'
+[0.886s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-27-44) by extensions ['python_setup_py']
+[0.886s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/outputs/2024-11-07/21-27-44) by extension 'python_setup_py'
+[0.886s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts) by extensions ['ignore', 'ignore_ament_install']
+[0.886s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts) by extension 'ignore'
+[0.886s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts) by extension 'ignore_ament_install'
+[0.886s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts) by extensions ['colcon_pkg']
+[0.886s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts) by extension 'colcon_pkg'
+[0.886s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts) by extensions ['colcon_meta']
+[0.886s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts) by extension 'colcon_meta'
+[0.886s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts) by extensions ['ros']
+[0.886s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts) by extension 'ros'
+[0.886s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts) by extensions ['cmake', 'python']
+[0.886s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts) by extension 'cmake'
+[0.886s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts) by extension 'python'
+[0.886s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts) by extensions ['python_setup_py']
+[0.886s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts) by extension 'python_setup_py'
+[0.887s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl) by extensions ['ignore', 'ignore_ament_install']
+[0.887s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl) by extension 'ignore'
+[0.887s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl) by extension 'ignore_ament_install'
+[0.887s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl) by extensions ['colcon_pkg']
+[0.887s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl) by extension 'colcon_pkg'
+[0.887s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl) by extensions ['colcon_meta']
+[0.887s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl) by extension 'colcon_meta'
+[0.887s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl) by extensions ['ros']
+[0.887s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl) by extension 'ros'
+[0.887s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl) by extensions ['cmake', 'python']
+[0.887s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl) by extension 'cmake'
+[0.887s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl) by extension 'python'
+[0.887s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl) by extensions ['python_setup_py']
+[0.887s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl) by extension 'python_setup_py'
+[0.887s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl/__pycache__) by extensions ['ignore', 'ignore_ament_install']
+[0.887s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl/__pycache__) by extension 'ignore'
+[0.887s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl/__pycache__) by extension 'ignore_ament_install'
+[0.888s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl/__pycache__) by extensions ['colcon_pkg']
+[0.888s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl/__pycache__) by extension 'colcon_pkg'
+[0.888s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl/__pycache__) by extensions ['colcon_meta']
+[0.888s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl/__pycache__) by extension 'colcon_meta'
+[0.888s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl/__pycache__) by extensions ['ros']
+[0.888s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl/__pycache__) by extension 'ros'
+[0.888s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl/__pycache__) by extensions ['cmake', 'python']
+[0.888s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl/__pycache__) by extension 'cmake'
+[0.888s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl/__pycache__) by extension 'python'
+[0.888s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl/__pycache__) by extensions ['python_setup_py']
+[0.888s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/scripts/rsl_rl/__pycache__) by extension 'python_setup_py'
+[0.888s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/py_trees_ros) by extensions ['ignore', 'ignore_ament_install']
+[0.888s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/py_trees_ros) by extension 'ignore'
+[0.888s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/py_trees_ros) by extension 'ignore_ament_install'
+[0.888s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/py_trees_ros) by extensions ['colcon_pkg']
+[0.888s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/py_trees_ros) by extension 'colcon_pkg'
+[0.888s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/py_trees_ros) by extensions ['colcon_meta']
+[0.888s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/py_trees_ros) by extension 'colcon_meta'
+[0.888s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/py_trees_ros) by extensions ['ros']
+[0.889s] Level 1:colcon.colcon_core.package_identification:_identify(/home/absolutezeno/Auto-BT-Generation/src/py_trees_ros) by extension 'ros'
+[0.890s] DEBUG:colcon.colcon_core.package_identification:Package '/home/absolutezeno/Auto-BT-Generation/src/py_trees_ros' with type 'ros.ament_python' and name 'py_trees_ros'
+[0.890s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) using defaults

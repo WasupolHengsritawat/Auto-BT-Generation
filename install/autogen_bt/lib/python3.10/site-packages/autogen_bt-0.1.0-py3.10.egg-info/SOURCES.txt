@@ -1,0 +1,9 @@
+setup.py
+../../../../build/autogen_bt/autogen_bt.egg-info/PKG-INFO
+../../../../build/autogen_bt/autogen_bt.egg-info/SOURCES.txt
+../../../../build/autogen_bt/autogen_bt.egg-info/dependency_links.txt
+../../../../build/autogen_bt/autogen_bt.egg-info/not-zip-safe
+../../../../build/autogen_bt/autogen_bt.egg-info/requires.txt
+../../../../build/autogen_bt/autogen_bt.egg-info/top_level.txt
+autogen_bt/__init__.py
+autogen_bt/ui_extension_example.py
