@@ -1,0 +1,28 @@
+-- Found ament_cmake: 1.3.5 (/opt/ros/humble/share/ament_cmake/cmake)
+-- Found rclpy: 3.3.14 (/opt/ros/humble/share/rclpy/cmake)
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/absolutezeno/Auto-BT-Generation/build/isaacsim
+-- Install configuration: ""
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/share/isaacsim/scripts
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/share/isaacsim/scripts/open_isaacsim_stage.py
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/share/isaacsim/scripts/run_isaacsim.py
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/share/isaacsim/launch
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/share/isaacsim/launch/run_isaacsim.launch.py
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/lib/isaacsim/run_isaacsim.py
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/lib/isaacsim/open_isaacsim_stage.py
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/share/ament_index/resource_index/package_run_dependencies/isaacsim
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/share/ament_index/resource_index/parent_prefix_path/isaacsim
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/share/isaacsim/environment/ament_prefix_path.sh
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/share/isaacsim/environment/ament_prefix_path.dsv
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/share/isaacsim/environment/path.sh
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/share/isaacsim/environment/path.dsv
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/share/isaacsim/local_setup.bash
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/share/isaacsim/local_setup.sh
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/share/isaacsim/local_setup.zsh
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/share/isaacsim/local_setup.dsv
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/share/isaacsim/package.dsv
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/share/ament_index/resource_index/packages/isaacsim
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/share/isaacsim/cmake/isaacsimConfig.cmake
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/share/isaacsim/cmake/isaacsimConfig-version.cmake
+-- Installing: /home/absolutezeno/Auto-BT-Generation/install/isaacsim/share/isaacsim/package.xml

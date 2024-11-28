@@ -1,0 +1,63 @@
+[0.622s] Invoking command in '/home/absolutezeno/Auto-BT-Generation/build/custom_message': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_tutorials:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros:/home/absolutezeno/FRA501/install/rqt_joint_trajectory_controller:/home/absolutezeno/FRA501/install/rqt_controller_manager:/home/absolutezeno/FRA501/install/ros2controlcli:/home/absolutezeno/FRA501/install/ros2_controllers_test_nodes:/opt/ros/humble PS1=(isaaclab) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ VIRTUAL_ENV_PROMPT=(isaaclab) /usr/bin/cmake /home/absolutezeno/Auto-BT-Generation/src/custom_message -DCMAKE_INSTALL_PREFIX=/home/absolutezeno/Auto-BT-Generation/install/custom_message
+[0.634s] -- Found ament_cmake: 1.3.5 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.771s] -- Found std_msgs: 4.2.4 (/opt/ros/humble/share/std_msgs/cmake)
+[0.786s] -- Found rosidl_generator_c: 3.1.5 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[0.788s] -- Found rosidl_adapter: 3.1.5 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[0.791s] -- Found rosidl_generator_cpp: 3.1.5 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[0.798s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.808s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.841s] -- Found rosidl_default_generators: 1.2.0 (/opt/ros/humble/share/rosidl_default_generators/cmake)
+[0.948s] [31mCMake Error at /opt/ros/humble/share/rosidl_adapter/cmake/rosidl_adapt_interfaces.cmake:59 (message):
+[0.949s]   execute_process(/home/absolutezeno/isaaclab/bin/python3.10 -m
+[0.949s]   rosidl_adapter --package-name custom_message --arguments-file
+[0.949s]   /home/absolutezeno/Auto-BT-Generation/build/custom_message/rosidl_adapter__arguments__custom_message.json
+[0.949s]   --output-dir
+[0.949s]   /home/absolutezeno/Auto-BT-Generation/build/custom_message/rosidl_adapter/custom_message
+[0.949s]   --output-file
+[0.949s]   /home/absolutezeno/Auto-BT-Generation/build/custom_message/rosidl_adapter/custom_message.idls)
+[0.949s]   returned error code 1:
+[0.949s] 
+[0.949s]   AttributeError processing template 'msg.idl.em'
+[0.950s] 
+[0.950s]   Traceback (most recent call last):
+[0.950s] 
+[0.950s]     File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_adapter/resource/__init__.py", line 51, in evaluate_template
+[0.950s]       em.BUFFERED_OPT: True,
+[0.950s] 
+[0.950s]   AttributeError: module 'em' has no attribute 'BUFFERED_OPT'
+[0.950s] 
+[0.950s]   
+[0.950s] 
+[0.950s]   During handling of the above exception, another exception occurred:
+[0.950s] 
+[0.950s]   
+[0.950s] 
+[0.950s]   Traceback (most recent call last):
+[0.950s] 
+[0.950s]     File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+[0.951s]       return _run_code(code, main_globals, None,
+[0.951s]     File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+[0.951s]       exec(code, run_globals)
+[0.951s]     File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_adapter/__main__.py", line 19, in <module>
+[0.951s]       sys.exit(main())
+[0.951s]     File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_adapter/main.py", line 53, in main
+[0.951s]       abs_idl_file = convert_to_idl(
+[0.951s]     File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_adapter/__init__.py", line 19, in convert_to_idl
+[0.951s]       return convert_msg_to_idl(
+[0.951s]     File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_adapter/msg/__init__.py", line 39, in convert_msg_to_idl
+[0.951s]       expand_template('msg.idl.em', data, output_file, encoding='iso-8859-1')
+[0.951s]     File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_adapter/resource/__init__.py", line 23, in expand_template
+[0.951s]       content = evaluate_template(template_name, data)
+[0.951s]     File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_adapter/resource/__init__.py", line 69, in evaluate_template
+[0.951s]       _interpreter.shutdown()
+[0.951s] 
+[0.951s]   AttributeError: 'NoneType' object has no attribute 'shutdown'
+[0.951s] 
+[0.951s] Call Stack (most recent call first):
+[0.952s]   /opt/ros/humble/share/rosidl_cmake/cmake/rosidl_generate_interfaces.cmake:130 (rosidl_adapt_interfaces)
+[0.952s]   CMakeLists.txt:23 (rosidl_generate_interfaces)
+[0.952s] 
+[0.952s] [0m
+[0.952s] -- Configuring incomplete, errors occurred!
+[0.952s] See also "/home/absolutezeno/Auto-BT-Generation/build/custom_message/CMakeFiles/CMakeOutput.log".
+[0.953s] Invoked command in '/home/absolutezeno/Auto-BT-Generation/build/custom_message' returned '1': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_tutorials:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros:/home/absolutezeno/FRA501/install/rqt_joint_trajectory_controller:/home/absolutezeno/FRA501/install/rqt_controller_manager:/home/absolutezeno/FRA501/install/ros2controlcli:/home/absolutezeno/FRA501/install/ros2_controllers_test_nodes:/opt/ros/humble PS1=(isaaclab) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ VIRTUAL_ENV_PROMPT=(isaaclab) /usr/bin/cmake /home/absolutezeno/Auto-BT-Generation/src/custom_message -DCMAKE_INSTALL_PREFIX=/home/absolutezeno/Auto-BT-Generation/install/custom_message

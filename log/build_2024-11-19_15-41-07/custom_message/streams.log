@@ -1,0 +1,38 @@
+[0.628s] Invoking command in '/home/absolutezeno/Auto-BT-Generation/build/custom_message': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_tutorials:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros:/home/absolutezeno/FRA501/install/rqt_joint_trajectory_controller:/home/absolutezeno/FRA501/install/rqt_controller_manager:/home/absolutezeno/FRA501/install/ros2controlcli:/home/absolutezeno/FRA501/install/ros2_controllers_test_nodes:/opt/ros/humble PS1=(isaaclab) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ VIRTUAL_ENV_PROMPT=(isaaclab) /usr/bin/cmake --build /home/absolutezeno/Auto-BT-Generation/build/custom_message -- -j20 -l20
+[0.659s] [  3%] [34m[1mGenerating C code for ROS interfaces[0m
+[0.663s] [  6%] [34m[1mGenerating C++ code for ROS interfaces[0m
+[0.672s] [  6%] Built target ament_cmake_python_copy_custom_message
+[0.702s] Traceback (most recent call last):
+[0.702s]   File "/opt/ros/humble/share/rosidl_generator_cpp/cmake/../../../lib/rosidl_generator_cpp/rosidl_generator_cpp", line 8, in <module>
+[0.702s]     from rosidl_generator_cpp import generate_cpp
+[0.702s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_generator_cpp/__init__.py", line 17, in <module>
+[0.702s]     from rosidl_cmake import generate_files
+[0.702s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_cmake/__init__.py", line 24, in <module>
+[0.702s]     from rosidl_parser.parser import parse_idl_file
+[0.702s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 20, in <module>
+[0.702s]     from lark import Lark
+[0.703s] ModuleNotFoundError: No module named 'lark'
+[0.706s] gmake[2]: *** [CMakeFiles/custom_message__cpp.dir/build.make:123: rosidl_generator_cpp/custom_message/msg/sample_msg.hpp] Error 1
+[0.707s] gmake[1]: *** [CMakeFiles/Makefile2:265: CMakeFiles/custom_message__cpp.dir/all] Error 2
+[0.707s] gmake[1]: *** Waiting for unfinished jobs....
+[0.716s] Traceback (most recent call last):
+[0.716s]   File "/opt/ros/humble/share/rosidl_generator_c/cmake/../../../lib/rosidl_generator_c/rosidl_generator_c", line 8, in <module>
+[0.716s]     from rosidl_generator_c import generate_c
+[0.717s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_generator_c/__init__.py", line 15, in <module>
+[0.717s]     from rosidl_cmake import convert_camel_case_to_lower_case_underscore
+[0.717s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_cmake/__init__.py", line 24, in <module>
+[0.717s]     from rosidl_parser.parser import parse_idl_file
+[0.717s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 20, in <module>
+[0.717s]     from lark import Lark
+[0.717s] ModuleNotFoundError: No module named 'lark'
+[0.721s] gmake[2]: *** [CMakeFiles/custom_message__rosidl_generator_c.dir/build.make:119: rosidl_generator_c/custom_message/msg/sample_msg.h] Error 1
+[0.721s] gmake[1]: *** [CMakeFiles/Makefile2:212: CMakeFiles/custom_message__rosidl_generator_c.dir/all] Error 2
+[0.830s] running egg_info
+[0.830s] writing custom_message.egg-info/PKG-INFO
+[0.830s] writing dependency_links to custom_message.egg-info/dependency_links.txt
+[0.830s] writing top-level names to custom_message.egg-info/top_level.txt
+[0.831s] reading manifest file 'custom_message.egg-info/SOURCES.txt'
+[0.831s] writing manifest file 'custom_message.egg-info/SOURCES.txt'
+[0.850s] [  6%] Built target ament_cmake_python_build_custom_message_egg
+[0.851s] gmake: *** [Makefile:146: all] Error 2
+[0.894s] Invoked command in '/home/absolutezeno/Auto-BT-Generation/build/custom_message' returned '2': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_tutorials:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros:/home/absolutezeno/FRA501/install/rqt_joint_trajectory_controller:/home/absolutezeno/FRA501/install/rqt_controller_manager:/home/absolutezeno/FRA501/install/ros2controlcli:/home/absolutezeno/FRA501/install/ros2_controllers_test_nodes:/opt/ros/humble PS1=(isaaclab) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ VIRTUAL_ENV_PROMPT=(isaaclab) /usr/bin/cmake --build /home/absolutezeno/Auto-BT-Generation/build/custom_message -- -j20 -l20
