@@ -1,0 +1,25 @@
+[2.493s] Invoking command in '/home/absolutezeno/Auto-BT-Generation/src/py_trees_ros_viewer': PYTHONPATH=/home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/prefix_override:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages:${PYTHONPATH} VIRTUAL_ENV_PROMPT=(isaaclab) /usr/bin/python3 setup.py egg_info --egg-base ../../build/py_trees_ros_viewer build --build-base /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build install --record /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/install.log --single-version-externally-managed
+[2.529s] /home/absolutezeno/Auto-BT-Generation/src/py_trees_ros_viewer/setup.py:5: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+[2.529s]   from distutils import log
+[2.759s] running egg_info
+[2.759s] writing ../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info/PKG-INFO
+[2.759s] writing dependency_links to ../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info/dependency_links.txt
+[2.759s] writing entry points to ../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info/entry_points.txt
+[2.759s] writing top-level names to ../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info/top_level.txt
+[2.761s] reading manifest file '../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info/SOURCES.txt'
+[2.761s] adding license file 'LICENSE'
+[2.762s] writing manifest file '../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info/SOURCES.txt'
+[2.762s] running build
+[2.762s] running build_py
+[2.763s] running install
+[2.763s] running install_lib
+[2.763s] /usr/lib/python3/dist-packages/setuptools/command/install.py:34: SetuptoolsDeprecationWarning: setup.py install is deprecated. Use build and pip and other standards-based tools.
+[2.764s]   warnings.warn(
+[2.765s] running install_data
+[2.765s] running install_egg_info
+[2.766s] removing '/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer-0.2.3-py3.10.egg-info' (and everything under it)
+[2.766s] Copying ../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info to /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer-0.2.3-py3.10.egg-info
+[2.767s] running install_scripts
+[2.770s] Installing py-trees-tree-viewer script to /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/bin
+[2.770s] writing list of installed files to '/home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/install.log'
+[2.806s] Invoked command in '/home/absolutezeno/Auto-BT-Generation/src/py_trees_ros_viewer' returned '0': PYTHONPATH=/home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/prefix_override:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages:${PYTHONPATH} VIRTUAL_ENV_PROMPT=(isaaclab) /usr/bin/python3 setup.py egg_info --egg-base ../../build/py_trees_ros_viewer build --build-base /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build install --record /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/install.log --single-version-externally-managed

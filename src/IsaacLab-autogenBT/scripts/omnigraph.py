@@ -19,10 +19,10 @@ def create_controller_omnigraph(env_ind):
                     ("SimulationTime", "omni.isaac.core_nodes.IsaacReadSimulationTime"),
 
                     # Sensors =================================================================================
-                    # Lidar
-                    ("OneSimulationFrame", "omni.isaac.core_nodes.OgnIsaacRunOneSimulationFrame"),
-                    ("CreateRenderProduct", "omni.isaac.core_nodes.IsaacCreateRenderProduct"),
-                    ("LidarHelperScan", "omni.isaac.ros2_bridge.ROS2RtxLidarHelper"),
+                    # # Lidar
+                    # ("OneSimulationFrame", "omni.isaac.core_nodes.OgnIsaacRunOneSimulationFrame"),
+                    # ("CreateRenderProduct", "omni.isaac.core_nodes.IsaacCreateRenderProduct"),
+                    # ("LidarHelperScan", "omni.isaac.ros2_bridge.ROS2RtxLidarHelper"),
                     
                     # # Robot Base Transformation
                     # ("RobotTransformation", "omni.isaac.ros2_bridge.ROS2PublishTransformTree"),
@@ -64,9 +64,9 @@ def create_controller_omnigraph(env_ind):
                 og.Controller.Keys.SET_VALUES: [
                     # Sensors =================================================================================
                     # Lidar
-                    ("CreateRenderProduct.inputs:cameraPrim", f"{environment_path}/Robot/Jackal/base_link/sick_lms1xx_lidar_frame/lidar"),
-                    ("LidarHelperScan.inputs:topicName", f"/robot_{env_ind}/laser_scan"),
-                    ("LidarHelperScan.inputs:type", "laser_scan"),
+                    # ("CreateRenderProduct.inputs:cameraPrim", f"{environment_path}/Robot/Jackal/base_link/sick_lms1xx_lidar_frame/lidar"),
+                    # ("LidarHelperScan.inputs:topicName", f"/robot_{env_ind}/laser_scan"),
+                    # ("LidarHelperScan.inputs:type", "laser_scan"),
 
                     # # Robot Base Transformation
                     # ("RobotTransformation.inputs:parentPrim", f"{environment_path}"),
@@ -108,11 +108,11 @@ def create_controller_omnigraph(env_ind):
 
                     # Sensors =================================================================================
                     # Lidar
-                    ("Context.outputs:context", "LidarHelperScan.inputs:context"),
-                    ("OnPlaybackTick.outputs:tick", "OneSimulationFrame.inputs:execIn"),
-                    ("OneSimulationFrame.outputs:step", "CreateRenderProduct.inputs:execIn"),
-                    ("CreateRenderProduct.outputs:execOut", "LidarHelperScan.inputs:execIn"),
-                    ("CreateRenderProduct.outputs:renderProductPath", "LidarHelperScan.inputs:renderProductPath"),
+                    # ("Context.outputs:context", "LidarHelperScan.inputs:context"),
+                    # ("OnPlaybackTick.outputs:tick", "OneSimulationFrame.inputs:execIn"),
+                    # ("OneSimulationFrame.outputs:step", "CreateRenderProduct.inputs:execIn"),
+                    # ("CreateRenderProduct.outputs:execOut", "LidarHelperScan.inputs:execIn"),
+                    # ("CreateRenderProduct.outputs:renderProductPath", "LidarHelperScan.inputs:renderProductPath"),
 
                     # # Robot Base Transformation
                     # ("OnPlaybackTick.outputs:tick", "RobotTransformation.inputs:execIn"),

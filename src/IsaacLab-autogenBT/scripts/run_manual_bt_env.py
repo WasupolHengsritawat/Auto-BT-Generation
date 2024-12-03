@@ -54,7 +54,7 @@ from omni.isaac.core.utils.extensions import enable_extension
 
 from assets.jackal_ur5 import JACKAL_UR5_CFG  # isort:skip
 from omnigraph import create_controller_omnigraph
-from ros2_publisher import pub_scene_data, RobotBaseNode
+from ros2_publisher import pub_scene_data, SceneNode
 
 # enable ROS2 bridge extension
 enable_extension("omni.isaac.ros2_bridge")
@@ -67,14 +67,14 @@ robot_rot = Rotation.from_euler('xyz', [-630, -400, 60], degrees=True).as_quat()
 # Possible target spawn point
 target_spawn_pool = [[ 14.0, -4.0,  0.7],
                      [ 22.0, -1.0,  0.7],
-                     [ 23.0, 21.0,  0.7],
+                     [ 19.5,  7.7,  0.7],
                      [ 20.5, 13.0,  0.7],
+                     [ 23.0, 21.0,  0.7],
                      [  9.0, 24.5,  0.7],
                      [ -2.0, 23.2,  0.7],
                      [ -1.5, 13.3,  0.7],
                      [ -2.6,  7.7,  0.7],
-                     [  8.0,  6.7,  0.7],
-                     [ 19.5,  7.7,  0.7],]
+                     [  8.0,  6.7,  0.7]]
 
 target_spawn_ind = np.random.default_rng().permutation(10)
 
@@ -217,7 +217,7 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
 
     # Initialize ROS2 node
     rclpy.init()
-    base_node = RobotBaseNode(args_cli.num_envs)
+    base_node = SceneNode(args_cli.num_envs)
 
     # Simulation loop
     while simulation_app.is_running():
@@ -225,7 +225,7 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
         pub_scene_data(scene.num_envs, base_node, scene)
 
         # Reset
-        if count % 4000 == 0:
+        if count % 400000 == 0:
             # Reset Counter
             count = 0
 
@@ -311,7 +311,7 @@ def main():
     # Create ROS2 omnigraph
     for i in range(args_cli.num_envs):
         create_controller_omnigraph(i)
-
+    
     # Play the simulator
     sim.reset()
     # Now we are ready!
