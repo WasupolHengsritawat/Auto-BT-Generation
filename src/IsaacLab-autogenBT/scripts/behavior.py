@@ -1,29 +1,75 @@
 import py_trees
 import py_trees_ros
+import roboticstoolbox as rtb
+from spatialmath import SE3
+from spatialmath.base import q2r
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import TransformStamped
+from sensor_msgs.msg import JointState
+from std_msgs.msg import Float64, Float32, Bool
 from tf_transformations import euler_from_quaternion
 import numpy as np
+from ikpy.chain import Chain
+from ikpy.link import OriginLink, URDFLink
 import networkx as nx
 import random
 import math
+import code 
 
 # Utility Functions =======================================================================================================================================
 def euclidean_distance(coord1, coord2):
     return math.sqrt((coord1[0] - coord2[0])**2 + (coord1[1] - coord2[1])**2)
 
-def move_to_target(pid, robot_position, robot_orientation, target_position, cmd_vel_publisher, logger = None):
+def trapezoidal_velocity(distance_to_target, max_velocity, acceleration, deceleration, current_velocity, delta_time):
     """
-    Move the robot towards the target position using a PID controller for angular velocity.
+    Calculate the linear velocity using a trapezoidal profile.
+
+    :param distance_to_target: Remaining distance to the target.
+    :param max_velocity: Maximum allowable velocity.
+    :param acceleration: Acceleration rate.
+    :param deceleration: Deceleration rate.
+    :param current_velocity: Current velocity of the robot.
+    :param delta_time: Time step for updating velocity.
+    :return: Updated velocity.
+    """
+    # Compute braking distance based on deceleration
+    braking_distance = (current_velocity**2) / (2 * deceleration)
+    
+    if distance_to_target <= braking_distance:
+        # Decelerate if within braking distance
+        new_velocity = max(0, current_velocity - deceleration * delta_time)
+    elif current_velocity < max_velocity:
+        # Accelerate if below max velocity
+        new_velocity = min(max_velocity, current_velocity + acceleration * delta_time)
+    else:
+        # Maintain max velocity
+        new_velocity = max_velocity
+
+    return new_velocity
+
+def move_to_target(pid, robot_position, robot_orientation, target_position, cmd_vel_publisher, logger=None, delta_time=0.1, tol=0.2):
+    """
+    Move the robot towards the target position using a PID controller for angular velocity
+    and trapezoidal velocity profile for linear velocity.
 
     :param robot_position: Tuple (x, y) of the robot's current position.
     :param robot_orientation: Quaternion representing the robot's orientation.
     :param target_position: Tuple (x, y) of the target position.
     :param cmd_vel_publisher: ROS2 publisher for /cmd_vel topic.
     :param pid: Instance of PIDController for angular velocity control.
-    :param transform_stamped: TransformStamped message containing the timestamp.
+    :param logger: Optional logger for debugging.
+    :param delta_time: Time step for velocity updates (default: 0.1 seconds).
     """
-    status = False # Running  
+    status = False  # Running
+
+    # Constants for the trapezoidal velocity profile
+    max_velocity = 2.0  # Maximum linear velocity
+    acceleration = 1.5  # Acceleration rate
+    deceleration = 0.7  # Deceleration rate
+
+    # Initialize static variable for current velocity
+    if not hasattr(move_to_target, "current_velocity"):
+        move_to_target.current_velocity = 0.0
 
     # Extract current position and target position
     x_robot, y_robot = robot_position
@@ -37,7 +83,10 @@ def move_to_target(pid, robot_position, robot_orientation, target_position, cmd_
 
     # Calculate angular error (normalize to [-pi, pi])
     angular_offset = np.pi
-    angular_error = math.atan2(math.sin(theta_target - theta_current + angular_offset), math.cos(theta_target - theta_current + angular_offset))
+    angular_error = math.atan2(
+        math.sin(theta_target - theta_current + angular_offset),
+        math.cos(theta_target - theta_current + angular_offset),
+    )
 
     # Distance to the target
     distance_to_target = math.sqrt((x_target - x_robot)**2 + (y_target - y_robot)**2)
@@ -45,32 +94,39 @@ def move_to_target(pid, robot_position, robot_orientation, target_position, cmd_
     # Compute angular velocity using the PID controller
     angular_velocity = pid.compute(angular_error)
 
-    # Proportional gain for linear velocity
-    K_linear = 1.0
+    # Handle linear motion and trajectory reset
     linear_velocity = 0.0
-
-    # If the angular error is small, move forward
-    if abs(angular_error) < 0.1:
-        linear_velocity = K_linear * distance_to_target
-        # angular_velocity = 0.0
-        if linear_velocity > 0.7:
-            linear_velocity = 0.7
+    if abs(angular_error) < 0.1:  # Allow movement if angular error is small
+        # Recompute trajectory and use trapezoidal velocity
+        move_to_target.current_velocity = trapezoidal_velocity(
+            distance_to_target,
+            max_velocity,
+            acceleration,
+            deceleration,
+            move_to_target.current_velocity,
+            delta_time,
+        )
+        linear_velocity = move_to_target.current_velocity
+    else:
+        # Stop linear motion due to excessive angular error and reset velocity
+        move_to_target.current_velocity = 0.0
 
     # Stop if close to the target
-    if distance_to_target < 0.2:
+    if distance_to_target < tol:
         linear_velocity = 0.0
         angular_velocity = 0.0
         pid.reset()  # Reset PID controller when goal is reached
-        status = True # Finish
+        move_to_target.current_velocity = 0.0  # Reset static velocity
+        status = True  # Finish
 
     # Publish the velocities
     twist_msg = Twist()
     twist_msg.linear.x = float(linear_velocity)
     twist_msg.angular.z = float(angular_velocity)
 
-    if not(logger == None):
-        logger.info(f'linear error  : {distance_to_target} angular error  : {angular_error}')
-        logger.info(f'linear command: {linear_velocity} angular command: {angular_velocity}')
+    if logger is not None:
+        logger.info(f"Linear error  : {distance_to_target}, Angular error  : {angular_error}")
+        logger.info(f"Linear command: {linear_velocity}, Angular command: {angular_velocity}")
 
     cmd_vel_publisher.publish(twist_msg)
 
@@ -177,6 +233,7 @@ class PatrolNode(py_trees.behaviour.Behaviour):
         self.robot_graph = robot_graph
 
         self.env_id = env_id
+        self.battery_level = None
 
         self.robot_pos = None
         self.robot_rot = None
@@ -195,10 +252,14 @@ class PatrolNode(py_trees.behaviour.Behaviour):
             error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
             raise KeyError(error_message) from e  # 'direct cause' traceability
         
+        self.battery_subscriber = self.node.create_subscription(Float32, f"/robot_{self.env_id}/battery_level", self.battery_level_callback, 10)
         self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/robot_{self.env_id}/tf", self.robot_trans_callback, 10)
         self.cmd_vel_publisher = self.node.create_publisher(Twist, f"/robot_{self.env_id}/cmd_vel", 10)
 
         return True
+    
+    def battery_level_callback(self, msg):
+        self.battery_level = msg.data
     
     def robot_trans_callback(self, msg):
         self.robot_pos = [msg.transform.translation.x, msg.transform.translation.y]
@@ -208,8 +269,11 @@ class PatrolNode(py_trees.behaviour.Behaviour):
         """
         Main behavior logic.
         """
-        if self.robot_pos is None or self.robot_rot is None:
+        if self.robot_pos is None or self.robot_rot is None or self.battery_level is None:
             return py_trees.common.Status.RUNNING   
+        
+        if self.battery_level < 0.1:
+            return py_trees.common.Status.FAILURE
     
         if self.path == []: # Plan to go to adjacent unvisited area 
 
@@ -251,162 +315,27 @@ class PatrolNode(py_trees.behaviour.Behaviour):
         """
         Stop the robot on termination.
         """
-        
-        self.logger.debug(f"{self.name}: terminate({new_status})")
+        twist_msg = Twist()
+        twist_msg.linear.x = 0.0
+        twist_msg.angular.z = 0.0
 
-class GoToChargerNode(py_trees.behaviour.Behaviour):
-    def __init__(self, name, robot_graph, env_id):
-        super().__init__(name)
-        self.robot_graph = robot_graph
-
-        self.env_id = env_id
-
-        self.final_target_node = 1
-
-        self.robot_pos = None
-        self.robot_rot = None
-        self.cmd_vel_publisher = None
+        self.cmd_vel_publisher.publish(twist_msg)
 
         self.path = []
-        self.angular_controller = PIDController(K_p = 5, K_i = 2, output_limits=(-2.7,2.7))
-        
-    def setup(self, **kwargs):
-        """
-        One-time setup to initialize ROS2 publishers and subscribers.
-        """
-        try:
-            self.node = kwargs['node']
-        except KeyError as e:
-            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
-            raise KeyError(error_message) from e  # 'direct cause' traceability
-        
-        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/robot_{self.env_id}/tf", self.robot_trans_callback, 10)
-        self.cmd_vel_publisher = self.node.create_publisher(Twist, f"/robot_{self.env_id}/cmd_vel", 10)
-
-        return True
-    
-    def robot_trans_callback(self, msg):
-        self.robot_pos = [msg.transform.translation.x, msg.transform.translation.y]
-        self.robot_rot = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
-
-    def update(self):
-        """
-        Main behavior logic.
-        """
-        if self.robot_pos is None or self.robot_rot is None:
-            return py_trees.common.Status.RUNNING   
-    
-        if self.path == []: # Plan to go to adjacent unvisited area 
-
-            # Use robot nearest node as the current node and check its unvisited adjacent nodes
-            robot_current_node = find_nearest_node(self.robot_pos, self.robot_graph)
-
-            # Find the shortest path to the final target node
-            self.path = nx.shortest_path(self.robot_graph, source=robot_current_node, target=self.final_target_node, weight='weight')
-        else: 
-            # Execute the plan
-            target_node = self.path[0]
-            target_pos = self.robot_graph.nodes[target_node]['pos']
-
-            # Move to target
-            status = move_to_target(self.angular_controller, self.robot_pos, self.robot_rot, target_pos, self.cmd_vel_publisher)
-            self.logger.info(f"status: {'Finished' if status else f'Running to {target_node}'}")
-
-            if status: # Finished moving to target
-                # remove the newly visited target from the path
-                self.path = self.path[1:]
-                if target_node == self.final_target_node:
-                    return py_trees.common.Status.SUCCESS
-
-        return py_trees.common.Status.RUNNING
-    
-    def terminate(self, new_status):
-        """
-        Stop the robot on termination.
-        """
-        
-        self.logger.debug(f"{self.name}: terminate({new_status})")
-
-class GoToSpawnNode(py_trees.behaviour.Behaviour):
-    def __init__(self, name, robot_graph, env_id):
-        super().__init__(name)
-        self.robot_graph = robot_graph
-
-        self.env_id = env_id
-
-        self.final_target_node = 0
-
-        self.robot_pos = None
-        self.robot_rot = None
-        self.cmd_vel_publisher = None
-
-        self.path = []
-        self.angular_controller = PIDController(K_p = 5, K_i = 2, output_limits=(-2.7,2.7))
-        
-    def setup(self, **kwargs):
-        """
-        One-time setup to initialize ROS2 publishers and subscribers.
-        """
-        try:
-            self.node = kwargs['node']
-        except KeyError as e:
-            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
-            raise KeyError(error_message) from e  # 'direct cause' traceability
-        
-        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/robot_{self.env_id}/tf", self.robot_trans_callback, 10)
-        self.cmd_vel_publisher = self.node.create_publisher(Twist, f"/robot_{self.env_id}/cmd_vel", 10)
-
-        return True
-    
-    def robot_trans_callback(self, msg):
-        self.robot_pos = [msg.transform.translation.x, msg.transform.translation.y]
-        self.robot_rot = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
-
-    def update(self):
-        """
-        Main behavior logic.
-        """
-        if self.robot_pos is None or self.robot_rot is None:
-            return py_trees.common.Status.RUNNING   
-    
-        if self.path == []: # Plan to go to adjacent unvisited area 
-
-            # Use robot nearest node as the current node and check its unvisited adjacent nodes
-            robot_current_node = find_nearest_node(self.robot_pos, self.robot_graph)
-
-            # Find the shortest path to the final target node
-            self.path = nx.shortest_path(self.robot_graph, source=robot_current_node, target=self.final_target_node, weight='weight')
-        else: 
-            # Execute the plan
-            target_node = self.path[0]
-            target_pos = self.robot_graph.nodes[target_node]['pos']
-
-            # Move to target
-            status = move_to_target(self.angular_controller, self.robot_pos, self.robot_rot, target_pos, self.cmd_vel_publisher)
-            self.logger.info(f"status: {'Finished' if status else f'Running to {target_node}'}")
-
-            if status: # Finished moving to target
-                # remove the newly visited target from the path
-                self.path = self.path[1:]
-                if target_node == self.final_target_node:
-                    return py_trees.common.Status.SUCCESS
-
-        return py_trees.common.Status.RUNNING
-    
-    def terminate(self, new_status):
-        """
-        Stop the robot on termination.
-        """
         
         self.logger.debug(f"{self.name}: terminate({new_status})")
 
 class FindTargetNode(py_trees.behaviour.Behaviour):
     def __init__(self, name, target_graph, robot_graph, env_id):
         super().__init__(name)
+        self.blackboard = self.attach_blackboard_client(name=name)
+        self.blackboard.register_key(key="is_target_in_robot_graph", access=py_trees.common.Access.WRITE)
+        
         self.target_graph = target_graph
         self.robot_graph = robot_graph
 
         self.env_id = env_id
+        self.battery_level = None
 
         self.target_pos = [None, None, None, None, None]
         self.target_rot = [None, None, None, None, None]
@@ -421,13 +350,19 @@ class FindTargetNode(py_trees.behaviour.Behaviour):
             error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
             raise KeyError(error_message) from e  # 'direct cause' traceability
         
+        self.battery_subscriber = self.node.create_subscription(Float32, f"/robot_{self.env_id}/battery_level", self.battery_level_callback, 10)
         self.target_1_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target1/tf", self.target_1_trans_callback, 10)
         self.target_2_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target2/tf", self.target_2_trans_callback, 10)
         self.target_3_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target3/tf", self.target_3_trans_callback, 10)
         self.target_4_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target4/tf", self.target_4_trans_callback, 10)
         self.target_5_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target5/tf", self.target_5_trans_callback, 10)
 
+        self.blackboard.is_target_in_robot_graph = False
+
         return True
+    
+    def battery_level_callback(self, msg):
+        self.battery_level = msg.data
     
     def target_1_trans_callback(self, msg):
         self.target_pos[0] = [msg.transform.translation.x, msg.transform.translation.y]
@@ -453,8 +388,11 @@ class FindTargetNode(py_trees.behaviour.Behaviour):
         """
         Main behavior logic.
         """
-        if None in self.target_pos or None in self.target_rot:
-            return py_trees.common.Status.RUNNING   
+        if None in self.target_pos or None in self.target_rot or self.battery_level is None:
+            return py_trees.common.Status.RUNNING  
+
+        if self.battery_level < 0.1:
+            return py_trees.common.Status.FAILURE 
     
         target_spawn_pool = [[ 14.0, -4.0], # 20 - target  #1
                              [ 22.0, -1.0], # 21 - target  #2
@@ -477,9 +415,783 @@ class FindTargetNode(py_trees.behaviour.Behaviour):
         
         for u in valid_target:
             add_node_to_robot_graph(u, self.robot_graph, self.target_graph)
-            self.logger.info(f'Add target node {u} to the robot graph -> robot graph size: {self.robot_graph.number_of_nodes()}')
+            if u in self.robot_graph.nodes:
+                self.logger.info(f'Add target node {u} to the robot graph -> robot graph size: {self.robot_graph.number_of_nodes()}')
+                self.blackboard.is_target_in_robot_graph = True
 
         return py_trees.common.Status.RUNNING
+    
+    def terminate(self, new_status):
+        """
+        Stop the robot on termination.
+        """
+        
+        self.logger.debug(f"{self.name}: terminate({new_status})")
+
+class GoToChargerNode(py_trees.behaviour.Behaviour):
+    def __init__(self, name, robot_graph, env_id):
+        super().__init__(name)
+        self.robot_graph = robot_graph
+
+        self.env_id = env_id
+        self.battery_level = None
+
+        self.final_target_node = 1
+
+        self.robot_pos = None
+        self.robot_rot = None
+        self.cmd_vel_publisher = None
+
+        self.path = []
+        self.angular_controller = PIDController(K_p = 5, K_i = 2, output_limits=(-2.7,2.7))
+        
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
+        try:
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+        
+        self.battery_subscriber = self.node.create_subscription(Float32, f"/robot_{self.env_id}/battery_level", self.battery_level_callback, 10)
+        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/robot_{self.env_id}/tf", self.robot_trans_callback, 10)
+        self.cmd_vel_publisher = self.node.create_publisher(Twist, f"/robot_{self.env_id}/cmd_vel", 10)
+
+        return True
+    
+    def battery_level_callback(self, msg):
+        self.battery_level = msg.data
+    
+    def robot_trans_callback(self, msg):
+        self.robot_pos = [msg.transform.translation.x, msg.transform.translation.y]
+        self.robot_rot = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
+
+    def update(self):
+        """
+        Main behavior logic.
+        """
+        if self.robot_pos is None or self.robot_rot is None or self.battery_level is None:
+            return py_trees.common.Status.RUNNING   
+        
+        if self.battery_level < 0.1:
+            return py_trees.common.Status.FAILURE
+    
+        if self.path == []: # Plan to go to adjacent unvisited area 
+
+            # Use robot nearest node as the current node and check its unvisited adjacent nodes
+            robot_current_node = find_nearest_node(self.robot_pos, self.robot_graph)
+
+            # Find the shortest path to the final target node
+            self.path = nx.shortest_path(self.robot_graph, source=robot_current_node, target=self.final_target_node, weight='weight')
+        else: 
+            # Execute the plan
+            target_node = self.path[0]
+            target_pos = self.robot_graph.nodes[target_node]['pos']
+
+            # Move to target
+            status = move_to_target(self.angular_controller, self.robot_pos, self.robot_rot, target_pos, self.cmd_vel_publisher)
+            self.logger.info(f"status: {'Finished' if status else f'Running to {target_node}'}")
+
+            if status: # Finished moving to target
+                # remove the newly visited target from the path
+                self.path = self.path[1:]
+                if target_node == self.final_target_node:
+                    return py_trees.common.Status.SUCCESS
+
+        return py_trees.common.Status.RUNNING
+    
+    def terminate(self, new_status):
+        """
+        Stop the robot on termination.
+        """
+        twist_msg = Twist()
+        twist_msg.linear.x = 0.0
+        twist_msg.angular.z = 0.0
+
+        self.cmd_vel_publisher.publish(twist_msg)
+
+        self.path = []
+        
+        self.logger.debug(f"{self.name}: terminate({new_status})")
+
+class GoToSpawnNode(py_trees.behaviour.Behaviour):
+    def __init__(self, name, robot_graph, env_id):
+        super().__init__(name)
+        self.robot_graph = robot_graph
+
+        self.env_id = env_id
+        self.battery_level = None
+
+        self.final_target_node = 0
+
+        self.robot_pos = None
+        self.robot_rot = None
+        self.cmd_vel_publisher = None
+
+        self.path = []
+        self.angular_controller = PIDController(K_p = 5, K_i = 2, output_limits=(-2.7,2.7))
+        
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
+        try:
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+        
+        self.battery_subscriber = self.node.create_subscription(Float32, f"/robot_{self.env_id}/battery_level", self.battery_level_callback, 10)
+        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/robot_{self.env_id}/tf", self.robot_trans_callback, 10)
+        self.cmd_vel_publisher = self.node.create_publisher(Twist, f"/robot_{self.env_id}/cmd_vel", 10)
+
+        return True
+    
+    def battery_level_callback(self, msg):
+        self.battery_level = msg.data
+    
+    def robot_trans_callback(self, msg):
+        self.robot_pos = [msg.transform.translation.x, msg.transform.translation.y]
+        self.robot_rot = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
+
+    def update(self):
+        """
+        Main behavior logic.
+        """
+        if self.robot_pos is None or self.robot_rot is None or self.battery_level is None:
+            return py_trees.common.Status.RUNNING  
+
+        if self.battery_level < 0.1:
+            return py_trees.common.Status.FAILURE 
+    
+        if self.path == []: # Plan to go to adjacent unvisited area 
+
+            # Use robot nearest node as the current node and check its unvisited adjacent nodes
+            robot_current_node = find_nearest_node(self.robot_pos, self.robot_graph)
+
+            # Find the shortest path to the final target node
+            self.path = nx.shortest_path(self.robot_graph, source=robot_current_node, target=self.final_target_node, weight='weight')
+        else: 
+            # Execute the plan
+            target_node = self.path[0]
+            target_pos = self.robot_graph.nodes[target_node]['pos']
+
+            # Move to target
+            status = move_to_target(self.angular_controller, self.robot_pos, self.robot_rot, target_pos, self.cmd_vel_publisher)
+            self.logger.info(f"status: {'Finished' if status else f'Running to {target_node}'}")
+
+            if status: # Finished moving to target
+                # remove the newly visited target from the path
+                self.path = self.path[1:]
+                if target_node == self.final_target_node:
+                    return py_trees.common.Status.SUCCESS
+
+        return py_trees.common.Status.RUNNING
+    
+    def terminate(self, new_status):
+        """
+        Stop the robot on termination.
+        """
+        twist_msg = Twist()
+        twist_msg.linear.x = 0.0
+        twist_msg.angular.z = 0.0
+
+        self.cmd_vel_publisher.publish(twist_msg)
+
+        self.path = []
+        
+        self.logger.debug(f"{self.name}: terminate({new_status})")
+
+class GoToNearestTarget(py_trees.behaviour.Behaviour):
+    def __init__(self, name, robot_graph, env_id):
+        super().__init__(name)
+        self.blackboard = self.attach_blackboard_client(name=name)
+        self.blackboard.register_key(key="is_target_in_robot_graph", access=py_trees.common.Access.READ)
+
+        self.robot_graph = robot_graph
+
+        self.env_id = env_id
+        self.battery_level = None
+
+        self.final_target_node = None
+
+        self.robot_pos = None
+        self.robot_rot = None
+        self.cmd_vel_publisher = None
+
+        self.path = []
+        self.angular_controller = PIDController(K_p = 5, K_i = 2, output_limits=(-2.7,2.7))
+        
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
+        try:
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+        
+        self.battery_subscriber = self.node.create_subscription(Float32, f"/robot_{self.env_id}/battery_level", self.battery_level_callback, 10)
+        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/robot_{self.env_id}/tf", self.robot_trans_callback, 10)
+        self.cmd_vel_publisher = self.node.create_publisher(Twist, f"/robot_{self.env_id}/cmd_vel", 10)
+
+        return True
+    
+    def battery_level_callback(self, msg):
+        self.battery_level = msg.data
+    
+    def robot_trans_callback(self, msg):
+        self.robot_pos = [msg.transform.translation.x, msg.transform.translation.y]
+        self.robot_rot = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
+
+    def update(self):
+        """
+        Main behavior logic.
+        """
+        if self.robot_pos is None or self.robot_rot is None or self.battery_level is None:
+            return py_trees.common.Status.RUNNING   
+        
+        if self.battery_level < 0.1:
+            return py_trees.common.Status.FAILURE  
+        
+        try:
+            if not(self.blackboard.is_target_in_robot_graph):
+                return py_trees.common.Status.FAILURE  
+        except:
+            return py_trees.common.Status.FAILURE
+    
+        if self.path == []: # Plan to go to adjacent unvisited area 
+
+            # Use robot nearest node as the current node and check its unvisited adjacent nodes
+            robot_current_node = find_nearest_node(self.robot_pos, self.robot_graph)
+
+            target_in_graph = [u for u in range(20,30) if u in self.robot_graph]
+
+            nearest_target_distance = np.inf
+            for valid_target in target_in_graph:
+                valid_target_distance = nx.shortest_path_length(self.robot_graph, source=robot_current_node, target=valid_target, weight='weight')
+                if valid_target_distance < nearest_target_distance:
+                    self.final_target_node = valid_target
+                    nearest_target_distance = valid_target_distance
+
+            # Find the shortest path to the final target node
+            self.path = nx.shortest_path(self.robot_graph, source=robot_current_node, target=self.final_target_node, weight='weight')
+        else: 
+            # Execute the plan
+            target_node = self.path[0]
+            target_pos = self.robot_graph.nodes[target_node]['pos']
+
+            # Move to target
+            status = move_to_target(self.angular_controller, self.robot_pos, self.robot_rot, target_pos, self.cmd_vel_publisher, tol=0.6)
+            self.logger.info(f"status: {'Finished' if status else f'Running to {target_node}'}")
+
+            if status: # Finished moving to target
+                # remove the newly visited target from the path
+                self.path = self.path[1:]
+                if target_node == self.final_target_node:
+                    return py_trees.common.Status.SUCCESS
+
+        return py_trees.common.Status.RUNNING
+    
+    def terminate(self, new_status):
+        """
+        Stop the robot on termination.
+        """
+        twist_msg = Twist()
+        twist_msg.linear.x = 0.0
+        twist_msg.angular.z = 0.0
+
+        self.cmd_vel_publisher.publish(twist_msg)
+
+        self.path = []
+        
+        self.logger.debug(f"{self.name}: terminate({new_status})")
+
+class PickTarget(py_trees.behaviour.Behaviour):
+    def __init__(self, name, env_id):
+        super().__init__(name)
+        self.env_id = env_id
+        self.battery_level = None
+
+        self.robot_pos = None
+        self.robot_rot = None
+
+        self.joint_pos = [None] * 6
+
+        self.contact_r = None
+        self.contact_l = None
+
+        self.target_pos = [None] * 5
+        self.target_rot = [None] * 5
+
+        self.joint_command = None
+
+        self.blackboard = self.attach_blackboard_client(name=name)
+        self.blackboard.register_key(key="is_object_in_hand", access=py_trees.common.Access.WRITE)
+
+        # # Define the robot chain using ikpy
+        # self.robotChain = Chain(name="Jackal_UR5", links=[
+        #     OriginLink(),
+        #     URDFLink(name="shoulder_pan_joint", translation_vector=[0, 0, 0.3732], orientation=[0, 0, 0], rotation=[0, 0, 1], bounds=(-np.pi, np.pi)),
+        #     URDFLink(name="shoulder_lift_joint", translation_vector=[0.1, 0, 0], orientation=[0, np.pi / 2, 0], rotation=[0, 1, 0], bounds=(-np.pi, 0)),
+        #     URDFLink(name="elbow_joint", translation_vector=[-0.425, 0, 0], orientation=[0, 0, 0], rotation=[0, 1, 0], bounds=(-np.pi, np.pi)),
+        #     URDFLink(name="wrist_1_joint", translation_vector=[-0.392, 0, 0.1093], orientation=[0, 0, 0], rotation=[0, 1, 0], bounds=(-np.pi, np.pi)),
+        #     URDFLink(name="wrist_2_joint", translation_vector=[0, 0, -0.09475], orientation=[0, -np.pi / 2, 0], rotation=[0, 0, 1], bounds=(-np.pi, np.pi)),
+        #     URDFLink(name="wrist_3_joint", translation_vector=[0, 0, 0], orientation=[0, np.pi / 2, 0], rotation=[0, 0, 1], bounds=(-np.pi, np.pi))
+        # ])
+        
+        # # Tool transformation matrix
+        # self.tool_transform = np.array([[0, 1, 0, 0],
+        #                                 [0, 0, -1, 0],
+        #                                 [1, 0, 0, 0.19085],
+        #                                 [0, 0, 0, 1]])
+        
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
+        try:
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+        
+        # ROS2 Message Setup -----------------------------------------------------------------------------------
+        # Subscriber 
+        self.battery_subscriber = self.node.create_subscription(Float32, f"/robot_{self.env_id}/battery_level", self.battery_level_callback, 10)
+        self.joint_state_subscriber = self.node.create_subscription(JointState, f"/robot_{self.env_id}/joint_state", self.joint_state_callback, 10)
+        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/robot_{self.env_id}/tf", self.robot_trans_callback, 10)
+        self.contact_r_subscriber = self.node.create_subscription(Float64, f"/robot_{self.env_id}/eef_contact_r", self.contact_r_callback, 10)
+        self.contact_l_subscriber = self.node.create_subscription(Float64, f"/robot_{self.env_id}/eef_contact_l", self.contact_l_callback, 10)
+
+        self.target_1_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target1/tf", self.target_1_trans_callback, 10)
+        self.target_2_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target2/tf", self.target_2_trans_callback, 10)
+        self.target_3_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target3/tf", self.target_3_trans_callback, 10)
+        self.target_4_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target4/tf", self.target_4_trans_callback, 10)
+        self.target_5_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target5/tf", self.target_5_trans_callback, 10)
+
+        # Publisher 
+        self.joint_command_publisher = self.node.create_publisher(JointState, f"/robot_{self.env_id}/joint_command", 10)
+
+        return True
+    
+    def battery_level_callback(self, msg):
+        self.battery_level = msg.data
+    
+    def robot_trans_callback(self, msg):
+        self.robot_pos = [msg.transform.translation.x, msg.transform.translation.y, msg.transform.translation.z]
+        self.robot_rot = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
+
+    def joint_state_callback(self, msg):
+        self.joint_pos[0] = msg.position[msg.name == 'shoulder_pan_joint']
+        self.joint_pos[1] = msg.position[msg.name == 'shoulder_lift_joint']
+        self.joint_pos[2] = msg.position[msg.name == 'elbow_joint']
+        self.joint_pos[3] = msg.position[msg.name == 'wrist_1_joint']
+        self.joint_pos[4] = msg.position[msg.name == 'wrist_2_joint']
+        self.joint_pos[5] = msg.position[msg.name == 'wrist_3_joint']
+        self.joint_pos[6] = msg.position[msg.name == 'Slider_1']
+        self.joint_pos[7] = msg.position[msg.name == 'Slider_2']
+
+    def contact_r_callback(self, msg):
+        self.contact_r = msg.data
+
+    def contact_l_callback(self, msg):
+        self.contact_l = msg.data
+
+    def target_1_trans_callback(self, msg):
+        self.target_pos[0] = [msg.transform.translation.x, msg.transform.translation.y, msg.transform.translation.z]
+        self.target_rot[0] = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
+
+    def target_2_trans_callback(self, msg):
+        self.target_pos[1] = [msg.transform.translation.x, msg.transform.translation.y, msg.transform.translation.z]
+        self.target_rot[1] = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
+    
+    def target_3_trans_callback(self, msg):
+        self.target_pos[2] = [msg.transform.translation.x, msg.transform.translation.y, msg.transform.translation.z]
+        self.target_rot[2] = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
+    
+    def target_4_trans_callback(self, msg):
+        self.target_pos[3] = [msg.transform.translation.x, msg.transform.translation.y, msg.transform.translation.z]
+        self.target_rot[3] = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
+    
+    def target_5_trans_callback(self, msg):
+        self.target_pos[4] = [msg.transform.translation.x, msg.transform.translation.y, msg.transform.translation.z]
+        self.target_rot[4] = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
+
+    def update(self):
+        # Ensure all required data is available
+        if self.robot_pos is None or self.robot_rot is None or None in self.joint_pos or None in self.target_pos or self.battery_level is None:
+            return py_trees.common.Status.RUNNING
+        
+        if self.battery_level < 0.1:
+            return py_trees.common.Status.FAILURE
+        
+        # # Find the nearest target
+        # nearest_distance = np.inf
+        # selected_target = None
+        # for i, target in enumerate(self.target_pos):
+        #     if target is not None:
+        #         distance = np.linalg.norm(np.array(self.robot_pos) - np.array(target))
+        #         if distance < nearest_distance:
+        #             nearest_distance = distance
+        #             selected_target = i
+        
+        # if selected_target is None:
+        #     return py_trees.common.Status.FAILURE
+        
+        # # Compute the target position in the robot's frame
+        # target_world = np.array(self.target_pos[selected_target])
+        # robot_world = np.array(self.robot_pos)
+        # target_relative_to_robot = target_world - robot_world
+
+        # # Solve IK for position only
+        # ik_solution = self.robotChain.inverse_kinematics(target_relative_to_robot)
+        # if ik_solution is None:
+        #     self.logger.info("IK solution not found.")
+        #     return py_trees.common.Status.FAILURE
+
+        # # Create and publish the joint command
+        # self.joint_command = JointState()
+        # self.joint_command.name = ['shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint', 'Slider_1', 'Slider_2']
+        # self.joint_command.position = list(ik_solution) + [0.025]*2
+        # self.joint_command_publisher.publish(self.joint_command)
+
+        return py_trees.common.Status.RUNNING
+    
+    def terminate(self, new_status):
+        """
+        Stop the robot on termination.
+        """
+        # self.joint_command = JointState()
+        # self.joint_command.name = ['shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint', 'Slider_1', 'Slider_2']
+        # self.joint_command.position = [0.0] * 8
+
+        # self.joint_command_publisher.publish(self.joint_command)
+        
+        self.logger.debug(f"{self.name}: terminate({new_status})")
+
+class Charge(py_trees.behaviour.Behaviour):
+    def __init__(self, name, env_id):
+        super().__init__(name)
+        self.blackboard = self.attach_blackboard_client(name=name)
+        self.blackboard.register_key(key="is_charging", access=py_trees.common.Access.WRITE)
+
+        self.env_id = env_id
+        self.battery_level = None
+
+        self.robot_pos = None
+        self.robot_rot = None
+
+        self.charger_loc = ( -2.00,  0.17)
+        
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
+        try:
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+        
+        self.battery_subscriber = self.node.create_subscription(Float32, f"/robot_{self.env_id}/battery_level", self.battery_level_callback, 10)
+        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/robot_{self.env_id}/tf", self.robot_trans_callback, 10)
+
+        self.charge_request_publisher = self.node.create_publisher(Bool, f"/robot_{self.env_id}/charge_request", 10)
+
+        return True
+    
+    def battery_level_callback(self, msg):
+        self.battery_level = msg.data
+    
+    def robot_trans_callback(self, msg):
+        self.robot_pos = [msg.transform.translation.x, msg.transform.translation.y]
+        self.robot_rot = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
+
+    def update(self):
+        """
+        Main behavior logic.
+        """
+        if self.robot_pos is None or self.robot_rot is None or self.battery_level is None:
+            return py_trees.common.Status.RUNNING   
+        
+        if self.battery_level < 0.1 or euclidean_distance(self.charger_loc, self.robot_pos) >= 0.2:
+            return py_trees.common.Status.FAILURE
+        
+        msg = Bool()
+        if self.battery_level < 100:
+            msg.data = True
+            self.blackboard.is_charging = True
+            self.charge_request_publisher.publish(msg)
+        else:
+            msg.data = False
+            self.blackboard.is_charging = False
+            self.charge_request_publisher.publish(msg)
+            return py_trees.common.Status.SUCCESS
+        
+        return py_trees.common.Status.RUNNING
+    
+    def terminate(self, new_status):
+        """
+        Stop the robot on termination.
+        """
+        msg = Bool()
+        msg.data = False
+        self.blackboard.is_charging = False
+        self.charge_request_publisher.publish(msg)
+        
+        self.logger.debug(f"{self.name}: terminate({new_status})")
+
+# Condition Nodes =========================================================================================================================================
+
+class AreObjectsExistOnInternalMap(py_trees.behaviour.Behaviour):
+    def __init__(self, name):
+        super().__init__(name)
+        self.blackboard = self.attach_blackboard_client(name=name)
+        self.blackboard.register_key(key="is_target_in_robot_graph", access=py_trees.common.Access.READ)
+        
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
+        try:
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+
+        return True
+
+    def update(self):
+        """
+        Main behavior logic.
+        """
+        try:
+            if self.blackboard.is_target_in_robot_graph:
+                return py_trees.common.Status.SUCCESS 
+            else:
+                return py_trees.common.Status.FAILURE   
+        except:
+            return py_trees.common.Status.FAILURE 
+    
+    def terminate(self, new_status):
+        """
+        Stop the robot on termination.
+        """
+        
+        self.logger.debug(f"{self.name}: terminate({new_status})")
+
+class IsRobotAtTheCharger(py_trees.behaviour.Behaviour):
+    def __init__(self, name, env_id):
+        super().__init__(name)
+        self.env_id = env_id
+
+        self.robot_pos = None
+
+        self.ref_loc = ( -2.00,  0.17)
+        
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
+        try:
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+        
+        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/robot_{self.env_id}/tf", self.robot_trans_callback, 10)
+
+        return True
+    
+    def robot_trans_callback(self, msg):
+        self.robot_pos = [msg.transform.translation.x, msg.transform.translation.y]
+            
+    def update(self):
+        """
+        Main behavior logic.
+        """
+        if self.robot_pos == None:
+            return py_trees.common.Status.FAILURE   
+    
+        if euclidean_distance(self.ref_loc, self.robot_pos) < 0.2:
+            self.logger.info('Robot is at the charger')
+            return py_trees.common.Status.SUCCESS  
+            
+        return py_trees.common.Status.FAILURE
+    
+    def terminate(self, new_status):
+        """
+        Stop the robot on termination.
+        """
+        
+        self.logger.debug(f"{self.name}: terminate({new_status})")
+
+class IsRobotAtTheSpawn(py_trees.behaviour.Behaviour):
+    def __init__(self, name, env_id):
+        super().__init__(name)
+        self.env_id = env_id
+
+        self.robot_pos = None
+
+        self.ref_loc = ( 0.00,  0.00)
+        
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
+        try:
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+        
+        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/robot_{self.env_id}/tf", self.robot_trans_callback, 10)
+
+        return True
+    
+    def robot_trans_callback(self, msg):
+        self.robot_pos = [msg.transform.translation.x, msg.transform.translation.y]
+            
+    def update(self):
+        """
+        Main behavior logic.
+        """
+        if self.robot_pos == None:
+            return py_trees.common.Status.FAILURE   
+    
+        if euclidean_distance(self.ref_loc, self.robot_pos) < 0.2:
+            self.logger.info('Robot is at the spawn')
+            return py_trees.common.Status.SUCCESS  
+            
+        return py_trees.common.Status.FAILURE
+    
+    def terminate(self, new_status):
+        """
+        Stop the robot on termination.
+        """
+        
+        self.logger.debug(f"{self.name}: terminate({new_status})")
+
+class IsBatteryOnProperLevel(py_trees.behaviour.Behaviour):
+    def __init__(self, name, env_id):
+        super().__init__(name)
+        self.blackboard = self.attach_blackboard_client(name=name)
+        self.blackboard.register_key(key="is_charging", access=py_trees.common.Access.READ)
+
+        self.env_id = env_id
+        self.battery_level = None
+        
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
+        try:
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+
+        self.battery_subscriber = self.node.create_subscription(Float32, f"/robot_{self.env_id}/battery_level", self.battery_level_callback, 10)
+
+        return True
+    
+    def battery_level_callback(self, msg):
+        self.battery_level = msg.data
+
+    def update(self):
+        """
+        Main behavior logic.
+        """
+        try:
+            if self.blackboard.is_charging:
+                if self.battery_level < 100:
+                    self.logger.info('Low Battery')
+                    return py_trees.common.Status.FAILURE
+                else:
+                    return py_trees.common.Status.SUCCESS
+            else:
+                if self.battery_level < 30:
+                    self.logger.info('Low Battery')
+                    return py_trees.common.Status.FAILURE
+                else:
+                    return py_trees.common.Status.SUCCESS 
+        except:  
+            if self.battery_level < 30:
+                self.logger.info('Low Battery')
+                return py_trees.common.Status.FAILURE
+            else:
+                return py_trees.common.Status.SUCCESS
+    
+    def terminate(self, new_status):
+        """
+        Stop the robot on termination.
+        """
+        
+        self.logger.debug(f"{self.name}: terminate({new_status})")
+
+class AreObjectNearby(py_trees.behaviour.Behaviour):
+    def __init__(self, name, env_id):
+        super().__init__(name)
+        self.env_id = env_id
+
+        self.robot_pos = None
+        self.target_pos = [None, None, None, None, None]
+        
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
+        try:
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+        
+        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/robot_{self.env_id}/tf", self.robot_trans_callback, 10)
+
+        self.target_1_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target1/tf", self.target_1_trans_callback, 10)
+        self.target_2_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target2/tf", self.target_2_trans_callback, 10)
+        self.target_3_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target3/tf", self.target_3_trans_callback, 10)
+        self.target_4_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target4/tf", self.target_4_trans_callback, 10)
+        self.target_5_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target5/tf", self.target_5_trans_callback, 10)
+
+        return True
+    
+    def robot_trans_callback(self, msg):
+        self.robot_pos = [msg.transform.translation.x, msg.transform.translation.y]
+    
+    def target_1_trans_callback(self, msg):
+        self.target_pos[0] = [msg.transform.translation.x, msg.transform.translation.y]
+
+    def target_2_trans_callback(self, msg):
+        self.target_pos[1] = [msg.transform.translation.x, msg.transform.translation.y]
+    
+    def target_3_trans_callback(self, msg):
+        self.target_pos[2] = [msg.transform.translation.x, msg.transform.translation.y]
+    
+    def target_4_trans_callback(self, msg):
+        self.target_pos[3] = [msg.transform.translation.x, msg.transform.translation.y]
+    
+    def target_5_trans_callback(self, msg):
+        self.target_pos[4] = [msg.transform.translation.x, msg.transform.translation.y]
+            
+    def update(self):
+        """
+        Main behavior logic.
+        """
+        if None in self.target_pos or self.robot_pos == None:
+            return py_trees.common.Status.FAILURE   
+    
+        for target_pos in self.target_pos:
+            if euclidean_distance(target_pos, self.robot_pos) < 0.6:
+                self.logger.info('There exists target nearby.')
+                return py_trees.common.Status.SUCCESS  
+            
+        return py_trees.common.Status.FAILURE
     
     def terminate(self, new_status):
         """

@@ -12,7 +12,7 @@ import math
 import networkx as nx
 
 from py_trees_ros.trees import BehaviourTree
-from behavior import PatrolNode, MoveNode, GoToChargerNode, FindTargetNode
+from behavior import PatrolNode, MoveNode, GoToChargerNode, FindTargetNode, AreObjectsExistOnInternalMap, GoToNearestTarget, AreObjectNearby, PickTarget, Charge, IsRobotAtTheCharger, IsRobotAtTheSpawn, IsBatteryOnProperLevel
 
 def euclidean_distance(coord1, coord2):
     return math.sqrt((coord1[0] - coord2[0])**2 + (coord1[1] - coord2[1])**2)
@@ -39,16 +39,16 @@ def graph_init():
                    ( 19.80, 14.94), # 17
                    ( 17.95, 15.11), # 18
                    ( 15.93, 17.75), # 19
-                   ( 14.21, -3.47), # 20 - target  #1
-                   ( 21.61, -0.59), # 21 - target  #2
-                   ( 19.18,  7.24), # 22 - target  #3
-                   ( 20.16, 13.45), # 23 - target  #4
-                   ( 22.52, 20.71), # 24 - target  #5
-                   (  9.40, 24.10), # 25 - target  #6
-                   ( -1.55, 22.86), # 26 - target  #7
-                   ( -0.94, 13.28), # 27 - target  #8
-                   ( -2.14,  7.38), # 28 - target  #9
-                   (  8.34,  7.16)] # 29 - target #10
+                   ( 14.00, -4.00), # 20 - target  #1
+                   ( 22.00, -1.00), # 21 - target  #2
+                   ( 19.50,  7.70), # 22 - target  #3
+                   ( 20.50, 13.00), # 23 - target  #4
+                   ( 23.00, 21.00), # 24 - target  #5
+                   (  9.00, 24.50), # 25 - target  #6
+                   ( -2.00, 23.20), # 26 - target  #7
+                   ( -1.50, 13.30), # 27 - target  #8
+                   ( -2.60,  7.70), # 28 - target  #9
+                   (  8.00,  6.70)] # 29 - target #10
     
     # Connection between nodes
     connections = [( 0, 1),
@@ -119,15 +119,64 @@ def create_tree():
 
     target_graph, full_graph, robot_graph = graph_init()
 
-    root = py_trees.composites.Parallel("Test Behavior", policy=py_trees.common.ParallelPolicy.SuccessOnAll(synchronise=False))
-    patrol_node = PatrolNode(name = "Patrol Node", full_graph = full_graph, robot_graph = robot_graph, env_id = 0)
-    root.add_child(patrol_node)
-    findtarget_node = FindTargetNode(name='FindTarget', target_graph=target_graph, robot_graph=robot_graph, env_id=0)
-    root.add_child(findtarget_node)
+    # Behavior Nodes
+    patrol_node = PatrolNode(name = "PatrolNode", full_graph = full_graph, robot_graph = robot_graph, env_id = 0)
+    find_target_node = FindTargetNode(name='FindTarget', target_graph=target_graph, robot_graph=robot_graph, env_id=0)
+    go_to_nearest_target = GoToNearestTarget(name="GoToNearestTarget",robot_graph=robot_graph, env_id=0)
+    go_to_charger_node =GoToChargerNode(name="GoToCharger", robot_graph=robot_graph, env_id=0)
+    picking_target_node = PickTarget(name = 'PickingTarget', env_id=0)
+    charge_node = Charge(name='Charge', env_id=0)
+    
+    # Condition Nodes
+    is_robot_at_the_charger_node = IsRobotAtTheCharger(name='IsRobotAtTheCharger', env_id=0)
+    is_robot_at_the_spawn_node = IsRobotAtTheSpawn(name='IsRobotAtTheSpawn', env_id=0)
+    is_battery_on_proper_level = IsBatteryOnProperLevel(name='IsBatteryOnProperLevel', env_id=0)
+    are_object_existed_on_internal_map = AreObjectsExistOnInternalMap(name='AreObjectExistsOnInternalMap')
+    are_object_nearby_node = AreObjectNearby('AreObjectNearby', env_id=0)
+
+    parallel_1 = py_trees.composites.Parallel("Parallel_1", policy=py_trees.common.ParallelPolicy.SuccessOnAll(synchronise=False))
+    parallel_1.add_child(patrol_node)
+    parallel_1.add_child(find_target_node)
+
+    selector_1 = py_trees.composites.Selector("Selector_1", memory=False)
+    selector_1.add_child(are_object_existed_on_internal_map)
+    selector_1.add_child(parallel_1)
+
+    sequence_1 = py_trees.composites.Sequence("Sequence_1", memory=False)
+    sequence_1.add_child(selector_1)
+    sequence_1.add_child(go_to_nearest_target)
+
+    selector_2 = py_trees.composites.Selector("Selector_2", memory=False)
+    are_object_nearby_node = AreObjectNearby('AreObjectNearby', env_id=0)
+    selector_2.add_child(are_object_nearby_node)
+    selector_2.add_child(sequence_1)
+
+    # sequence_2 = py_trees.composites.Sequence("Sequence_2", memory=False)
+    # sequence_2.add_child(selector_2)
+    # sequence_2.add_child(picking_target_node)
+
+    selector_4 = py_trees.composites.Selector("Selector_4", memory=False)
+    selector_4.add_child(is_robot_at_the_charger_node)
+    selector_4.add_child(go_to_charger_node)
+
+    sequence_3 = py_trees.composites.Sequence("Sequence_4", memory=False)
+    sequence_3.add_child(selector_4)
+    sequence_3.add_child(charge_node)
+
+    selector_5 = py_trees.composites.Selector("Selector_5", memory=False)
+    selector_5.add_child(is_battery_on_proper_level)
+    selector_5.add_child(sequence_3)
+
+    sequence_5 = py_trees.composites.Sequence("Sequence_5", memory=False)
+    sequence_5.add_child(selector_5)
+    sequence_5.add_child(selector_2)
+
     # gotocharger_node = GoToChargerNode(name='GoToChargerNode', robot_graph = robot_graph, env_id=0)
     # root.add_child(gotocharger_node)
+    # move_node = MoveNode(name='MoveNode', target = [10.30,2.00], env_id=0)
+    # root.add_child(move_node)
 
-    return root
+    return sequence_5
 
 def main(args=None):
     rclpy.init(args=args)

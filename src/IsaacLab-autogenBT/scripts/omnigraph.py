@@ -23,9 +23,12 @@ def create_controller_omnigraph(env_ind):
                     # ("OneSimulationFrame", "omni.isaac.core_nodes.OgnIsaacRunOneSimulationFrame"),
                     # ("CreateRenderProduct", "omni.isaac.core_nodes.IsaacCreateRenderProduct"),
                     # ("LidarHelperScan", "omni.isaac.ros2_bridge.ROS2RtxLidarHelper"),
-                    
-                    # # Robot Base Transformation
-                    # ("RobotTransformation", "omni.isaac.ros2_bridge.ROS2PublishTransformTree"),
+
+                    # Contact
+                    ("ReadContact_R", "omni.isaac.sensor.IsaacReadContactSensor"),
+                    ("ReadContact_L", "omni.isaac.sensor.IsaacReadContactSensor"),
+                    ("ContactPublish_R", "omni.isaac.ros2_bridge.ROS2Publisher"),
+                    ("ContactPublish_L", "omni.isaac.ros2_bridge.ROS2Publisher"),
 
                     # Controllers =============================================================================
                     # Four-wheel Mobile Robot Controller
@@ -57,7 +60,6 @@ def create_controller_omnigraph(env_ind):
                     # Manipulator Controller
                     ("JointStateSubscribe", "omni.isaac.ros2_bridge.ROS2SubscribeJointState"),
                     ("ManiArticulationController", "omni.isaac.core_nodes.IsaacArticulationController"),
-                    ("JointStatePublish", "omni.isaac.ros2_bridge.ROS2PublishJointState"),
 
                     # =========================================================================================
                 ],
@@ -68,11 +70,17 @@ def create_controller_omnigraph(env_ind):
                     # ("LidarHelperScan.inputs:topicName", f"/robot_{env_ind}/laser_scan"),
                     # ("LidarHelperScan.inputs:type", "laser_scan"),
 
-                    # # Robot Base Transformation
-                    # ("RobotTransformation.inputs:parentPrim", f"{environment_path}"),
-                    # ("RobotTransformation.inputs:targetPrims", f"{environment_path}/Robot/Jackal/base_link"),
-                    # # ("RobotTransformation.inputs:topicName", f"/robot_{env_ind}/tf"),
-                    # ("RobotTransformation.inputs:topicName", "/tf"),
+                    # Contact
+                    ("ReadContact_R.inputs:csPrim", f"{environment_path}/Robot/UR5/Robotiq_Hand_E/right_gripper/Contact_Sensor"),
+                    ("ReadContact_L.inputs:csPrim", f"{environment_path}/Robot/UR5/Robotiq_Hand_E/left_gripper/Contact_Sensor"),
+                    ("ContactPublish_R.inputs:messageName", "Float64"),
+                    ("ContactPublish_R.inputs:messagePackage", "std_msgs"),
+                    ("ContactPublish_R.inputs:messageSubfolder", "msg"),
+                    ("ContactPublish_R.inputs:topicName", f"/robot_{env_ind}/eef_contact_r"),
+                    ("ContactPublish_L.inputs:messageName", "Float64"),
+                    ("ContactPublish_L.inputs:messagePackage", "std_msgs"),
+                    ("ContactPublish_L.inputs:messageSubfolder", "msg"),
+                    ("ContactPublish_L.inputs:topicName", f"/robot_{env_ind}/eef_contact_l"),
 
                     # Controllers =============================================================================
                     # Four-wheel Mobile Robot Controller
@@ -91,20 +99,20 @@ def create_controller_omnigraph(env_ind):
                     # Manipulator Controller
                     ("JointStateSubscribe.inputs:topicName", f"/robot_{env_ind}/joint_command"),
                     ("ManiArticulationController.inputs:targetPrim", f"{environment_path}/Robot"),
-                    ("JointStatePublish.inputs:targetPrim", f"{environment_path}/Robot"),
-                    ("JointStatePublish.inputs:topicName", f"/robot_{env_ind}/joint_states"),
 
                     # =========================================================================================
                 ],
                 og.Controller.Keys.CONNECT: [
                     # ROS2 and Simulation Context
                     ("Context.outputs:context", "CmdVelSubscribe.inputs:context"),
+                    ("Context.outputs:context", "ContactPublish_R.inputs:context"),
+                    ("Context.outputs:context", "ContactPublish_L.inputs:context"),
                     ("OnPlaybackTick.outputs:tick", "CmdVelSubscribe.inputs:execIn"),
                     ("OnPlaybackTick.outputs:tick", "MobileArticulationController.inputs:execIn"),
                     ("OnPlaybackTick.outputs:tick", "JointStateSubscribe.inputs:execIn"),
                     ("OnPlaybackTick.outputs:tick", "ManiArticulationController.inputs:execIn"),
-                    ("OnPlaybackTick.outputs:tick", "JointStatePublish.inputs:execIn"),
-                    ("SimulationTime.outputs:simulationTime", "JointStatePublish.inputs:timeStamp"),
+                    ("OnPlaybackTick.outputs:tick", "ReadContact_R.inputs:execIn"),
+                    ("OnPlaybackTick.outputs:tick", "ReadContact_L.inputs:execIn"),
 
                     # Sensors =================================================================================
                     # Lidar
@@ -114,10 +122,11 @@ def create_controller_omnigraph(env_ind):
                     # ("CreateRenderProduct.outputs:execOut", "LidarHelperScan.inputs:execIn"),
                     # ("CreateRenderProduct.outputs:renderProductPath", "LidarHelperScan.inputs:renderProductPath"),
 
-                    # # Robot Base Transformation
-                    # ("OnPlaybackTick.outputs:tick", "RobotTransformation.inputs:execIn"),
-                    # ("Context.outputs:context", "RobotTransformation.inputs:context"),
-                    # ("SimulationTime.outputs:simulationTime", "RobotTransformation.inputs:timeStamp"),
+                    # Contact
+                    ("ReadContact_R.outputs:execOut", "ContactPublish_R.inputs:execIn"),
+                    # ("ReadContact_R.outputs:value", "ContactPublish_R.inputs:data"),
+                    ("ReadContact_L.outputs:execOut", "ContactPublish_L.inputs:execIn"),
+                    # ("ReadContact_L.outputs:value", "ContactPublish_L.inputs:data"),
 
                     # Controllers =============================================================================
                     # Four-wheel Mobile Robot Controller
@@ -160,6 +169,9 @@ def create_controller_omnigraph(env_ind):
                 ],
             },
         )
+
+        og.Controller.connect(f"/World/ActionGraph_{env_ind}/ReadContact_R.outputs:value", f"/World/ActionGraph_{env_ind}/ContactPublish_R.inputs:data")
+        og.Controller.connect(f"/World/ActionGraph_{env_ind}/ReadContact_L.outputs:value", f"/World/ActionGraph_{env_ind}/ContactPublish_L.inputs:data")
         
     except Exception as e:
         print(e)

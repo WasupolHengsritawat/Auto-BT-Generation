@@ -1,0 +1,20 @@
+[1.969s] Invoking command in '/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts/autogen_bt': PS1=(isaaclab) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ PYTHONPATH=/home/absolutezeno/Auto-BT-Generation/build/autogen_bt/prefix_override:/home/absolutezeno/Auto-BT-Generation/install/autogen_bt/lib/python3.10/site-packages:${PYTHONPATH} VIRTUAL_ENV_PROMPT=(isaaclab) /usr/bin/python3 setup.py egg_info --egg-base ../../../../build/autogen_bt build --build-base /home/absolutezeno/Auto-BT-Generation/build/autogen_bt/build install --record /home/absolutezeno/Auto-BT-Generation/build/autogen_bt/install.log --single-version-externally-managed
+[2.236s] running egg_info
+[2.236s] writing ../../../../build/autogen_bt/autogen_bt.egg-info/PKG-INFO
+[2.237s] writing dependency_links to ../../../../build/autogen_bt/autogen_bt.egg-info/dependency_links.txt
+[2.237s] writing requirements to ../../../../build/autogen_bt/autogen_bt.egg-info/requires.txt
+[2.237s] writing top-level names to ../../../../build/autogen_bt/autogen_bt.egg-info/top_level.txt
+[2.238s] reading manifest file '../../../../build/autogen_bt/autogen_bt.egg-info/SOURCES.txt'
+[2.239s] writing manifest file '../../../../build/autogen_bt/autogen_bt.egg-info/SOURCES.txt'
+[2.239s] running build
+[2.239s] running build_py
+[2.239s] running install
+[2.240s] /usr/lib/python3/dist-packages/setuptools/command/install.py:34: SetuptoolsDeprecationWarning: setup.py install is deprecated. Use build and pip and other standards-based tools.
+[2.240s]   warnings.warn(
+[2.240s] running install_lib
+[2.241s] running install_egg_info
+[2.243s] removing '/home/absolutezeno/Auto-BT-Generation/install/autogen_bt/lib/python3.10/site-packages/autogen_bt-0.1.0-py3.10.egg-info' (and everything under it)
+[2.243s] Copying ../../../../build/autogen_bt/autogen_bt.egg-info to /home/absolutezeno/Auto-BT-Generation/install/autogen_bt/lib/python3.10/site-packages/autogen_bt-0.1.0-py3.10.egg-info
+[2.243s] running install_scripts
+[2.261s] writing list of installed files to '/home/absolutezeno/Auto-BT-Generation/build/autogen_bt/install.log'
+[2.633s] Invoked command in '/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts/autogen_bt' returned '0': PS1=(isaaclab) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ PYTHONPATH=/home/absolutezeno/Auto-BT-Generation/build/autogen_bt/prefix_override:/home/absolutezeno/Auto-BT-Generation/install/autogen_bt/lib/python3.10/site-packages:${PYTHONPATH} VIRTUAL_ENV_PROMPT=(isaaclab) /usr/bin/python3 setup.py egg_info --egg-base ../../../../build/autogen_bt build --build-base /home/absolutezeno/Auto-BT-Generation/build/autogen_bt/build install --record /home/absolutezeno/Auto-BT-Generation/build/autogen_bt/install.log --single-version-externally-managed

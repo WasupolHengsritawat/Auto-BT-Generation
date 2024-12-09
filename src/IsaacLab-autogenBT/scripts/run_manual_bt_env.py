@@ -55,6 +55,7 @@ from omni.isaac.core.utils.extensions import enable_extension
 from assets.jackal_ur5 import JACKAL_UR5_CFG  # isort:skip
 from omnigraph import create_controller_omnigraph
 from ros2_publisher import pub_scene_data, SceneNode
+from battery import BatteryManager
 
 # enable ROS2 bridge extension
 enable_extension("omni.isaac.ros2_bridge")
@@ -65,18 +66,24 @@ map_rot = Rotation.from_euler('xyz', [90, 0, 0], degrees=True).as_quat()
 robot_rot = Rotation.from_euler('xyz', [-630, -400, 60], degrees=True).as_quat()
 
 # Possible target spawn point
-target_spawn_pool = [[ 14.0, -4.0,  0.7],
-                     [ 22.0, -1.0,  0.7],
-                     [ 19.5,  7.7,  0.7],
-                     [ 20.5, 13.0,  0.7],
-                     [ 23.0, 21.0,  0.7],
-                     [  9.0, 24.5,  0.7],
-                     [ -2.0, 23.2,  0.7],
-                     [ -1.5, 13.3,  0.7],
-                     [ -2.6,  7.7,  0.7],
-                     [  8.0,  6.7,  0.7]]
+target_spawn_pool = [[ 14.0, -4.0,  0.1],
+                     [ 22.0, -1.0,  0.1],
+                     [ 19.5,  7.7,  0.1],
+                     [ 20.5, 13.0,  0.1],
+                     [ 23.0, 21.0,  0.1],
+                     [  9.0, 24.5,  0.1],
+                     [ -2.0, 23.2,  0.1],
+                     [ -1.5, 13.3,  0.1],
+                     [ -2.6,  7.7,  0.1],
+                     [  8.0,  6.7,  0.1]]
 
-target_spawn_ind = np.random.default_rng().permutation(10)
+# target_spawn_pool = [[ 14.0, -4.0,  0.1],
+#                      [ 22.0, -1.0,  0.1],
+#                      [ 19.5,  7.7,  0.1],
+#                      [ -2.6,  7.7,  0.1],
+#                      [  8.0,  6.7,  0.1]]
+
+target_spawn_ind = np.random.default_rng().permutation(len(target_spawn_pool))
 
 
 # target_spawn_pool[target_spawn_ind[i]] # increment in i
@@ -101,7 +108,7 @@ class ManualBTSceneCfg(InteractiveSceneCfg):
     target_1: RigidObjectCfg = RigidObjectCfg(
         prim_path="{ENV_REGEX_NS}/Target_1",
         spawn=sim_utils.CuboidCfg(
-            size=[0.1] * 3,
+            size=[0.06] * 3,
             rigid_props=sim_utils.RigidBodyPropertiesCfg(),
             mass_props=sim_utils.MassPropertiesCfg(mass=0.001),
             collision_props=sim_utils.CollisionPropertiesCfg(),
@@ -112,7 +119,7 @@ class ManualBTSceneCfg(InteractiveSceneCfg):
     target_2: RigidObjectCfg = RigidObjectCfg(
         prim_path="{ENV_REGEX_NS}/Target_2",
         spawn=sim_utils.CuboidCfg(
-            size=[0.1] * 3,
+            size=[0.06] * 3,
             rigid_props=sim_utils.RigidBodyPropertiesCfg(),
             mass_props=sim_utils.MassPropertiesCfg(mass=0.001),
             collision_props=sim_utils.CollisionPropertiesCfg(),
@@ -123,7 +130,7 @@ class ManualBTSceneCfg(InteractiveSceneCfg):
     target_3: RigidObjectCfg = RigidObjectCfg(
         prim_path="{ENV_REGEX_NS}/Target_3",
         spawn=sim_utils.CuboidCfg(
-            size=[0.1] * 3,
+            size=[0.06] * 3,
             rigid_props=sim_utils.RigidBodyPropertiesCfg(),
             mass_props=sim_utils.MassPropertiesCfg(mass=0.001),
             collision_props=sim_utils.CollisionPropertiesCfg(),
@@ -134,7 +141,7 @@ class ManualBTSceneCfg(InteractiveSceneCfg):
     target_4: RigidObjectCfg = RigidObjectCfg(
         prim_path="{ENV_REGEX_NS}/Target_4",
         spawn=sim_utils.CuboidCfg(
-            size=[0.1] * 3,
+            size=[0.06] * 3,
             rigid_props=sim_utils.RigidBodyPropertiesCfg(),
             mass_props=sim_utils.MassPropertiesCfg(mass=0.001),
             collision_props=sim_utils.CollisionPropertiesCfg(),
@@ -145,7 +152,7 @@ class ManualBTSceneCfg(InteractiveSceneCfg):
     target_5: RigidObjectCfg = RigidObjectCfg(
         prim_path="{ENV_REGEX_NS}/Target_5",
         spawn=sim_utils.CuboidCfg(
-            size=[0.1] * 3,
+            size=[0.06] * 3,
             rigid_props=sim_utils.RigidBodyPropertiesCfg(),
             mass_props=sim_utils.MassPropertiesCfg(mass=0.001),
             collision_props=sim_utils.CollisionPropertiesCfg(),
@@ -216,7 +223,6 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
     count = 0
 
     # Initialize ROS2 node
-    rclpy.init()
     base_node = SceneNode(args_cli.num_envs)
 
     # Simulation loop
@@ -267,7 +273,7 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
             target_4_root_state[:, 3:7] += torch.tensor([1.0, 0.0, 0.0, 0.0],device=args_cli.device)
             target_5_root_state[:, 3:7] += torch.tensor([1.0, 0.0, 0.0, 0.0],device=args_cli.device)
 
-            target_spawn_ind = np.random.default_rng().permutation(10)
+            target_spawn_ind = np.random.default_rng().permutation(len(target_spawn_pool))
 
             target_1_root_state[:, :3] += torch.tensor(target_spawn_pool[target_spawn_ind[0]],device=args_cli.device)
             target_2_root_state[:, :3] += torch.tensor(target_spawn_pool[target_spawn_ind[1]],device=args_cli.device)
@@ -292,9 +298,6 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
         # Update buffers
         scene.update(sim_dt)
 
-        # print(scene["robot_frame"])
-        # print(scene["robot_frame"].data)
-        # print("Received max contact force of: ", torch.max(scene["contact_forces"].data.net_forces_w).item())
 
 def main():
     """Main function."""
@@ -308,17 +311,38 @@ def main():
     scene_cfg = ManualBTSceneCfg(num_envs=args_cli.num_envs, env_spacing=args_cli.env_spacing)
     scene = InteractiveScene(scene_cfg)
 
-    # Create ROS2 omnigraph
+    battery_names = []
     for i in range(args_cli.num_envs):
+
+        # Create ROS2 omnigraph
         create_controller_omnigraph(i)
+
+        # Declare battery name for each robot
+        battery_names.append(f'robot_{i}')
+
+    # Battery configuration
+    discharge_rate = 0.05   # % per second
+    charge_rate = 5.0       # % per second
+
+    # Initialize ROS2 node
+    rclpy.init()
+
+    # Initialize the battery manager
+    manager = BatteryManager(battery_names, discharge_rate, charge_rate)
     
     # Play the simulator
     sim.reset()
     # Now we are ready!
     print("[INFO]: Setup complete...")
-    # Run the simulator
-    run_simulator(sim, scene)
 
+    try:
+        # Run the simulator
+        run_simulator(sim, scene)
+
+    finally:
+        # Gracefully stop all battery nodes
+        manager.stop()
+        print("Battery nodes stopped.")
 
 if __name__ == "__main__":
     # run the main function
