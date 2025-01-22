@@ -149,7 +149,7 @@ rosidl_generator_c/isaac_ros2_messages/srv/isaac_pose.h: /opt/ros/humble/share/g
 rosidl_generator_c/isaac_ros2_messages/srv/isaac_pose.h: /opt/ros/humble/share/geometry_msgs/msg/Wrench.idl
 rosidl_generator_c/isaac_ros2_messages/srv/isaac_pose.h: /opt/ros/humble/share/geometry_msgs/msg/WrenchStamped.idl
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/absolutezeno/Auto-BT-Generation/build/isaac_ros2_messages/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating C code for ROS interfaces"
-	/home/absolutezeno/isaaclab/bin/python3.10 /opt/ros/humble/share/rosidl_generator_c/cmake/../../../lib/rosidl_generator_c/rosidl_generator_c --generator-arguments-file /home/absolutezeno/Auto-BT-Generation/build/isaac_ros2_messages/rosidl_generator_c__arguments.json
+	/usr/bin/python3.10 /opt/ros/humble/share/rosidl_generator_c/cmake/../../../lib/rosidl_generator_c/rosidl_generator_c --generator-arguments-file /home/absolutezeno/Auto-BT-Generation/build/isaac_ros2_messages/rosidl_generator_c__arguments.json
 
 rosidl_generator_c/isaac_ros2_messages/srv/detail/isaac_pose__functions.h: rosidl_generator_c/isaac_ros2_messages/srv/isaac_pose.h
 	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_c/isaac_ros2_messages/srv/detail/isaac_pose__functions.h

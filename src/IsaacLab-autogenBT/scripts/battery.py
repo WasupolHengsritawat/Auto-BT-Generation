@@ -3,9 +3,10 @@ from rclpy.node import Node
 from std_msgs.msg import Float32, Bool
 from threading import Thread
 
+from autogen_bt_interface.srv import ChargingRequest
 
 class BatteryNode(Node):
-    def __init__(self, name: str, discharge_rate: float, charge_rate: float):
+    def __init__(self, name: str, discharge_rate: float, charge_rate: float, robot_name: str = "robot"):
         super().__init__(f'{name}_battery_node')
 
         self.battery_level = 100.0  # Initial battery percentage
@@ -14,21 +15,28 @@ class BatteryNode(Node):
         self.discharge_rate = discharge_rate
         self.charge_rate = charge_rate
 
-        # Publishers and Subscribers
-        self.battery_pub = self.create_publisher(Float32, f'{name}/battery_level', 10)
-        self.charge_sub = self.create_subscription(Bool, f'{name}/charge_request', self.charge_callback, 10)
+        if  len(robot_name) != 0 and robot_name[0] != '/':
+            robot_name = '/' + robot_name
 
+        # ROS2 Publishers
+        self.battery_pub = self.create_publisher(Float32, f'{name}{robot_name}/battery_level', 10)
+
+        # ROS2 Service Server
+        self.create_service(ChargingRequest, f"{name}{robot_name}/charging_req", self.charge_callback)
+        
         # Timer for battery update
         self.update_timer = self.create_timer(1.0, self.update_battery)
 
         self.get_logger().info(f"Battery node {name} initialized.")
 
-    def charge_callback(self, msg: Bool):
-        self.is_charging = msg.data
+    def charge_callback(self, req, res):
+        self.is_charging = req.status.data
         if self.is_charging:
             self.get_logger().info(f"{self.name}: Charging started.")
         else:
             self.get_logger().info(f"{self.name}: Charging stopped.")
+
+        return ChargingRequest.Response()
 
     def update_battery(self):
         if self.is_charging:
@@ -48,7 +56,7 @@ class BatteryNode(Node):
 
 
 class BatteryManager:
-    def __init__(self, battery_names, discharge_rate: float, charge_rate: float):
+    def __init__(self, battery_names, discharge_rate: float, charge_rate: float, robot_name: str = "robot"):
         """
         Initialize multiple battery nodes with shared charge and discharge rates.
 
@@ -58,7 +66,7 @@ class BatteryManager:
         """
     
         self.batteries = [
-            BatteryNode(name, discharge_rate, charge_rate) for name in battery_names
+            BatteryNode(name, discharge_rate, charge_rate, robot_name) for name in battery_names
         ]
 
         self.executor_thread = Thread(target=self.run_executor, daemon=True)
@@ -74,9 +82,7 @@ class BatteryManager:
             executor.shutdown()
             for battery in self.batteries:
                 battery.destroy_node()
-            rclpy.shutdown()
 
     def stop(self):
         # Ensure the nodes shut down gracefully
-        rclpy.shutdown()
         self.executor_thread.join()

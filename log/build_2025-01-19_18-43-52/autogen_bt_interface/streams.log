@@ -1,0 +1,264 @@
+[1.171s] Invoking command in '/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/absolutezeno/Auto-BT-Generation/install/turtlebot3_teleop:/home/absolutezeno/Auto-BT-Generation/install/turtlebot3_example:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_tutorials:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros:/home/absolutezeno/FRA501/install/rqt_joint_trajectory_controller:/home/absolutezeno/FRA501/install/rqt_controller_manager:/home/absolutezeno/FRA501/install/ros2controlcli:/home/absolutezeno/FRA501/install/ros2_controllers_test_nodes:/opt/ros/humble /usr/bin/cmake /home/absolutezeno/Auto-BT-Generation/src/autogen_bt_interface -DCMAKE_INSTALL_PREFIX=/home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface
+[1.212s] -- The C compiler identification is GNU 11.4.0
+[1.257s] -- The CXX compiler identification is GNU 11.4.0
+[1.264s] -- Detecting C compiler ABI info
+[1.326s] -- Detecting C compiler ABI info - done
+[1.331s] -- Check for working C compiler: /usr/bin/cc - skipped
+[1.331s] -- Detecting C compile features
+[1.331s] -- Detecting C compile features - done
+[1.333s] -- Detecting CXX compiler ABI info
+[1.399s] -- Detecting CXX compiler ABI info - done
+[1.406s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[1.406s] -- Detecting CXX compile features
+[1.406s] -- Detecting CXX compile features - done
+[1.409s] -- Found ament_cmake: 1.3.5 (/opt/ros/humble/share/ament_cmake/cmake)
+[1.592s] -- Found Python3: /usr/bin/python3.10 (found version "3.10.12") found components: Interpreter 
+[1.743s] -- Found ament_lint_auto: 0.12.8 (/opt/ros/humble/share/ament_lint_auto/cmake)
+[1.837s] -- Found std_msgs: 4.2.4 (/opt/ros/humble/share/std_msgs/cmake)
+[1.899s] -- Found rosidl_generator_c: 3.1.5 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[1.906s] -- Found rosidl_adapter: 3.1.5 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[1.915s] -- Found rosidl_generator_cpp: 3.1.5 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[1.932s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[1.960s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[2.030s] -- Found rosidl_default_generators: 1.2.0 (/opt/ros/humble/share/rosidl_default_generators/cmake)
+[2.392s] -- Found ament_cmake_ros: 0.10.0 (/opt/ros/humble/share/ament_cmake_ros/cmake)
+[2.965s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[3.099s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[3.123s] -- Found PythonInterp: /usr/bin/python3 (found suitable version "3.10.12", minimum required is "3.6") 
+[3.126s] -- Found python_cmake_module: 0.10.0 (/opt/ros/humble/share/python_cmake_module/cmake)
+[3.152s] -- Found PythonLibs: /usr/lib/x86_64-linux-gnu/libpython3.10.so (found suitable version "3.10.12", minimum required is "3.5") 
+[3.152s] -- Using PYTHON_EXECUTABLE: /usr/bin/python3
+[3.152s] -- Using PYTHON_INCLUDE_DIRS: /usr/include/python3.10
+[3.152s] -- Using PYTHON_LIBRARIES: /usr/lib/x86_64-linux-gnu/libpython3.10.so
+[3.174s] -- Found PythonExtra: .so  
+[3.267s] -- Added test 'lint_cmake' to check CMake code style
+[3.269s] -- Added test 'xmllint' to check XML markup files
+[3.273s] -- Configuring done
+[3.297s] -- Generating done
+[3.300s] -- Build files have been written to: /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface
+[3.307s] Invoked command in '/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/absolutezeno/Auto-BT-Generation/install/turtlebot3_teleop:/home/absolutezeno/Auto-BT-Generation/install/turtlebot3_example:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_tutorials:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros:/home/absolutezeno/FRA501/install/rqt_joint_trajectory_controller:/home/absolutezeno/FRA501/install/rqt_controller_manager:/home/absolutezeno/FRA501/install/ros2controlcli:/home/absolutezeno/FRA501/install/ros2_controllers_test_nodes:/opt/ros/humble /usr/bin/cmake /home/absolutezeno/Auto-BT-Generation/src/autogen_bt_interface -DCMAKE_INSTALL_PREFIX=/home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface
+[3.309s] Invoking command in '/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/absolutezeno/Auto-BT-Generation/install/turtlebot3_teleop:/home/absolutezeno/Auto-BT-Generation/install/turtlebot3_example:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_tutorials:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros:/home/absolutezeno/FRA501/install/rqt_joint_trajectory_controller:/home/absolutezeno/FRA501/install/rqt_controller_manager:/home/absolutezeno/FRA501/install/ros2controlcli:/home/absolutezeno/FRA501/install/ros2_controllers_test_nodes:/opt/ros/humble /usr/bin/cmake --build /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface -- -j20 -l20
+[3.344s] [  2%] [34m[1mGenerating C code for ROS interfaces[0m
+[3.355s] [  5%] [34m[1mGenerating C++ code for ROS interfaces[0m
+[3.366s] [  5%] Built target ament_cmake_python_copy_autogen_bt_interface
+[3.726s] running egg_info
+[3.726s] creating autogen_bt_interface.egg-info
+[3.726s] writing autogen_bt_interface.egg-info/PKG-INFO
+[3.727s] writing dependency_links to autogen_bt_interface.egg-info/dependency_links.txt
+[3.727s] writing top-level names to autogen_bt_interface.egg-info/top_level.txt
+[3.727s] writing manifest file 'autogen_bt_interface.egg-info/SOURCES.txt'
+[3.730s] reading manifest file 'autogen_bt_interface.egg-info/SOURCES.txt'
+[3.734s] writing manifest file 'autogen_bt_interface.egg-info/SOURCES.txt'
+[3.765s] [  5%] Built target ament_cmake_python_build_autogen_bt_interface_egg
+[3.838s] [  5%] Built target autogen_bt_interface__cpp
+[3.847s] [  7%] [34m[1mGenerating C++ type support dispatch for ROS interfaces[0m
+[3.851s] [ 10%] [34m[1mGenerating C++ type support for eProsima Fast-RTPS[0m
+[3.855s] [ 12%] [34m[1mGenerating C++ introspection for ROS interfaces[0m
+[3.861s] [ 15%] [32mBuilding C object CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/srv/detail/picking_request__functions.c.o[0m
+[3.862s] [ 17%] [32mBuilding C object CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/srv/detail/charging_request__functions.c.o[0m
+[3.996s] [ 20%] [32m[1mLinking C shared library libautogen_bt_interface__rosidl_generator_c.so[0m
+[4.054s] [ 20%] Built target autogen_bt_interface__rosidl_generator_c
+[4.082s] [ 23%] [34m[1mGenerating C type support for eProsima Fast-RTPS[0m
+[4.084s] [ 25%] [34m[1mGenerating C type support dispatch for ROS interfaces[0m
+[4.086s] [ 28%] [34m[1mGenerating C introspection for ROS interfaces[0m
+[4.366s] [ 30%] [32mBuilding CXX object CMakeFiles/autogen_bt_interface__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/autogen_bt_interface/srv/charging_request__type_support.cpp.o[0m
+[4.367s] [ 33%] [32mBuilding CXX object CMakeFiles/autogen_bt_interface__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/autogen_bt_interface/srv/picking_request__type_support.cpp.o[0m
+[4.442s] [ 35%] [32mBuilding CXX object CMakeFiles/autogen_bt_interface__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/autogen_bt_interface/srv/detail/charging_request__type_support.cpp.o[0m
+[4.451s] [ 38%] [32mBuilding CXX object CMakeFiles/autogen_bt_interface__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/autogen_bt_interface/srv/detail/picking_request__type_support.cpp.o[0m
+[4.542s] [ 41%] [32mBuilding CXX object CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/autogen_bt_interface/srv/detail/dds_fastrtps/charging_request__type_support.cpp.o[0m
+[4.543s] [ 43%] [32mBuilding CXX object CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/autogen_bt_interface/srv/detail/dds_fastrtps/picking_request__type_support.cpp.o[0m
+[4.711s] [ 46%] [32mBuilding CXX object CMakeFiles/autogen_bt_interface__rosidl_typesupport_c.dir/rosidl_typesupport_c/autogen_bt_interface/srv/charging_request__type_support.cpp.o[0m
+[4.718s] [ 48%] [32mBuilding CXX object CMakeFiles/autogen_bt_interface__rosidl_typesupport_c.dir/rosidl_typesupport_c/autogen_bt_interface/srv/picking_request__type_support.cpp.o[0m
+[4.772s] [ 51%] [32m[1mLinking CXX shared library libautogen_bt_interface__rosidl_typesupport_c.so[0m
+[4.784s] [ 53%] [32mBuilding C object CMakeFiles/autogen_bt_interface__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/autogen_bt_interface/srv/detail/charging_request__type_support.c.o[0m
+[4.790s] [ 56%] [32mBuilding CXX object CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/charging_request__type_support_c.cpp.o[0m
+[4.790s] [ 58%] [32mBuilding C object CMakeFiles/autogen_bt_interface__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/autogen_bt_interface/srv/detail/picking_request__type_support.c.o[0m
+[4.800s] [ 61%] [32mBuilding CXX object CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/picking_request__type_support_c.cpp.o[0m
+[4.801s] [ 64%] [32m[1mLinking CXX shared library libautogen_bt_interface__rosidl_typesupport_cpp.so[0m
+[4.846s] [ 64%] Built target autogen_bt_interface__rosidl_typesupport_c
+[4.876s] [ 66%] [32m[1mLinking C shared library libautogen_bt_interface__rosidl_typesupport_introspection_c.so[0m
+[4.894s] [ 66%] Built target autogen_bt_interface__rosidl_typesupport_cpp
+[4.923s] [ 66%] Built target autogen_bt_interface__rosidl_typesupport_introspection_c
+[5.037s] [ 69%] [32m[1mLinking CXX shared library libautogen_bt_interface__rosidl_typesupport_introspection_cpp.so[0m
+[5.152s] [ 69%] Built target autogen_bt_interface__rosidl_typesupport_introspection_cpp
+[5.192s] [ 71%] [32m[1mLinking CXX shared library libautogen_bt_interface__rosidl_typesupport_fastrtps_cpp.so[0m
+[5.261s] [ 71%] Built target autogen_bt_interface__rosidl_typesupport_fastrtps_cpp
+[5.319s] [ 74%] [32m[1mLinking CXX shared library libautogen_bt_interface__rosidl_typesupport_fastrtps_c.so[0m
+[5.416s] [ 74%] Built target autogen_bt_interface__rosidl_typesupport_fastrtps_c
+[5.441s] [ 74%] Built target autogen_bt_interface
+[5.468s] [ 76%] [34m[1mGenerating Python code for ROS interfaces[0m
+[6.469s] [ 76%] Built target autogen_bt_interface__py
+[6.488s] [ 82%] [32mBuilding C object CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/srv/_charging_request_s.c.o[0m
+[6.488s] [ 82%] [32mBuilding C object CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/srv/_picking_request_s.c.o[0m
+[6.600s] [ 84%] [32m[1mLinking C shared library rosidl_generator_py/autogen_bt_interface/libautogen_bt_interface__rosidl_generator_py.so[0m
+[6.631s] [ 84%] Built target autogen_bt_interface__rosidl_generator_py
+[6.648s] [ 87%] [32mBuilding C object CMakeFiles/autogen_bt_interface__rosidl_typesupport_c__pyext.dir/rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_c.c.o[0m
+[6.649s] [ 89%] [32mBuilding C object CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c__pyext.dir/rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_fastrtps_c.c.o[0m
+[6.655s] [ 92%] [32mBuilding C object CMakeFiles/autogen_bt_interface__rosidl_typesupport_introspection_c__pyext.dir/rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_introspection_c.c.o[0m
+[6.723s] [ 94%] [32m[1mLinking C shared library rosidl_generator_py/autogen_bt_interface/autogen_bt_interface_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so[0m
+[6.724s] [ 97%] [32m[1mLinking C shared library rosidl_generator_py/autogen_bt_interface/autogen_bt_interface_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so[0m
+[6.732s] [100%] [32m[1mLinking C shared library rosidl_generator_py/autogen_bt_interface/autogen_bt_interface_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so[0m
+[6.754s] [100%] Built target autogen_bt_interface__rosidl_typesupport_fastrtps_c__pyext
+[6.754s] [100%] Built target autogen_bt_interface__rosidl_typesupport_c__pyext
+[6.763s] [100%] Built target autogen_bt_interface__rosidl_typesupport_introspection_c__pyext
+[6.773s] Invoked command in '/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/absolutezeno/Auto-BT-Generation/install/turtlebot3_teleop:/home/absolutezeno/Auto-BT-Generation/install/turtlebot3_example:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_tutorials:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros:/home/absolutezeno/FRA501/install/rqt_joint_trajectory_controller:/home/absolutezeno/FRA501/install/rqt_controller_manager:/home/absolutezeno/FRA501/install/ros2controlcli:/home/absolutezeno/FRA501/install/ros2_controllers_test_nodes:/opt/ros/humble /usr/bin/cmake --build /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface -- -j20 -l20
+[6.870s] Invoking command in '/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/absolutezeno/Auto-BT-Generation/install/turtlebot3_teleop:/home/absolutezeno/Auto-BT-Generation/install/turtlebot3_example:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_tutorials:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros:/home/absolutezeno/FRA501/install/rqt_joint_trajectory_controller:/home/absolutezeno/FRA501/install/rqt_controller_manager:/home/absolutezeno/FRA501/install/ros2controlcli:/home/absolutezeno/FRA501/install/ros2_controllers_test_nodes:/opt/ros/humble /usr/bin/cmake --install /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface
+[6.878s] -- Install configuration: ""
+[6.878s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/ament_index/resource_index/rosidl_interfaces/autogen_bt_interface
+[6.878s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface
+[6.878s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/msg
+[6.878s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/msg/rosidl_generator_c__visibility_control.h
+[6.878s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv
+[6.878s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/picking_request.h
+[6.879s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/charging_request.h
+[6.879s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail
+[6.879s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/charging_request__type_support.h
+[6.879s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/picking_request__type_support.h
+[6.879s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/picking_request__functions.h
+[6.879s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/charging_request__functions.h
+[6.879s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/picking_request__functions.c
+[6.879s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/picking_request__struct.h
+[6.879s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/charging_request__struct.h
+[6.879s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/charging_request__functions.c
+[6.879s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/environment/library_path.sh
+[6.879s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/environment/library_path.dsv
+[6.879s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/lib/libautogen_bt_interface__rosidl_generator_c.so
+[6.879s] -- Set runtime path of "/home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/lib/libautogen_bt_interface__rosidl_generator_c.so" to ""
+[6.880s] -- Up-to-date: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface
+[6.880s] -- Up-to-date: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/msg
+[6.880s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/msg/rosidl_typesupport_fastrtps_c__visibility_control.h
+[6.880s] -- Up-to-date: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv
+[6.880s] -- Up-to-date: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail
+[6.880s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/charging_request__rosidl_typesupport_fastrtps_c.h
+[6.880s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/picking_request__rosidl_typesupport_fastrtps_c.h
+[6.880s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/lib/libautogen_bt_interface__rosidl_typesupport_fastrtps_c.so
+[6.880s] -- Set runtime path of "/home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/lib/libautogen_bt_interface__rosidl_typesupport_fastrtps_c.so" to ""
+[6.880s] -- Up-to-date: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface
+[6.880s] -- Up-to-date: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv
+[6.880s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/charging_request.hpp
+[6.880s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/picking_request.hpp
+[6.881s] -- Up-to-date: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail
+[6.881s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/charging_request__builder.hpp
+[6.881s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/picking_request__struct.hpp
+[6.881s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/picking_request__traits.hpp
+[6.881s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/picking_request__builder.hpp
+[6.881s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/charging_request__traits.hpp
+[6.881s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/charging_request__struct.hpp
+[6.881s] -- Up-to-date: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface
+[6.881s] -- Up-to-date: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/msg
+[6.881s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h
+[6.881s] -- Up-to-date: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv
+[6.881s] -- Up-to-date: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail
+[6.881s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/picking_request__rosidl_typesupport_fastrtps_cpp.hpp
+[6.882s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/dds_fastrtps
+[6.882s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/charging_request__rosidl_typesupport_fastrtps_cpp.hpp
+[6.882s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/lib/libautogen_bt_interface__rosidl_typesupport_fastrtps_cpp.so
+[6.882s] -- Set runtime path of "/home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/lib/libautogen_bt_interface__rosidl_typesupport_fastrtps_cpp.so" to ""
+[6.882s] -- Up-to-date: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface
+[6.882s] -- Up-to-date: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/msg
+[6.882s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/msg/rosidl_typesupport_introspection_c__visibility_control.h
+[6.882s] -- Up-to-date: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv
+[6.882s] -- Up-to-date: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail
+[6.882s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/charging_request__rosidl_typesupport_introspection_c.h
+[6.882s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/charging_request__type_support.c
+[6.882s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/picking_request__rosidl_typesupport_introspection_c.h
+[6.882s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/picking_request__type_support.c
+[6.882s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/lib/libautogen_bt_interface__rosidl_typesupport_introspection_c.so
+[6.883s] -- Set runtime path of "/home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/lib/libautogen_bt_interface__rosidl_typesupport_introspection_c.so" to ""
+[6.883s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/lib/libautogen_bt_interface__rosidl_typesupport_c.so
+[6.883s] -- Set runtime path of "/home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/lib/libautogen_bt_interface__rosidl_typesupport_c.so" to ""
+[6.883s] -- Up-to-date: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface
+[6.883s] -- Up-to-date: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv
+[6.883s] -- Up-to-date: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail
+[6.883s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/charging_request__rosidl_typesupport_introspection_cpp.hpp
+[6.883s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/picking_request__rosidl_typesupport_introspection_cpp.hpp
+[6.883s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/charging_request__type_support.cpp
+[6.883s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/include/autogen_bt_interface/autogen_bt_interface/srv/detail/picking_request__type_support.cpp
+[6.883s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/lib/libautogen_bt_interface__rosidl_typesupport_introspection_cpp.so
+[6.883s] -- Set runtime path of "/home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/lib/libautogen_bt_interface__rosidl_typesupport_introspection_cpp.so" to ""
+[6.883s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/lib/libautogen_bt_interface__rosidl_typesupport_cpp.so
+[6.883s] -- Set runtime path of "/home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/lib/libautogen_bt_interface__rosidl_typesupport_cpp.so" to ""
+[6.883s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/environment/pythonpath.sh
+[6.884s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/environment/pythonpath.dsv
+[6.884s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface-0.0.0-py3.10.egg-info
+[6.884s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface-0.0.0-py3.10.egg-info/PKG-INFO
+[6.884s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface-0.0.0-py3.10.egg-info/top_level.txt
+[6.884s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface-0.0.0-py3.10.egg-info/dependency_links.txt
+[6.884s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface-0.0.0-py3.10.egg-info/SOURCES.txt
+[6.884s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface
+[6.884s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_introspection_c.c
+[6.884s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/autogen_bt_interface_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so
+[6.884s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/autogen_bt_interface_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so
+[6.884s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_fastrtps_c.c
+[6.884s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_c.c
+[6.884s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/__init__.py
+[6.884s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/autogen_bt_interface_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so
+[6.884s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/libautogen_bt_interface__rosidl_generator_py.so
+[6.884s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/srv
+[6.885s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/srv/_charging_request_s.c
+[6.885s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/srv/_picking_request_s.c
+[6.885s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/srv/__init__.py
+[6.885s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/srv/_charging_request.py
+[6.885s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/srv/_picking_request.py
+[6.921s] Listing '/home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface'...
+[6.921s] Compiling '/home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/__init__.py'...
+[6.921s] Listing '/home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/srv'...
+[6.921s] Compiling '/home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/srv/__init__.py'...
+[6.921s] Compiling '/home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/srv/_charging_request.py'...
+[6.921s] Compiling '/home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/srv/_picking_request.py'...
+[6.924s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/autogen_bt_interface_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so
+[6.925s] -- Set runtime path of "/home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/autogen_bt_interface_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so" to ""
+[6.925s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/autogen_bt_interface_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so
+[6.925s] -- Set runtime path of "/home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/autogen_bt_interface_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so" to ""
+[6.925s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/autogen_bt_interface_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so
+[6.925s] -- Set runtime path of "/home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface/autogen_bt_interface_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so" to ""
+[6.925s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/lib/libautogen_bt_interface__rosidl_generator_py.so
+[6.925s] -- Set runtime path of "/home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/lib/libautogen_bt_interface__rosidl_generator_py.so" to ""
+[6.925s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/srv/ChargingRequest.idl
+[6.925s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/srv/PickingRequest.idl
+[6.925s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/srv/ChargingRequest.srv
+[6.925s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/srv/ChargingRequest_Request.msg
+[6.926s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/srv/ChargingRequest_Response.msg
+[6.926s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/srv/PickingRequest.srv
+[6.926s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/srv/PickingRequest_Request.msg
+[6.926s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/srv/PickingRequest_Response.msg
+[6.926s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/ament_index/resource_index/package_run_dependencies/autogen_bt_interface
+[6.926s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/ament_index/resource_index/parent_prefix_path/autogen_bt_interface
+[6.926s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/environment/ament_prefix_path.sh
+[6.926s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/environment/ament_prefix_path.dsv
+[6.926s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/environment/path.sh
+[6.926s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/environment/path.dsv
+[6.926s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/local_setup.bash
+[6.926s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/local_setup.sh
+[6.926s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/local_setup.zsh
+[6.926s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/local_setup.dsv
+[6.926s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/package.dsv
+[6.927s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/ament_index/resource_index/packages/autogen_bt_interface
+[6.927s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/export_autogen_bt_interface__rosidl_generator_cExport.cmake
+[6.927s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/export_autogen_bt_interface__rosidl_generator_cExport-noconfig.cmake
+[6.927s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/export_autogen_bt_interface__rosidl_typesupport_fastrtps_cExport.cmake
+[6.927s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/export_autogen_bt_interface__rosidl_typesupport_fastrtps_cExport-noconfig.cmake
+[6.927s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/export_autogen_bt_interface__rosidl_generator_cppExport.cmake
+[6.927s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/export_autogen_bt_interface__rosidl_typesupport_fastrtps_cppExport.cmake
+[6.927s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/export_autogen_bt_interface__rosidl_typesupport_fastrtps_cppExport-noconfig.cmake
+[6.927s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/autogen_bt_interface__rosidl_typesupport_introspection_cExport.cmake
+[6.927s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/autogen_bt_interface__rosidl_typesupport_introspection_cExport-noconfig.cmake
+[6.927s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/autogen_bt_interface__rosidl_typesupport_cExport.cmake
+[6.927s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/autogen_bt_interface__rosidl_typesupport_cExport-noconfig.cmake
+[6.927s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/autogen_bt_interface__rosidl_typesupport_introspection_cppExport.cmake
+[6.928s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/autogen_bt_interface__rosidl_typesupport_introspection_cppExport-noconfig.cmake
+[6.928s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/autogen_bt_interface__rosidl_typesupport_cppExport.cmake
+[6.928s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/autogen_bt_interface__rosidl_typesupport_cppExport-noconfig.cmake
+[6.928s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/export_autogen_bt_interface__rosidl_generator_pyExport.cmake
+[6.928s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/export_autogen_bt_interface__rosidl_generator_pyExport-noconfig.cmake
+[6.928s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/rosidl_cmake-extras.cmake
+[6.928s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/ament_cmake_export_dependencies-extras.cmake
+[6.928s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/ament_cmake_export_include_directories-extras.cmake
+[6.928s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/ament_cmake_export_libraries-extras.cmake
+[6.928s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/ament_cmake_export_targets-extras.cmake
+[6.928s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake
+[6.928s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake
+[6.928s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/autogen_bt_interfaceConfig.cmake
+[6.928s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/cmake/autogen_bt_interfaceConfig-version.cmake
+[6.928s] -- Installing: /home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/share/autogen_bt_interface/package.xml
+[6.929s] Invoked command in '/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/absolutezeno/Auto-BT-Generation/install/turtlebot3_teleop:/home/absolutezeno/Auto-BT-Generation/install/turtlebot3_example:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_tutorials:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros:/home/absolutezeno/FRA501/install/rqt_joint_trajectory_controller:/home/absolutezeno/FRA501/install/rqt_controller_manager:/home/absolutezeno/FRA501/install/ros2controlcli:/home/absolutezeno/FRA501/install/ros2_controllers_test_nodes:/opt/ros/humble /usr/bin/cmake --install /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface

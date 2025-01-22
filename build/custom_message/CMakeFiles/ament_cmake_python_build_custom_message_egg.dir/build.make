@@ -67,7 +67,7 @@ include CMakeFiles/ament_cmake_python_build_custom_message_egg.dir/compiler_depe
 include CMakeFiles/ament_cmake_python_build_custom_message_egg.dir/progress.make
 
 CMakeFiles/ament_cmake_python_build_custom_message_egg:
-	cd /home/absolutezeno/Auto-BT-Generation/build/custom_message/ament_cmake_python/custom_message && /home/absolutezeno/isaaclab/bin/python3.10 setup.py egg_info
+	cd /home/absolutezeno/Auto-BT-Generation/build/custom_message/ament_cmake_python/custom_message && /usr/bin/python3.10 setup.py egg_info
 
 ament_cmake_python_build_custom_message_egg: CMakeFiles/ament_cmake_python_build_custom_message_egg
 ament_cmake_python_build_custom_message_egg: CMakeFiles/ament_cmake_python_build_custom_message_egg.dir/build.make

@@ -76,15 +76,15 @@ def create_controller_omnigraph(env_ind):
                     ("ContactPublish_R.inputs:messageName", "Float64"),
                     ("ContactPublish_R.inputs:messagePackage", "std_msgs"),
                     ("ContactPublish_R.inputs:messageSubfolder", "msg"),
-                    ("ContactPublish_R.inputs:topicName", f"/robot_{env_ind}/eef_contact_r"),
+                    ("ContactPublish_R.inputs:topicName", f"/env_{env_ind}/robot/eef_contact_r"),
                     ("ContactPublish_L.inputs:messageName", "Float64"),
                     ("ContactPublish_L.inputs:messagePackage", "std_msgs"),
                     ("ContactPublish_L.inputs:messageSubfolder", "msg"),
-                    ("ContactPublish_L.inputs:topicName", f"/robot_{env_ind}/eef_contact_l"),
+                    ("ContactPublish_L.inputs:topicName", f"/env_{env_ind}/robot/eef_contact_l"),
 
                     # Controllers =============================================================================
                     # Four-wheel Mobile Robot Controller
-                    ("CmdVelSubscribe.inputs:topicName", f"/robot_{env_ind}/cmd_vel"),
+                    ("CmdVelSubscribe.inputs:topicName", f"/env_{env_ind}/robot/cmd_vel"),
                     ("DifferentialController.inputs:maxWheelSpeed", 500.0),
                     ("DifferentialController.inputs:wheelDistance", 0.37558),
                     ("DifferentialController.inputs:wheelRadius", 0.098),
@@ -97,7 +97,7 @@ def create_controller_omnigraph(env_ind):
                     ("MobileArticulationController.inputs:targetPrim", f"{environment_path}/Robot"),
 
                     # Manipulator Controller
-                    ("JointStateSubscribe.inputs:topicName", f"/robot_{env_ind}/joint_command"),
+                    ("JointStateSubscribe.inputs:topicName", f"/env_{env_ind}/robot/joint_command"),
                     ("ManiArticulationController.inputs:targetPrim", f"{environment_path}/Robot"),
 
                     # =========================================================================================

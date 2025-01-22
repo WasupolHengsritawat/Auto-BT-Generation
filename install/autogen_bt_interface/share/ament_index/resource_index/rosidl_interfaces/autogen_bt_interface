@@ -1,0 +1,8 @@
+srv/ChargingRequest.idl
+srv/ChargingRequest.srv
+srv/ChargingRequest_Request.msg
+srv/ChargingRequest_Response.msg
+srv/PickingRequest.idl
+srv/PickingRequest.srv
+srv/PickingRequest_Request.msg
+srv/PickingRequest_Response.msg

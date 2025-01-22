@@ -1,0 +1,22 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from autogen_bt_interface/srv/PickingRequest.srv
+// generated code does not contain a copyright notice
+
+#include "std_msgs/msg/Bool.idl"
+#include "std_msgs/msg/String.idl"
+#include "std_msgs/msg/UInt32.idl"
+
+module autogen_bt_interface {
+  module srv {
+    struct PickingRequest_Request {
+      std_msgs::msg::String host_name;
+
+      std_msgs::msg::UInt32 obj_id;
+
+      std_msgs::msg::Bool status;
+    };
+    struct PickingRequest_Response {
+      uint8 structure_needs_at_least_one_member;
+    };
+  };
+};

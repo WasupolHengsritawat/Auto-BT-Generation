@@ -1,0 +1,16 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from autogen_bt_interface/srv/ChargingRequest.srv
+// generated code does not contain a copyright notice
+
+#include "std_msgs/msg/Bool.idl"
+
+module autogen_bt_interface {
+  module srv {
+    struct ChargingRequest_Request {
+      std_msgs::msg::Bool status;
+    };
+    struct ChargingRequest_Response {
+      uint8 structure_needs_at_least_one_member;
+    };
+  };
+};

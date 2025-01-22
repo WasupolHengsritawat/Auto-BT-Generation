@@ -3,10 +3,9 @@ import py_trees_ros
 import roboticstoolbox as rtb
 from spatialmath import SE3
 from spatialmath.base import q2r
-from geometry_msgs.msg import Twist
-from geometry_msgs.msg import TransformStamped
+from geometry_msgs.msg import Twist, PointStamped, TransformStamped
 from sensor_msgs.msg import JointState
-from std_msgs.msg import Float64, Float32, Bool
+from std_msgs.msg import Float64, Float32, Bool, UInt8
 from tf_transformations import euler_from_quaternion
 import numpy as np
 from ikpy.chain import Chain
@@ -15,6 +14,8 @@ import networkx as nx
 import random
 import math
 import code 
+
+from autogen_bt_interface.srv import ChargingRequest, PickingRequest
 
 # Utility Functions =======================================================================================================================================
 def euclidean_distance(coord1, coord2):
@@ -252,9 +253,9 @@ class PatrolNode(py_trees.behaviour.Behaviour):
             error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
             raise KeyError(error_message) from e  # 'direct cause' traceability
         
-        self.battery_subscriber = self.node.create_subscription(Float32, f"/robot_{self.env_id}/battery_level", self.battery_level_callback, 10)
-        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/robot_{self.env_id}/tf", self.robot_trans_callback, 10)
-        self.cmd_vel_publisher = self.node.create_publisher(Twist, f"/robot_{self.env_id}/cmd_vel", 10)
+        self.battery_subscriber = self.node.create_subscription(Float32, f"/env_{self.env_id}/robot/battery_level", self.battery_level_callback, 10)
+        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/robot/tf", self.robot_trans_callback, 10)
+        self.cmd_vel_publisher = self.node.create_publisher(Twist, f"/env_{self.env_id}/robot/cmd_vel", 10)
 
         return True
     
@@ -329,7 +330,7 @@ class FindTargetNode(py_trees.behaviour.Behaviour):
     def __init__(self, name, target_graph, robot_graph, env_id):
         super().__init__(name)
         self.blackboard = self.attach_blackboard_client(name=name)
-        self.blackboard.register_key(key="is_target_in_robot_graph", access=py_trees.common.Access.WRITE)
+        self.blackboard.register_key(key="target_in_robot_graph", access=py_trees.common.Access.WRITE)
         
         self.target_graph = target_graph
         self.robot_graph = robot_graph
@@ -338,7 +339,6 @@ class FindTargetNode(py_trees.behaviour.Behaviour):
         self.battery_level = None
 
         self.target_pos = [None, None, None, None, None]
-        self.target_rot = [None, None, None, None, None]
         
     def setup(self, **kwargs):
         """
@@ -350,45 +350,40 @@ class FindTargetNode(py_trees.behaviour.Behaviour):
             error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
             raise KeyError(error_message) from e  # 'direct cause' traceability
         
-        self.battery_subscriber = self.node.create_subscription(Float32, f"/robot_{self.env_id}/battery_level", self.battery_level_callback, 10)
-        self.target_1_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target1/tf", self.target_1_trans_callback, 10)
-        self.target_2_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target2/tf", self.target_2_trans_callback, 10)
-        self.target_3_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target3/tf", self.target_3_trans_callback, 10)
-        self.target_4_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target4/tf", self.target_4_trans_callback, 10)
-        self.target_5_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target5/tf", self.target_5_trans_callback, 10)
+        self.node.create_subscription(Float32, f"/env_{self.env_id}/robot/battery_level", self.battery_level_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target0/tf", self.target_0_trans_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target1/tf", self.target_1_trans_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target2/tf", self.target_2_trans_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target3/tf", self.target_3_trans_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target4/tf", self.target_4_trans_callback, 10)
 
-        self.blackboard.is_target_in_robot_graph = False
+        self.blackboard.target_in_robot_graph = 0
 
         return True
     
     def battery_level_callback(self, msg):
         self.battery_level = msg.data
     
-    def target_1_trans_callback(self, msg):
-        self.target_pos[0] = [msg.transform.translation.x, msg.transform.translation.y]
-        self.target_rot[0] = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
+    def target_0_trans_callback(self, msg):
+        self.target_pos[0] = [msg.point.x, msg.point.y]
 
+    def target_1_trans_callback(self, msg):
+        self.target_pos[1] = [msg.point.x, msg.point.y]
+    
     def target_2_trans_callback(self, msg):
-        self.target_pos[1] = [msg.transform.translation.x, msg.transform.translation.y]
-        self.target_rot[1] = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
+        self.target_pos[2] = [msg.point.x, msg.point.y]
     
     def target_3_trans_callback(self, msg):
-        self.target_pos[2] = [msg.transform.translation.x, msg.transform.translation.y]
-        self.target_rot[2] = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
+        self.target_pos[3] = [msg.point.x, msg.point.y]
     
     def target_4_trans_callback(self, msg):
-        self.target_pos[3] = [msg.transform.translation.x, msg.transform.translation.y]
-        self.target_rot[3] = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
-    
-    def target_5_trans_callback(self, msg):
-        self.target_pos[4] = [msg.transform.translation.x, msg.transform.translation.y]
-        self.target_rot[4] = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
+        self.target_pos[4] = [msg.point.x, msg.point.y]
             
     def update(self):
         """
         Main behavior logic.
         """
-        if None in self.target_pos or None in self.target_rot or self.battery_level is None:
+        if None in self.target_pos or self.battery_level is None:
             return py_trees.common.Status.RUNNING  
 
         if self.battery_level < 0.1:
@@ -417,7 +412,7 @@ class FindTargetNode(py_trees.behaviour.Behaviour):
             add_node_to_robot_graph(u, self.robot_graph, self.target_graph)
             if u in self.robot_graph.nodes:
                 self.logger.info(f'Add target node {u} to the robot graph -> robot graph size: {self.robot_graph.number_of_nodes()}')
-                self.blackboard.is_target_in_robot_graph = True
+                self.blackboard.target_in_robot_graph = self.blackboard.target_in_robot_graph + 1
 
         return py_trees.common.Status.RUNNING
     
@@ -455,9 +450,9 @@ class GoToChargerNode(py_trees.behaviour.Behaviour):
             error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
             raise KeyError(error_message) from e  # 'direct cause' traceability
         
-        self.battery_subscriber = self.node.create_subscription(Float32, f"/robot_{self.env_id}/battery_level", self.battery_level_callback, 10)
-        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/robot_{self.env_id}/tf", self.robot_trans_callback, 10)
-        self.cmd_vel_publisher = self.node.create_publisher(Twist, f"/robot_{self.env_id}/cmd_vel", 10)
+        self.battery_subscriber = self.node.create_subscription(Float32, f"/env_{self.env_id}/robot/battery_level", self.battery_level_callback, 10)
+        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/robot/tf", self.robot_trans_callback, 10)
+        self.cmd_vel_publisher = self.node.create_publisher(Twist, f"/env_{self.env_id}/robot/cmd_vel", 10)
 
         return True
     
@@ -543,9 +538,9 @@ class GoToSpawnNode(py_trees.behaviour.Behaviour):
             error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
             raise KeyError(error_message) from e  # 'direct cause' traceability
         
-        self.battery_subscriber = self.node.create_subscription(Float32, f"/robot_{self.env_id}/battery_level", self.battery_level_callback, 10)
-        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/robot_{self.env_id}/tf", self.robot_trans_callback, 10)
-        self.cmd_vel_publisher = self.node.create_publisher(Twist, f"/robot_{self.env_id}/cmd_vel", 10)
+        self.battery_subscriber = self.node.create_subscription(Float32, f"/env_{self.env_id}/robot/battery_level", self.battery_level_callback, 10)
+        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/robot/tf", self.robot_trans_callback, 10)
+        self.cmd_vel_publisher = self.node.create_publisher(Twist, f"/env_{self.env_id}/robot/cmd_vel", 10)
 
         return True
     
@@ -608,18 +603,17 @@ class GoToNearestTarget(py_trees.behaviour.Behaviour):
     def __init__(self, name, robot_graph, env_id):
         super().__init__(name)
         self.blackboard = self.attach_blackboard_client(name=name)
-        self.blackboard.register_key(key="is_target_in_robot_graph", access=py_trees.common.Access.READ)
+
+        try:
+            self.blackboard.register_key(key="target_in_robot_graph", access=py_trees.common.Access.READ)
+            self.blackboard.target_in_robot_graph
+        except:
+            self.blackboard.register_key(key="target_in_robot_graph", access=py_trees.common.Access.WRITE)
+            self.blackboard.target_in_robot_graph = 0
 
         self.robot_graph = robot_graph
 
         self.env_id = env_id
-        self.battery_level = None
-
-        self.final_target_node = None
-
-        self.robot_pos = None
-        self.robot_rot = None
-        self.cmd_vel_publisher = None
 
         self.path = []
         self.angular_controller = PIDController(K_p = 5, K_i = 2, output_limits=(-2.7,2.7))
@@ -634,9 +628,9 @@ class GoToNearestTarget(py_trees.behaviour.Behaviour):
             error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
             raise KeyError(error_message) from e  # 'direct cause' traceability
         
-        self.battery_subscriber = self.node.create_subscription(Float32, f"/robot_{self.env_id}/battery_level", self.battery_level_callback, 10)
-        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/robot_{self.env_id}/tf", self.robot_trans_callback, 10)
-        self.cmd_vel_publisher = self.node.create_publisher(Twist, f"/robot_{self.env_id}/cmd_vel", 10)
+        self.battery_subscriber = self.node.create_subscription(Float32, f"/env_{self.env_id}/robot/battery_level", self.battery_level_callback, 10)
+        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/robot/tf", self.robot_trans_callback, 10)
+        self.cmd_vel_publisher = self.node.create_publisher(Twist, f"/env_{self.env_id}/robot/cmd_vel", 10)
 
         return True
     
@@ -658,7 +652,7 @@ class GoToNearestTarget(py_trees.behaviour.Behaviour):
             return py_trees.common.Status.FAILURE  
         
         try:
-            if not(self.blackboard.is_target_in_robot_graph):
+            if self.blackboard.target_in_robot_graph == 0:
                 return py_trees.common.Status.FAILURE  
         except:
             return py_trees.common.Status.FAILURE
@@ -685,7 +679,7 @@ class GoToNearestTarget(py_trees.behaviour.Behaviour):
             target_pos = self.robot_graph.nodes[target_node]['pos']
 
             # Move to target
-            status = move_to_target(self.angular_controller, self.robot_pos, self.robot_rot, target_pos, self.cmd_vel_publisher, tol=0.6)
+            status = move_to_target(self.angular_controller, self.robot_pos, self.robot_rot, target_pos, self.cmd_vel_publisher)
             self.logger.info(f"status: {'Finished' if status else f'Running to {target_node}'}")
 
             if status: # Finished moving to target
@@ -710,44 +704,136 @@ class GoToNearestTarget(py_trees.behaviour.Behaviour):
         
         self.logger.debug(f"{self.name}: terminate({new_status})")
 
-class PickTarget(py_trees.behaviour.Behaviour):
-    def __init__(self, name, env_id):
+class PickObject(py_trees.behaviour.Behaviour):
+    def __init__(self, name, robot_graph, env_id):
         super().__init__(name)
+        self.robot_graph = robot_graph
+
         self.env_id = env_id
         self.battery_level = None
 
         self.robot_pos = None
         self.robot_rot = None
 
-        self.joint_pos = [None] * 6
-
-        self.contact_r = None
-        self.contact_l = None
-
         self.target_pos = [None] * 5
-        self.target_rot = [None] * 5
-
-        self.joint_command = None
 
         self.blackboard = self.attach_blackboard_client(name=name)
-        self.blackboard.register_key(key="is_object_in_hand", access=py_trees.common.Access.WRITE)
+        self.blackboard.register_key(key="object_in_hand", access=py_trees.common.Access.WRITE)
+        self.blackboard.register_key(key="target_in_robot_graph", access=py_trees.common.Access.READ)
+        self.blackboard.register_key(key="target_in_robot_graph", access=py_trees.common.Access.WRITE)
 
-        # # Define the robot chain using ikpy
-        # self.robotChain = Chain(name="Jackal_UR5", links=[
-        #     OriginLink(),
-        #     URDFLink(name="shoulder_pan_joint", translation_vector=[0, 0, 0.3732], orientation=[0, 0, 0], rotation=[0, 0, 1], bounds=(-np.pi, np.pi)),
-        #     URDFLink(name="shoulder_lift_joint", translation_vector=[0.1, 0, 0], orientation=[0, np.pi / 2, 0], rotation=[0, 1, 0], bounds=(-np.pi, 0)),
-        #     URDFLink(name="elbow_joint", translation_vector=[-0.425, 0, 0], orientation=[0, 0, 0], rotation=[0, 1, 0], bounds=(-np.pi, np.pi)),
-        #     URDFLink(name="wrist_1_joint", translation_vector=[-0.392, 0, 0.1093], orientation=[0, 0, 0], rotation=[0, 1, 0], bounds=(-np.pi, np.pi)),
-        #     URDFLink(name="wrist_2_joint", translation_vector=[0, 0, -0.09475], orientation=[0, -np.pi / 2, 0], rotation=[0, 0, 1], bounds=(-np.pi, np.pi)),
-        #     URDFLink(name="wrist_3_joint", translation_vector=[0, 0, 0], orientation=[0, np.pi / 2, 0], rotation=[0, 0, 1], bounds=(-np.pi, np.pi))
-        # ])
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
+        try:
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
         
-        # # Tool transformation matrix
-        # self.tool_transform = np.array([[0, 1, 0, 0],
-        #                                 [0, 0, -1, 0],
-        #                                 [1, 0, 0, 0.19085],
-        #                                 [0, 0, 0, 1]])
+        # ROS2 Message Setup -----------------------------------------------------------------------------------
+        # Subscriber 
+        self.node.create_subscription(Float32, f"/env_{self.env_id}/robot/battery_level", self.battery_level_callback, 10)
+        self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/robot/tf", self.robot_trans_callback, 10)
+
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target0/tf", self.target_0_trans_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target1/tf", self.target_1_trans_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target2/tf", self.target_2_trans_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target3/tf", self.target_3_trans_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target4/tf", self.target_4_trans_callback, 10)
+
+        # Service Client
+        self.picking_request_client = self.node.create_client(PickingRequest, f"/env_{self.env_id}/picking_req")
+
+        return True
+    
+    def battery_level_callback(self, msg):
+        self.battery_level = msg.data
+
+    def robot_trans_callback(self, msg):
+        self.robot_pos = [msg.transform.translation.x, msg.transform.translation.y]
+        self.robot_rot = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
+    
+    def target_0_trans_callback(self, msg):
+        self.target_pos[0] = [msg.point.x, msg.point.y]
+
+    def target_1_trans_callback(self, msg):
+        self.target_pos[1] = [msg.point.x, msg.point.y]
+    
+    def target_2_trans_callback(self, msg):
+        self.target_pos[2] = [msg.point.x, msg.point.y]
+    
+    def target_3_trans_callback(self, msg):
+        self.target_pos[3] = [msg.point.x, msg.point.y]
+    
+    def target_4_trans_callback(self, msg):
+        self.target_pos[4] = [msg.point.x, msg.point.y]
+
+    def set_pick_request(self, obj_id: int, status: bool)->None:
+        req = PickingRequest.Request()
+        req.host_name.data = "robot"
+        req.obj_id.data = obj_id
+        req.status.data = status
+        self.picking_request_client.call_async(req) 
+    
+    def update(self):
+        # Ensure all required data is available
+        if self.robot_pos is None or self.robot_rot is None or None in self.target_pos or self.battery_level is None:
+            return py_trees.common.Status.RUNNING
+        
+        if self.battery_level < 0.1:
+            return py_trees.common.Status.FAILURE
+
+        # Find the nearest target
+        nearest_distance = np.inf
+        selected_target = None
+        for i, target in enumerate(self.target_pos):
+            if target is not None:
+                distance = np.linalg.norm(np.array(self.robot_pos) - np.array(target))
+                print(f'object {i}: {distance}')
+                if distance < nearest_distance and distance <= 0.5:
+                    nearest_distance = distance
+                    selected_target = i
+
+        if selected_target is None:
+            return py_trees.common.Status.FAILURE
+
+        # Picking the nearest target
+        self.set_pick_request(selected_target, True)
+        self.logger.info(f"{self.name}: picking object {selected_target} at {self.target_pos[selected_target]}")
+        self.blackboard.object_in_hand = selected_target
+
+        # Remove picked target from the robot graph
+        for u in self.robot_graph.nodes:
+            if euclidean_distance(self.target_pos[selected_target], self.robot_graph.nodes[u]['pos']) < 0.1:
+                self.robot_graph.remove_node(u)
+                self.blackboard.target_in_robot_graph = self.blackboard.target_in_robot_graph - 1
+                break
+
+        return py_trees.common.Status.SUCCESS
+    
+    def terminate(self, new_status):
+        """
+        Stop the robot on termination.
+        """
+        
+        self.logger.debug(f"{self.name}: terminate({new_status})")
+
+class DropObject(py_trees.behaviour.Behaviour):
+    def __init__(self, name, env_id):
+        super().__init__(name)
+        self.env_id = env_id
+        self.battery_level = None
+
+        self.blackboard = self.attach_blackboard_client(name=name)
+        
+        try:
+            self.blackboard.register_key(key="object_in_hand", access=py_trees.common.Access.READ)
+            self.blackboard.object_in_hand
+        except:
+            self.blackboard.register_key(key="object_in_hand", access=py_trees.common.Access.WRITE)
+            self.blackboard.object_in_hand = None
         
     def setup(self, **kwargs):
         """
@@ -761,131 +847,62 @@ class PickTarget(py_trees.behaviour.Behaviour):
         
         # ROS2 Message Setup -----------------------------------------------------------------------------------
         # Subscriber 
-        self.battery_subscriber = self.node.create_subscription(Float32, f"/robot_{self.env_id}/battery_level", self.battery_level_callback, 10)
-        self.joint_state_subscriber = self.node.create_subscription(JointState, f"/robot_{self.env_id}/joint_state", self.joint_state_callback, 10)
-        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/robot_{self.env_id}/tf", self.robot_trans_callback, 10)
-        self.contact_r_subscriber = self.node.create_subscription(Float64, f"/robot_{self.env_id}/eef_contact_r", self.contact_r_callback, 10)
-        self.contact_l_subscriber = self.node.create_subscription(Float64, f"/robot_{self.env_id}/eef_contact_l", self.contact_l_callback, 10)
+        self.node.create_subscription(Float32, f"/env_{self.env_id}/robot/battery_level", self.battery_level_callback, 10)
 
-        self.target_1_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target1/tf", self.target_1_trans_callback, 10)
-        self.target_2_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target2/tf", self.target_2_trans_callback, 10)
-        self.target_3_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target3/tf", self.target_3_trans_callback, 10)
-        self.target_4_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target4/tf", self.target_4_trans_callback, 10)
-        self.target_5_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target5/tf", self.target_5_trans_callback, 10)
-
-        # Publisher 
-        self.joint_command_publisher = self.node.create_publisher(JointState, f"/robot_{self.env_id}/joint_command", 10)
+        # Service Client
+        self.picking_request_client = self.node.create_client(PickingRequest, f"/env_{self.env_id}/picking_req")
 
         return True
     
     def battery_level_callback(self, msg):
         self.battery_level = msg.data
+
+    def set_pick_request(self, obj_id: int, status: bool)->None:
+        req = PickingRequest.Request()
+        req.host_name.data = "robot"
+        req.obj_id.data = obj_id
+        req.status.data = status
+        self.picking_request_client.call_async(req) 
     
-    def robot_trans_callback(self, msg):
-        self.robot_pos = [msg.transform.translation.x, msg.transform.translation.y, msg.transform.translation.z]
-        self.robot_rot = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
-
-    def joint_state_callback(self, msg):
-        self.joint_pos[0] = msg.position[msg.name == 'shoulder_pan_joint']
-        self.joint_pos[1] = msg.position[msg.name == 'shoulder_lift_joint']
-        self.joint_pos[2] = msg.position[msg.name == 'elbow_joint']
-        self.joint_pos[3] = msg.position[msg.name == 'wrist_1_joint']
-        self.joint_pos[4] = msg.position[msg.name == 'wrist_2_joint']
-        self.joint_pos[5] = msg.position[msg.name == 'wrist_3_joint']
-        self.joint_pos[6] = msg.position[msg.name == 'Slider_1']
-        self.joint_pos[7] = msg.position[msg.name == 'Slider_2']
-
-    def contact_r_callback(self, msg):
-        self.contact_r = msg.data
-
-    def contact_l_callback(self, msg):
-        self.contact_l = msg.data
-
-    def target_1_trans_callback(self, msg):
-        self.target_pos[0] = [msg.transform.translation.x, msg.transform.translation.y, msg.transform.translation.z]
-        self.target_rot[0] = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
-
-    def target_2_trans_callback(self, msg):
-        self.target_pos[1] = [msg.transform.translation.x, msg.transform.translation.y, msg.transform.translation.z]
-        self.target_rot[1] = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
-    
-    def target_3_trans_callback(self, msg):
-        self.target_pos[2] = [msg.transform.translation.x, msg.transform.translation.y, msg.transform.translation.z]
-        self.target_rot[2] = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
-    
-    def target_4_trans_callback(self, msg):
-        self.target_pos[3] = [msg.transform.translation.x, msg.transform.translation.y, msg.transform.translation.z]
-        self.target_rot[3] = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
-    
-    def target_5_trans_callback(self, msg):
-        self.target_pos[4] = [msg.transform.translation.x, msg.transform.translation.y, msg.transform.translation.z]
-        self.target_rot[4] = [msg.transform.rotation.x, msg.transform.rotation.y, msg.transform.rotation.z, msg.transform.rotation.w]
-
     def update(self):
+        object_in_hand = self.blackboard.object_in_hand
         # Ensure all required data is available
-        if self.robot_pos is None or self.robot_rot is None or None in self.joint_pos or None in self.target_pos or self.battery_level is None:
+        if self.battery_level is None:
             return py_trees.common.Status.RUNNING
         
         if self.battery_level < 0.1:
             return py_trees.common.Status.FAILURE
-        
-        # # Find the nearest target
-        # nearest_distance = np.inf
-        # selected_target = None
-        # for i, target in enumerate(self.target_pos):
-        #     if target is not None:
-        #         distance = np.linalg.norm(np.array(self.robot_pos) - np.array(target))
-        #         if distance < nearest_distance:
-        #             nearest_distance = distance
-        #             selected_target = i
-        
-        # if selected_target is None:
-        #     return py_trees.common.Status.FAILURE
-        
-        # # Compute the target position in the robot's frame
-        # target_world = np.array(self.target_pos[selected_target])
-        # robot_world = np.array(self.robot_pos)
-        # target_relative_to_robot = target_world - robot_world
 
-        # # Solve IK for position only
-        # ik_solution = self.robotChain.inverse_kinematics(target_relative_to_robot)
-        # if ik_solution is None:
-        #     self.logger.info("IK solution not found.")
-        #     return py_trees.common.Status.FAILURE
+        self.set_pick_request(object_in_hand, False)
+        self.blackboard.register_key(key="object_in_hand", access=py_trees.common.Access.WRITE)
+        self.blackboard.object_in_hand = None
 
-        # # Create and publish the joint command
-        # self.joint_command = JointState()
-        # self.joint_command.name = ['shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint', 'Slider_1', 'Slider_2']
-        # self.joint_command.position = list(ik_solution) + [0.025]*2
-        # self.joint_command_publisher.publish(self.joint_command)
-
-        return py_trees.common.Status.RUNNING
+        return py_trees.common.Status.SUCCESS
     
     def terminate(self, new_status):
         """
         Stop the robot on termination.
         """
-        # self.joint_command = JointState()
-        # self.joint_command.name = ['shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint', 'Slider_1', 'Slider_2']
-        # self.joint_command.position = [0.0] * 8
-
-        # self.joint_command_publisher.publish(self.joint_command)
         
         self.logger.debug(f"{self.name}: terminate({new_status})")
 
 class Charge(py_trees.behaviour.Behaviour):
-    def __init__(self, name, env_id):
+    def __init__(self, name, robot_graph, env_id):
         super().__init__(name)
         self.blackboard = self.attach_blackboard_client(name=name)
         self.blackboard.register_key(key="is_charging", access=py_trees.common.Access.WRITE)
 
+        self.robot_graph = robot_graph
+
         self.env_id = env_id
         self.battery_level = None
+
+        self.charger_node = 1
 
         self.robot_pos = None
         self.robot_rot = None
 
-        self.charger_loc = ( -2.00,  0.17)
+        self.charger_loc = self.robot_graph.nodes[self.charger_node]['pos']
         
     def setup(self, **kwargs):
         """
@@ -897,15 +914,20 @@ class Charge(py_trees.behaviour.Behaviour):
             error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
             raise KeyError(error_message) from e  # 'direct cause' traceability
         
-        self.battery_subscriber = self.node.create_subscription(Float32, f"/robot_{self.env_id}/battery_level", self.battery_level_callback, 10)
-        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/robot_{self.env_id}/tf", self.robot_trans_callback, 10)
+        self.battery_subscriber = self.node.create_subscription(Float32, f"/env_{self.env_id}/robot/battery_level", self.battery_level_callback, 10)
+        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/robot/tf", self.robot_trans_callback, 10)
 
-        self.charge_request_publisher = self.node.create_publisher(Bool, f"/robot_{self.env_id}/charge_request", 10)
-
+        self.charging_request_client = self.node.create_client(ChargingRequest, f"/env_{self.env_id}/robot/charging_req")
+        
         return True
     
     def battery_level_callback(self, msg):
         self.battery_level = msg.data
+    
+    def set_charging_request(self, data: Bool)->None:
+        req = ChargingRequest.Request()
+        req.status.data = data
+        self.charging_request_client.call_async(req)
     
     def robot_trans_callback(self, msg):
         self.robot_pos = [msg.transform.translation.x, msg.transform.translation.y]
@@ -921,15 +943,12 @@ class Charge(py_trees.behaviour.Behaviour):
         if self.battery_level < 0.1 or euclidean_distance(self.charger_loc, self.robot_pos) >= 0.2:
             return py_trees.common.Status.FAILURE
         
-        msg = Bool()
         if self.battery_level < 100:
-            msg.data = True
+            self.set_charging_request(True)
             self.blackboard.is_charging = True
-            self.charge_request_publisher.publish(msg)
         else:
-            msg.data = False
+            self.set_charging_request(False)
             self.blackboard.is_charging = False
-            self.charge_request_publisher.publish(msg)
             return py_trees.common.Status.SUCCESS
         
         return py_trees.common.Status.RUNNING
@@ -938,21 +957,26 @@ class Charge(py_trees.behaviour.Behaviour):
         """
         Stop the robot on termination.
         """
-        msg = Bool()
-        msg.data = False
+        self.set_charging_request(False)
         self.blackboard.is_charging = False
-        self.charge_request_publisher.publish(msg)
         
         self.logger.debug(f"{self.name}: terminate({new_status})")
 
 # Condition Nodes =========================================================================================================================================
 
 class AreObjectsExistOnInternalMap(py_trees.behaviour.Behaviour):
-    def __init__(self, name):
+    def __init__(self, name, env_id):
         super().__init__(name)
         self.blackboard = self.attach_blackboard_client(name=name)
-        self.blackboard.register_key(key="is_target_in_robot_graph", access=py_trees.common.Access.READ)
-        
+        self.env_id = env_id
+
+        try:
+            self.blackboard.register_key(key="target_in_robot_graph", access=py_trees.common.Access.READ)
+            self.blackboard.target_in_robot_graph
+        except:
+            self.blackboard.register_key(key="target_in_robot_graph", access=py_trees.common.Access.WRITE)
+            self.blackboard.target_in_robot_graph = False
+
     def setup(self, **kwargs):
         """
         One-time setup to initialize ROS2 publishers and subscribers.
@@ -970,7 +994,7 @@ class AreObjectsExistOnInternalMap(py_trees.behaviour.Behaviour):
         Main behavior logic.
         """
         try:
-            if self.blackboard.is_target_in_robot_graph:
+            if self.blackboard.target_in_robot_graph > 0:
                 return py_trees.common.Status.SUCCESS 
             else:
                 return py_trees.common.Status.FAILURE   
@@ -1003,7 +1027,7 @@ class IsRobotAtTheCharger(py_trees.behaviour.Behaviour):
             error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
             raise KeyError(error_message) from e  # 'direct cause' traceability
         
-        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/robot_{self.env_id}/tf", self.robot_trans_callback, 10)
+        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/robot/tf", self.robot_trans_callback, 10)
 
         return True
     
@@ -1049,7 +1073,7 @@ class IsRobotAtTheSpawn(py_trees.behaviour.Behaviour):
             error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
             raise KeyError(error_message) from e  # 'direct cause' traceability
         
-        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/robot_{self.env_id}/tf", self.robot_trans_callback, 10)
+        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/robot/tf", self.robot_trans_callback, 10)
 
         return True
     
@@ -1080,7 +1104,13 @@ class IsBatteryOnProperLevel(py_trees.behaviour.Behaviour):
     def __init__(self, name, env_id):
         super().__init__(name)
         self.blackboard = self.attach_blackboard_client(name=name)
-        self.blackboard.register_key(key="is_charging", access=py_trees.common.Access.READ)
+
+        try:
+            self.blackboard.register_key(key="is_charging", access=py_trees.common.Access.READ)
+            self.blackboard.is_charging
+        except:
+            self.blackboard.register_key(key="is_charging", access=py_trees.common.Access.WRITE)
+            self.blackboard.is_charging = False
 
         self.env_id = env_id
         self.battery_level = None
@@ -1095,7 +1125,7 @@ class IsBatteryOnProperLevel(py_trees.behaviour.Behaviour):
             error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
             raise KeyError(error_message) from e  # 'direct cause' traceability
 
-        self.battery_subscriber = self.node.create_subscription(Float32, f"/robot_{self.env_id}/battery_level", self.battery_level_callback, 10)
+        self.battery_subscriber = self.node.create_subscription(Float32, f"/env_{self.env_id}/robot/battery_level", self.battery_level_callback, 10)
 
         return True
     
@@ -1151,33 +1181,33 @@ class AreObjectNearby(py_trees.behaviour.Behaviour):
             error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
             raise KeyError(error_message) from e  # 'direct cause' traceability
         
-        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/robot_{self.env_id}/tf", self.robot_trans_callback, 10)
+        self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/robot/tf", self.robot_trans_callback, 10)
 
-        self.target_1_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target1/tf", self.target_1_trans_callback, 10)
-        self.target_2_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target2/tf", self.target_2_trans_callback, 10)
-        self.target_3_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target3/tf", self.target_3_trans_callback, 10)
-        self.target_4_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target4/tf", self.target_4_trans_callback, 10)
-        self.target_5_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/target5/tf", self.target_5_trans_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target0/tf", self.target_0_trans_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target1/tf", self.target_1_trans_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target2/tf", self.target_2_trans_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target3/tf", self.target_3_trans_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target4/tf", self.target_4_trans_callback, 10)
 
         return True
     
     def robot_trans_callback(self, msg):
         self.robot_pos = [msg.transform.translation.x, msg.transform.translation.y]
     
-    def target_1_trans_callback(self, msg):
-        self.target_pos[0] = [msg.transform.translation.x, msg.transform.translation.y]
+    def target_0_trans_callback(self, msg):
+        self.target_pos[0] = [msg.point.x, msg.point.y]
 
+    def target_1_trans_callback(self, msg):
+        self.target_pos[1] = [msg.point.x, msg.point.y]
+    
     def target_2_trans_callback(self, msg):
-        self.target_pos[1] = [msg.transform.translation.x, msg.transform.translation.y]
+        self.target_pos[2] = [msg.point.x, msg.point.y]
     
     def target_3_trans_callback(self, msg):
-        self.target_pos[2] = [msg.transform.translation.x, msg.transform.translation.y]
+        self.target_pos[3] = [msg.point.x, msg.point.y]
     
     def target_4_trans_callback(self, msg):
-        self.target_pos[3] = [msg.transform.translation.x, msg.transform.translation.y]
-    
-    def target_5_trans_callback(self, msg):
-        self.target_pos[4] = [msg.transform.translation.x, msg.transform.translation.y]
+        self.target_pos[4] = [msg.point.x, msg.point.y]
             
     def update(self):
         """
@@ -1187,11 +1217,213 @@ class AreObjectNearby(py_trees.behaviour.Behaviour):
             return py_trees.common.Status.FAILURE   
     
         for target_pos in self.target_pos:
-            if euclidean_distance(target_pos, self.robot_pos) < 0.6:
+            if euclidean_distance(target_pos, self.robot_pos) < 0.4:
                 self.logger.info('There exists target nearby.')
                 return py_trees.common.Status.SUCCESS  
             
         return py_trees.common.Status.FAILURE
+    
+    def terminate(self, new_status):
+        """
+        Stop the robot on termination.
+        """
+        
+        self.logger.debug(f"{self.name}: terminate({new_status})")
+
+class IsNearbyObjectNotAtGoal(py_trees.behaviour.Behaviour):
+    def __init__(self, name, robot_graph, goal_node, env_id):
+        super().__init__(name)
+        self.robot_graph = robot_graph
+
+        self.env_id = env_id
+
+        self.robot_pos = None
+        self.target_pos = [None, None, None, None, None]
+
+        self.goal_node = goal_node
+        
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
+        try:
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+        
+        self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/robot/tf", self.robot_trans_callback, 10)
+
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target0/tf", self.target_0_trans_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target1/tf", self.target_1_trans_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target2/tf", self.target_2_trans_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target3/tf", self.target_3_trans_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target4/tf", self.target_4_trans_callback, 10)
+
+        return True
+    
+    def robot_trans_callback(self, msg):
+        self.robot_pos = [msg.transform.translation.x, msg.transform.translation.y]
+    
+    def target_0_trans_callback(self, msg):
+        self.target_pos[0] = [msg.point.x, msg.point.y]
+
+    def target_1_trans_callback(self, msg):
+        self.target_pos[1] = [msg.point.x, msg.point.y]
+    
+    def target_2_trans_callback(self, msg):
+        self.target_pos[2] = [msg.point.x, msg.point.y]
+    
+    def target_3_trans_callback(self, msg):
+        self.target_pos[3] = [msg.point.x, msg.point.y]
+    
+    def target_4_trans_callback(self, msg):
+        self.target_pos[4] = [msg.point.x, msg.point.y]
+            
+    def update(self):
+        """
+        Main behavior logic.
+        """
+        if None in self.target_pos or self.robot_pos == None:
+            return py_trees.common.Status.FAILURE   
+    
+        for target_pos in self.target_pos:
+            if euclidean_distance(target_pos, self.robot_pos) < 0.4:
+
+                for goal in self.goal_node:
+                    if euclidean_distance(target_pos, self.robot_graph.nodes[goal]['pos']) < 0.4:
+                        self.logger.info('The nearby target has reached the goal.')
+                        return py_trees.common.Status.FAILURE  
+    
+                return py_trees.common.Status.SUCCESS  
+            
+        self.logger.info('There is no object nearby...')
+        return py_trees.common.Status.FAILURE
+    
+    def terminate(self, new_status):
+        """
+        Stop the robot on termination.
+        """
+        
+        self.logger.debug(f"{self.name}: terminate({new_status})")
+
+class IsObjectInHand(py_trees.behaviour.Behaviour):
+    def __init__(self, name, env_id):
+        super().__init__(name)
+        self.blackboard = self.attach_blackboard_client(name=name)
+        self.env_id = env_id
+
+        try:
+            self.blackboard.register_key(key="object_in_hand", access=py_trees.common.Access.READ)
+            self.blackboard.object_in_hand
+        except:
+            self.blackboard.register_key(key="object_in_hand", access=py_trees.common.Access.WRITE)
+            self.blackboard.object_in_hand = None
+
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
+        try:
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+
+        return True
+
+    def update(self):
+        """
+        Main behavior logic.
+        """
+        try:
+            if self.blackboard.object_in_hand != None:
+                return py_trees.common.Status.SUCCESS 
+            else:
+                return py_trees.common.Status.FAILURE   
+        except:
+            return py_trees.common.Status.FAILURE 
+    
+    def terminate(self, new_status):
+        """
+        Stop the robot on termination.
+        """
+        
+        self.logger.debug(f"{self.name}: terminate({new_status})")
+
+class AreFiveObjectsAtSpawn(py_trees.behaviour.Behaviour):
+    def __init__(self, name, robot_graph, env_id):
+        super().__init__(name)
+        self.robot_graph = robot_graph
+
+        self.env_id = env_id
+
+        self.spawn_node = 0
+
+        self.robot_pos = None
+        self.target_pos = [None, None, None, None, None]
+        
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
+        try:
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+        
+        self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/robot/tf", self.robot_trans_callback, 10)
+
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target0/tf", self.target_0_trans_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target1/tf", self.target_1_trans_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target2/tf", self.target_2_trans_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target3/tf", self.target_3_trans_callback, 10)
+        self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target4/tf", self.target_4_trans_callback, 10)
+
+        self.obj_at_spawn_pub = self.node.create_publisher(UInt8, f"/env_{self.env_id}/object_at_spawn", 10)
+        
+        return True
+    
+    def robot_trans_callback(self, msg):
+        self.robot_pos = [msg.transform.translation.x, msg.transform.translation.y]
+    
+    def target_0_trans_callback(self, msg):
+        self.target_pos[0] = [msg.point.x, msg.point.y]
+
+    def target_1_trans_callback(self, msg):
+        self.target_pos[1] = [msg.point.x, msg.point.y]
+    
+    def target_2_trans_callback(self, msg):
+        self.target_pos[2] = [msg.point.x, msg.point.y]
+    
+    def target_3_trans_callback(self, msg):
+        self.target_pos[3] = [msg.point.x, msg.point.y]
+    
+    def target_4_trans_callback(self, msg):
+        self.target_pos[4] = [msg.point.x, msg.point.y]
+            
+    def update(self):
+        """
+        Main behavior logic.
+        """
+        if None in self.target_pos or self.robot_pos == None:
+            return py_trees.common.Status.FAILURE   
+     
+        object_in_spawn = 0
+        for target_pos in self.target_pos:
+            if euclidean_distance(target_pos, self.robot_graph.nodes[self.spawn_node]['pos']) < 0.4:
+                object_in_spawn += 1
+                
+        msg = UInt8()
+        msg.data = object_in_spawn
+        self.obj_at_spawn_pub.publish(msg)
+
+        if object_in_spawn == 5:
+            self.logger.info(f'There exists five objects at the spawn.')
+            return py_trees.common.Status.SUCCESS
+        else:
+            return py_trees.common.Status.FAILURE
     
     def terminate(self, new_status):
         """
@@ -1228,8 +1460,8 @@ class MoveNode(py_trees.behaviour.Behaviour):
             error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
             raise KeyError(error_message) from e  # 'direct cause' traceability
         
-        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/robot_{self.env_id}/tf", self.robot_trans_callback, 10)
-        self.cmd_vel_publisher = self.node.create_publisher(Twist, f"/robot_{self.env_id}/cmd_vel", 10)
+        self.robot_trans_subscriber = self.node.create_subscription(TransformStamped, f"/env_{self.env_id}/robot/tf", self.robot_trans_callback, 10)
+        self.cmd_vel_publisher = self.node.create_publisher(Twist, f"/env_{self.env_id}/robot/cmd_vel", 10)
 
         return True
     

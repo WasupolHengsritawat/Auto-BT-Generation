@@ -144,7 +144,7 @@ rosidl_typesupport_introspection_c/isaac_ros2_messages/srv/detail/isaac_pose__ro
 rosidl_typesupport_introspection_c/isaac_ros2_messages/srv/detail/isaac_pose__rosidl_typesupport_introspection_c.h: /opt/ros/humble/share/geometry_msgs/msg/Wrench.idl
 rosidl_typesupport_introspection_c/isaac_ros2_messages/srv/detail/isaac_pose__rosidl_typesupport_introspection_c.h: /opt/ros/humble/share/geometry_msgs/msg/WrenchStamped.idl
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/absolutezeno/Auto-BT-Generation/build/isaac_ros2_messages/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating C introspection for ROS interfaces"
-	/home/absolutezeno/isaaclab/bin/python3.10 /opt/ros/humble/lib/rosidl_typesupport_introspection_c/rosidl_typesupport_introspection_c --generator-arguments-file /home/absolutezeno/Auto-BT-Generation/build/isaac_ros2_messages/rosidl_typesupport_introspection_c__arguments.json
+	/usr/bin/python3.10 /opt/ros/humble/lib/rosidl_typesupport_introspection_c/rosidl_typesupport_introspection_c --generator-arguments-file /home/absolutezeno/Auto-BT-Generation/build/isaac_ros2_messages/rosidl_typesupport_introspection_c__arguments.json
 
 rosidl_typesupport_introspection_c/isaac_ros2_messages/srv/detail/get_prims__rosidl_typesupport_introspection_c.h: rosidl_typesupport_introspection_c/isaac_ros2_messages/srv/detail/isaac_pose__rosidl_typesupport_introspection_c.h
 	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_typesupport_introspection_c/isaac_ros2_messages/srv/detail/get_prims__rosidl_typesupport_introspection_c.h

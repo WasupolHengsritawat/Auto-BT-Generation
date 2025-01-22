@@ -12,12 +12,12 @@ import math
 import networkx as nx
 
 from py_trees_ros.trees import BehaviourTree
-from behavior import PatrolNode, MoveNode, GoToChargerNode, FindTargetNode, AreObjectsExistOnInternalMap, GoToNearestTarget, AreObjectNearby, PickTarget, Charge, IsRobotAtTheCharger, IsRobotAtTheSpawn, IsBatteryOnProperLevel
+from behavior import PatrolNode, MoveNode, GoToChargerNode, FindTargetNode, AreObjectsExistOnInternalMap, GoToNearestTarget, AreObjectNearby, PickObject, Charge, IsRobotAtTheCharger, IsRobotAtTheSpawn, IsBatteryOnProperLevel, IsObjectInHand, DropObject, GoToSpawnNode, IsNearbyObjectNotAtGoal, AreFiveObjectsAtSpawn
 
 def euclidean_distance(coord1, coord2):
     return math.sqrt((coord1[0] - coord2[0])**2 + (coord1[1] - coord2[1])**2)
 
-def graph_init():
+def graph_init(offset):
     # Coordinates extracted manually from the cave map
     coordinates = [(  0.00,  0.00), #  0 - spawn point
                    ( -2.00,  0.17), #  1 - charging station
@@ -49,6 +49,9 @@ def graph_init():
                    ( -1.50, 13.30), # 27 - target  #8
                    ( -2.60,  7.70), # 28 - target  #9
                    (  8.00,  6.70)] # 29 - target #10
+    
+    for i in range(len(coordinates)):
+        coordinates[0] = (coordinates[0][0] + offset[0], coordinates[0][1] + offset[1]) 
     
     # Connection between nodes
     connections = [( 0, 1),
@@ -117,22 +120,27 @@ def graph_init():
 
 def create_tree():
 
-    target_graph, full_graph, robot_graph = graph_init()
+    target_graph, full_graph, robot_graph = graph_init([0,0])
 
     # Behavior Nodes
     patrol_node = PatrolNode(name = "PatrolNode", full_graph = full_graph, robot_graph = robot_graph, env_id = 0)
     find_target_node = FindTargetNode(name='FindTarget', target_graph=target_graph, robot_graph=robot_graph, env_id=0)
     go_to_nearest_target = GoToNearestTarget(name="GoToNearestTarget",robot_graph=robot_graph, env_id=0)
     go_to_charger_node =GoToChargerNode(name="GoToCharger", robot_graph=robot_graph, env_id=0)
-    picking_target_node = PickTarget(name = 'PickingTarget', env_id=0)
-    charge_node = Charge(name='Charge', env_id=0)
+    go_to_spawn_node = GoToSpawnNode(name='GoToSpawnNode', robot_graph=robot_graph, env_id=0)
+    picking_object_node = PickObject(name = 'PickObject', robot_graph=robot_graph, env_id=0)
+    drop_object_node = DropObject(name='DropObject', env_id=0)
+    charge_node = Charge(name='Charge', robot_graph = robot_graph, env_id=0)
     
     # Condition Nodes
     is_robot_at_the_charger_node = IsRobotAtTheCharger(name='IsRobotAtTheCharger', env_id=0)
     is_robot_at_the_spawn_node = IsRobotAtTheSpawn(name='IsRobotAtTheSpawn', env_id=0)
     is_battery_on_proper_level = IsBatteryOnProperLevel(name='IsBatteryOnProperLevel', env_id=0)
-    are_object_existed_on_internal_map = AreObjectsExistOnInternalMap(name='AreObjectExistsOnInternalMap')
+    are_object_existed_on_internal_map = AreObjectsExistOnInternalMap(name='AreObjectExistsOnInternalMap', env_id=0)
     are_object_nearby_node = AreObjectNearby('AreObjectNearby', env_id=0)
+    is_object_in_hand_node = IsObjectInHand('IsObjectInHand', env_id=0)
+    is_nearby_object_not_at_goal = IsNearbyObjectNotAtGoal('IsNearbyObjectNotAtGoal', robot_graph=robot_graph, goal_node=[0], env_id=0)
+    are_five_objects_at_spawn = AreFiveObjectsAtSpawn('AreFiveObjectsAtSpawn', robot_graph=robot_graph, env_id=0)
 
     parallel_1 = py_trees.composites.Parallel("Parallel_1", policy=py_trees.common.ParallelPolicy.SuccessOnAll(synchronise=False))
     parallel_1.add_child(patrol_node)
@@ -146,14 +154,21 @@ def create_tree():
     sequence_1.add_child(selector_1)
     sequence_1.add_child(go_to_nearest_target)
 
+    sequence_6 = py_trees.composites.Sequence("Sequence_6", memory=False)
+    sequence_6.add_child(are_object_nearby_node)
+    sequence_6.add_child(is_nearby_object_not_at_goal)
+
     selector_2 = py_trees.composites.Selector("Selector_2", memory=False)
-    are_object_nearby_node = AreObjectNearby('AreObjectNearby', env_id=0)
-    selector_2.add_child(are_object_nearby_node)
+    selector_2.add_child(sequence_6)
     selector_2.add_child(sequence_1)
 
-    # sequence_2 = py_trees.composites.Sequence("Sequence_2", memory=False)
-    # sequence_2.add_child(selector_2)
-    # sequence_2.add_child(picking_target_node)
+    sequence_2 = py_trees.composites.Sequence("Sequence_2", memory=False)
+    sequence_2.add_child(selector_2)
+    sequence_2.add_child(picking_object_node)
+
+    selector_3 = py_trees.composites.Selector("Selector_3", memory=False)
+    selector_3.add_child(is_object_in_hand_node)
+    selector_3.add_child(sequence_2)
 
     selector_4 = py_trees.composites.Selector("Selector_4", memory=False)
     selector_4.add_child(is_robot_at_the_charger_node)
@@ -167,16 +182,24 @@ def create_tree():
     selector_5.add_child(is_battery_on_proper_level)
     selector_5.add_child(sequence_3)
 
+    selector_6 = py_trees.composites.Selector("Selector_6", memory=False)
+    selector_6.add_child(is_robot_at_the_spawn_node)
+    selector_6.add_child(go_to_spawn_node)
+
+    sequence_4 = py_trees.composites.Sequence("Sequence_4", memory=False)
+    sequence_4.add_child(selector_3)
+    sequence_4.add_child(selector_6)
+    sequence_4.add_child(drop_object_node)
+
     sequence_5 = py_trees.composites.Sequence("Sequence_5", memory=False)
     sequence_5.add_child(selector_5)
-    sequence_5.add_child(selector_2)
+    sequence_5.add_child(sequence_4)
 
-    # gotocharger_node = GoToChargerNode(name='GoToChargerNode', robot_graph = robot_graph, env_id=0)
-    # root.add_child(gotocharger_node)
-    # move_node = MoveNode(name='MoveNode', target = [10.30,2.00], env_id=0)
-    # root.add_child(move_node)
+    selector_7 = py_trees.composites.Selector("Selector_7", memory=False)
+    selector_7.add_child(are_five_objects_at_spawn)
+    selector_7.add_child(sequence_5)
 
-    return sequence_5
+    return selector_7
 
 def main(args=None):
     rclpy.init(args=args)

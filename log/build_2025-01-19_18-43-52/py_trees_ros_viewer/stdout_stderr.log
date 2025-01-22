@@ -1,0 +1,80 @@
+/home/absolutezeno/Auto-BT-Generation/src/py_trees_ros_viewer/setup.py:5: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+  from distutils import log
+running egg_info
+creating ../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info
+writing ../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info/PKG-INFO
+writing dependency_links to ../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info/dependency_links.txt
+writing entry points to ../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info/entry_points.txt
+writing top-level names to ../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info/top_level.txt
+writing manifest file '../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info/SOURCES.txt'
+reading manifest file '../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info/SOURCES.txt'
+adding license file 'LICENSE'
+writing manifest file '../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build
+creating /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib
+creating /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer
+copying py_trees_ros_viewer/viewer.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer
+copying py_trees_ros_viewer/web_app_rc.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer
+copying py_trees_ros_viewer/exceptions.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer
+copying py_trees_ros_viewer/backend.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer
+copying py_trees_ros_viewer/main_window_ui.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer
+copying py_trees_ros_viewer/conversions.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer
+copying py_trees_ros_viewer/console.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer
+copying py_trees_ros_viewer/utilities.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer
+copying py_trees_ros_viewer/__init__.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer
+copying py_trees_ros_viewer/web_view_ui.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer
+copying py_trees_ros_viewer/images_rc.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer
+copying py_trees_ros_viewer/main_window.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer
+copying py_trees_ros_viewer/web_view.py -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer
+copying py_trees_ros_viewer/main_window.ui -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer
+copying py_trees_ros_viewer/web_view.ui -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer
+creating /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer/html
+copying py_trees_ros_viewer/html/index.html -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer/html
+creating /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer/images
+copying py_trees_ros_viewer/images/tuxrobot.png -> /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer/images
+/usr/lib/python3/dist-packages/setuptools/command/install.py:34: SetuptoolsDeprecationWarning: setup.py install is deprecated. Use build and pip and other standards-based tools.
+  warnings.warn(
+running install
+running install_lib
+creating /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer
+copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer/main_window.ui -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer
+copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer/viewer.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer
+copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer/web_app_rc.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer
+copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer/exceptions.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer
+creating /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer/html
+copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer/html/index.html -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer/html
+copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer/backend.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer
+copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer/main_window_ui.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer
+copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer/conversions.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer
+copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer/console.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer
+copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer/utilities.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer
+copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer/__init__.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer
+copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer/web_view.ui -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer
+copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer/web_view_ui.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer
+copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer/images_rc.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer
+copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer/main_window.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer
+creating /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer/images
+copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer/images/tuxrobot.png -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer/images
+copying /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build/lib/py_trees_ros_viewer/web_view.py -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer
+byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer/viewer.py to viewer.cpython-310.pyc
+byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer/web_app_rc.py to web_app_rc.cpython-310.pyc
+byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer/exceptions.py to exceptions.cpython-310.pyc
+byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer/backend.py to backend.cpython-310.pyc
+byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer/main_window_ui.py to main_window_ui.cpython-310.pyc
+byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer/conversions.py to conversions.cpython-310.pyc
+byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer/console.py to console.cpython-310.pyc
+byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer/utilities.py to utilities.cpython-310.pyc
+byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer/__init__.py to __init__.cpython-310.pyc
+byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer/web_view_ui.py to web_view_ui.cpython-310.pyc
+byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer/images_rc.py to images_rc.cpython-310.pyc
+byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer/main_window.py to main_window.cpython-310.pyc
+byte-compiling /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer/web_view.py to web_view.cpython-310.pyc
+running install_data
+copying package.xml -> /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/share/py_trees_ros_viewer
+running install_egg_info
+Copying ../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info to /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer-0.2.3-py3.10.egg-info
+running install_scripts
+Installing py-trees-tree-viewer script to /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/bin
+writing list of installed files to '/home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/install.log'

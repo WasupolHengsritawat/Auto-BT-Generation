@@ -67,7 +67,7 @@ include CMakeFiles/ament_cmake_python_build_isaac_ros2_messages_egg.dir/compiler
 include CMakeFiles/ament_cmake_python_build_isaac_ros2_messages_egg.dir/progress.make
 
 CMakeFiles/ament_cmake_python_build_isaac_ros2_messages_egg:
-	cd /home/absolutezeno/Auto-BT-Generation/build/isaac_ros2_messages/ament_cmake_python/isaac_ros2_messages && /home/absolutezeno/isaaclab/bin/python3.10 setup.py egg_info
+	cd /home/absolutezeno/Auto-BT-Generation/build/isaac_ros2_messages/ament_cmake_python/isaac_ros2_messages && /usr/bin/python3.10 setup.py egg_info
 
 ament_cmake_python_build_isaac_ros2_messages_egg: CMakeFiles/ament_cmake_python_build_isaac_ros2_messages_egg
 ament_cmake_python_build_isaac_ros2_messages_egg: CMakeFiles/ament_cmake_python_build_isaac_ros2_messages_egg.dir/build.make
