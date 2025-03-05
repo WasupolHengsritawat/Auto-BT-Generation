@@ -7,5 +7,6 @@
 #include "isaac_ros2_messages/srv/detail/get_prims__struct.hpp"
 #include "isaac_ros2_messages/srv/detail/get_prims__builder.hpp"
 #include "isaac_ros2_messages/srv/detail/get_prims__traits.hpp"
+#include "isaac_ros2_messages/srv/detail/get_prims__type_support.hpp"
 
 #endif  // ISAAC_ROS2_MESSAGES__SRV__GET_PRIMS_HPP_

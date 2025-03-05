@@ -67,7 +67,7 @@ include CMakeFiles/ament_cmake_python_build_autogen_bt_interface_egg.dir/compile
 include CMakeFiles/ament_cmake_python_build_autogen_bt_interface_egg.dir/progress.make
 
 CMakeFiles/ament_cmake_python_build_autogen_bt_interface_egg:
-	cd /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/ament_cmake_python/autogen_bt_interface && /usr/bin/python3.10 setup.py egg_info
+	cd /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/ament_cmake_python/autogen_bt_interface && /home/absolutezeno/isaaclab/bin/python3 setup.py egg_info
 
 ament_cmake_python_build_autogen_bt_interface_egg: CMakeFiles/ament_cmake_python_build_autogen_bt_interface_egg
 ament_cmake_python_build_autogen_bt_interface_egg: CMakeFiles/ament_cmake_python_build_autogen_bt_interface_egg.dir/build.make

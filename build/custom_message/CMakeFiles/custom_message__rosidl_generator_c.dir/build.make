@@ -116,7 +116,7 @@ rosidl_generator_c/custom_message/msg/sample_msg.h: /opt/ros/humble/share/std_ms
 rosidl_generator_c/custom_message/msg/sample_msg.h: /opt/ros/humble/share/builtin_interfaces/msg/Duration.idl
 rosidl_generator_c/custom_message/msg/sample_msg.h: /opt/ros/humble/share/builtin_interfaces/msg/Time.idl
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/absolutezeno/Auto-BT-Generation/build/custom_message/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating C code for ROS interfaces"
-	/usr/bin/python3.10 /opt/ros/humble/share/rosidl_generator_c/cmake/../../../lib/rosidl_generator_c/rosidl_generator_c --generator-arguments-file /home/absolutezeno/Auto-BT-Generation/build/custom_message/rosidl_generator_c__arguments.json
+	/home/absolutezeno/isaaclab/bin/python3 /opt/ros/humble/share/rosidl_generator_c/cmake/../../../lib/rosidl_generator_c/rosidl_generator_c --generator-arguments-file /home/absolutezeno/Auto-BT-Generation/build/custom_message/rosidl_generator_c__arguments.json
 
 rosidl_generator_c/custom_message/msg/detail/sample_msg__functions.h: rosidl_generator_c/custom_message/msg/sample_msg.h
 	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_c/custom_message/msg/detail/sample_msg__functions.h

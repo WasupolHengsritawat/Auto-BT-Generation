@@ -339,6 +339,8 @@ class FindTargetNode(py_trees.behaviour.Behaviour):
         self.battery_level = None
 
         self.target_pos = [None, None, None, None, None]
+
+        self.target_spawn_pool_size = 10
         
     def setup(self, **kwargs):
         """
@@ -388,23 +390,14 @@ class FindTargetNode(py_trees.behaviour.Behaviour):
 
         if self.battery_level < 0.1:
             return py_trees.common.Status.FAILURE 
-    
-        target_spawn_pool = [[ 14.0, -4.0], # 20 - target  #1
-                             [ 22.0, -1.0], # 21 - target  #2
-                             [ 19.5,  7.7], # 22 - target  #3
-                             [ 20.5, 13.0], # 23 - target  #4
-                             [ 23.0, 21.0], # 24 - target  #5
-                             [  9.0, 24.5], # 25 - target  #6
-                             [ -2.0, 23.2], # 26 - target  #7
-                             [ -1.5, 13.3], # 27 - target  #8
-                             [ -2.6,  7.7], # 28 - target  #9
-                             [  8.0,  6.7]] # 29 - target #10
+        
+        target_spawn_pool = list(nx.get_node_attributes(self.target_graph,'pos').values())[len(self.target_graph.nodes)-self.target_spawn_pool_size:]
         
         valid_target = []
 
         for target_pos in self.target_pos:
             for i in range(len(target_spawn_pool)):
-                if euclidean_distance(target_pos, target_spawn_pool[i]) < 0.2:
+                if euclidean_distance(target_pos, target_spawn_pool[i]) < 0.5:
                     valid_target.append(20+i)
                     break
         

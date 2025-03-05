@@ -140,6 +140,7 @@ CMakeFiles/isaac_ros2_messages: /opt/ros/humble/share/geometry_msgs/msg/TwistWit
 CMakeFiles/isaac_ros2_messages: /opt/ros/humble/share/geometry_msgs/msg/TwistWithCovarianceStamped.idl
 CMakeFiles/isaac_ros2_messages: /opt/ros/humble/share/geometry_msgs/msg/Vector3.idl
 CMakeFiles/isaac_ros2_messages: /opt/ros/humble/share/geometry_msgs/msg/Vector3Stamped.idl
+CMakeFiles/isaac_ros2_messages: /opt/ros/humble/share/geometry_msgs/msg/VelocityStamped.idl
 CMakeFiles/isaac_ros2_messages: /opt/ros/humble/share/geometry_msgs/msg/Wrench.idl
 CMakeFiles/isaac_ros2_messages: /opt/ros/humble/share/geometry_msgs/msg/WrenchStamped.idl
 

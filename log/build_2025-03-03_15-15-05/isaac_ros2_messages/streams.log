@@ -1,0 +1,121 @@
+[0.572s] Invoking command in '/home/absolutezeno/Auto-BT-Generation/build/isaac_ros2_messages': CMAKE_PREFIX_PATH=/opt/ros/humble PS1=(isaaclab) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ VIRTUAL_ENV_PROMPT=(isaaclab) /usr/bin/cmake --build /home/absolutezeno/Auto-BT-Generation/build/isaac_ros2_messages -- -j20 -l20
+[0.587s] -- Found ament_cmake: 1.3.11 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.708s] -- Found Python3: /home/absolutezeno/isaaclab/bin/python3 (found version "3.10.12") found components: Interpreter 
+[0.758s] -- Found ament_lint_auto: 0.12.11 (/opt/ros/humble/share/ament_lint_auto/cmake)
+[0.835s] -- Found builtin_interfaces: 1.2.1 (/opt/ros/humble/share/builtin_interfaces/cmake)
+[0.858s] -- Found rosidl_generator_c: 3.1.6 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[0.861s] -- Found rosidl_adapter: 3.1.6 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[0.866s] -- Found rosidl_generator_cpp: 3.1.6 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[0.876s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.890s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.902s] -- Found rosidl_default_generators: 1.2.0 (/opt/ros/humble/share/rosidl_default_generators/cmake)
+[0.921s] -- Found std_msgs: 4.2.4 (/opt/ros/humble/share/std_msgs/cmake)
+[0.929s] -- Found geometry_msgs: 4.2.4 (/opt/ros/humble/share/geometry_msgs/cmake)
+[1.128s] -- Found ament_cmake_ros: 0.10.0 (/opt/ros/humble/share/ament_cmake_ros/cmake)
+[1.393s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[1.506s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[1.522s] -- Found python_cmake_module: 0.10.0 (/opt/ros/humble/share/python_cmake_module/cmake)
+[1.539s] -- Using PYTHON_EXECUTABLE: /usr/bin/python3
+[1.539s] -- Using PYTHON_INCLUDE_DIRS: /usr/include/python3.10
+[1.540s] -- Using PYTHON_LIBRARIES: /usr/lib/x86_64-linux-gnu/libpython3.10.so
+[1.589s] -- Added test 'copyright' to check source files copyright and LICENSE
+[1.590s] -- Added test 'lint_cmake' to check CMake code style
+[1.591s] -- Added test 'xmllint' to check XML markup files
+[1.596s] -- Configuring done
+[1.649s] -- Generating done
+[1.653s] -- Build files have been written to: /home/absolutezeno/Auto-BT-Generation/build/isaac_ros2_messages
+[1.675s] [  1%] [34m[1mGenerating C code for ROS interfaces[0m
+[1.685s] [  3%] [34m[1mGenerating C++ code for ROS interfaces[0m
+[1.692s] [  3%] Built target ament_cmake_python_copy_isaac_ros2_messages
+[1.936s] running egg_info
+[1.937s] writing isaac_ros2_messages.egg-info/PKG-INFO
+[1.937s] writing dependency_links to isaac_ros2_messages.egg-info/dependency_links.txt
+[1.937s] writing top-level names to isaac_ros2_messages.egg-info/top_level.txt
+[1.940s] reading manifest file 'isaac_ros2_messages.egg-info/SOURCES.txt'
+[1.941s] writing manifest file 'isaac_ros2_messages.egg-info/SOURCES.txt'
+[1.969s] [  3%] Built target ament_cmake_python_build_isaac_ros2_messages_egg
+[2.662s] [  3%] Built target isaac_ros2_messages__cpp
+[2.675s] [  4%] [34m[1mGenerating C++ introspection for ROS interfaces[0m
+[2.675s] [  6%] [34m[1mGenerating C++ type support for eProsima Fast-RTPS[0m
+[2.675s] [  7%] [34m[1mGenerating C++ type support dispatch for ROS interfaces[0m
+[2.685s] [35m[1mConsolidate compiler generated dependencies of target isaac_ros2_messages__rosidl_generator_c[0m
+[2.698s] [  9%] [32mBuilding C object CMakeFiles/isaac_ros2_messages__rosidl_generator_c.dir/rosidl_generator_c/isaac_ros2_messages/srv/detail/isaac_pose__functions.c.o[0m
+[2.699s] [ 11%] [32mBuilding C object CMakeFiles/isaac_ros2_messages__rosidl_generator_c.dir/rosidl_generator_c/isaac_ros2_messages/srv/detail/get_prims__functions.c.o[0m
+[2.699s] [ 12%] [32mBuilding C object CMakeFiles/isaac_ros2_messages__rosidl_generator_c.dir/rosidl_generator_c/isaac_ros2_messages/srv/detail/set_prim_attribute__functions.c.o[0m
+[2.699s] [ 14%] [32mBuilding C object CMakeFiles/isaac_ros2_messages__rosidl_generator_c.dir/rosidl_generator_c/isaac_ros2_messages/srv/detail/get_prim_attribute__functions.c.o[0m
+[2.700s] [ 15%] [32mBuilding C object CMakeFiles/isaac_ros2_messages__rosidl_generator_c.dir/rosidl_generator_c/isaac_ros2_messages/srv/detail/get_prim_attributes__functions.c.o[0m
+[2.791s] [ 17%] [32m[1mLinking C shared library libisaac_ros2_messages__rosidl_generator_c.so[0m
+[2.833s] [ 17%] Built target isaac_ros2_messages__rosidl_generator_c
+[2.843s] [ 19%] [34m[1mGenerating C type support for eProsima Fast-RTPS[0m
+[2.843s] [ 20%] [34m[1mGenerating C introspection for ROS interfaces[0m
+[2.846s] [ 22%] [34m[1mGenerating C type support dispatch for ROS interfaces[0m
+[3.379s] [35m[1mConsolidate compiler generated dependencies of target isaac_ros2_messages__rosidl_typesupport_cpp[0m
+[3.394s] [ 23%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/isaac_ros2_messages/srv/get_prims__type_support.cpp.o[0m
+[3.394s] [ 25%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/isaac_ros2_messages/srv/get_prim_attributes__type_support.cpp.o[0m
+[3.396s] [ 26%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/isaac_ros2_messages/srv/get_prim_attribute__type_support.cpp.o[0m
+[3.396s] [ 28%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/isaac_ros2_messages/srv/isaac_pose__type_support.cpp.o[0m
+[3.396s] [ 30%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/isaac_ros2_messages/srv/set_prim_attribute__type_support.cpp.o[0m
+[3.438s] [35m[1mConsolidate compiler generated dependencies of target isaac_ros2_messages__rosidl_typesupport_c[0m
+[3.451s] [ 31%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/isaac_ros2_messages/srv/isaac_pose__type_support.cpp.o[0m
+[3.451s] [ 34%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/isaac_ros2_messages/srv/get_prims__type_support.cpp.o[0m
+[3.452s] [ 34%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/isaac_ros2_messages/srv/get_prim_attribute__type_support.cpp.o[0m
+[3.452s] [ 36%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/isaac_ros2_messages/srv/get_prim_attributes__type_support.cpp.o[0m
+[3.453s] [ 38%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_c.dir/rosidl_typesupport_c/isaac_ros2_messages/srv/set_prim_attribute__type_support.cpp.o[0m
+[3.491s] [ 39%] [32m[1mLinking CXX shared library libisaac_ros2_messages__rosidl_typesupport_c.so[0m
+[3.508s] [35m[1mConsolidate compiler generated dependencies of target isaac_ros2_messages__rosidl_typesupport_fastrtps_cpp[0m
+[3.529s] [ 42%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/isaac_ros2_messages/srv/detail/dds_fastrtps/get_prim_attributes__type_support.cpp.o[0m
+[3.530s] [ 42%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/isaac_ros2_messages/srv/detail/dds_fastrtps/isaac_pose__type_support.cpp.o[0m
+[3.530s] [ 44%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/isaac_ros2_messages/srv/detail/dds_fastrtps/get_prim_attribute__type_support.cpp.o[0m
+[3.532s] [ 46%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/isaac_ros2_messages/srv/detail/dds_fastrtps/get_prims__type_support.cpp.o[0m
+[3.534s] [ 47%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/isaac_ros2_messages/srv/detail/dds_fastrtps/set_prim_attribute__type_support.cpp.o[0m
+[3.537s] [35m[1mConsolidate compiler generated dependencies of target isaac_ros2_messages__rosidl_typesupport_introspection_c[0m
+[3.541s] [ 47%] Built target isaac_ros2_messages__rosidl_typesupport_c
+[3.552s] [ 49%] [32mBuilding C object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/isaac_ros2_messages/srv/detail/get_prim_attribute__type_support.c.o[0m
+[3.552s] [ 50%] [32mBuilding C object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/isaac_ros2_messages/srv/detail/isaac_pose__type_support.c.o[0m
+[3.555s] [ 52%] [32mBuilding C object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/isaac_ros2_messages/srv/detail/get_prim_attributes__type_support.c.o[0m
+[3.557s] [ 53%] [32mBuilding C object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/isaac_ros2_messages/srv/detail/set_prim_attribute__type_support.c.o[0m
+[3.561s] [ 55%] [32mBuilding C object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/isaac_ros2_messages/srv/detail/get_prims__type_support.c.o[0m
+[3.622s] [ 57%] [32m[1mLinking C shared library libisaac_ros2_messages__rosidl_typesupport_introspection_c.so[0m
+[3.630s] [35m[1mConsolidate compiler generated dependencies of target isaac_ros2_messages__rosidl_typesupport_introspection_cpp[0m
+[3.647s] [ 60%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/isaac_ros2_messages/srv/detail/isaac_pose__type_support.cpp.o[0m
+[3.647s] [ 58%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/isaac_ros2_messages/srv/detail/get_prim_attributes__type_support.cpp.o[0m
+[3.650s] [ 61%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/isaac_ros2_messages/srv/detail/get_prims__type_support.cpp.o[0m
+[3.651s] [ 63%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/isaac_ros2_messages/srv/detail/get_prim_attribute__type_support.cpp.o[0m
+[3.653s] [ 65%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/isaac_ros2_messages/srv/detail/set_prim_attribute__type_support.cpp.o[0m
+[3.661s] [ 65%] Built target isaac_ros2_messages__rosidl_typesupport_introspection_c
+[3.763s] [ 66%] [32m[1mLinking CXX shared library libisaac_ros2_messages__rosidl_typesupport_cpp.so[0m
+[3.812s] [ 66%] Built target isaac_ros2_messages__rosidl_typesupport_cpp
+[3.900s] [35m[1mConsolidate compiler generated dependencies of target isaac_ros2_messages__rosidl_typesupport_fastrtps_c[0m
+[3.921s] [ 69%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/isaac_ros2_messages/srv/detail/get_prim_attribute__type_support_c.cpp.o[0m
+[3.922s] [ 69%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/isaac_ros2_messages/srv/detail/isaac_pose__type_support_c.cpp.o[0m
+[3.922s] [ 71%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/isaac_ros2_messages/srv/detail/get_prims__type_support_c.cpp.o[0m
+[3.923s] [ 73%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/isaac_ros2_messages/srv/detail/set_prim_attribute__type_support_c.cpp.o[0m
+[3.924s] [ 74%] [32mBuilding CXX object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/isaac_ros2_messages/srv/detail/get_prim_attributes__type_support_c.cpp.o[0m
+[4.109s] [ 76%] [32m[1mLinking CXX shared library libisaac_ros2_messages__rosidl_typesupport_introspection_cpp.so[0m
+[4.200s] [ 76%] Built target isaac_ros2_messages__rosidl_typesupport_introspection_cpp
+[4.221s] [ 77%] [32m[1mLinking CXX shared library libisaac_ros2_messages__rosidl_typesupport_fastrtps_cpp.so[0m
+[4.283s] [ 77%] Built target isaac_ros2_messages__rosidl_typesupport_fastrtps_cpp
+[4.353s] [ 79%] [32m[1mLinking CXX shared library libisaac_ros2_messages__rosidl_typesupport_fastrtps_c.so[0m
+[4.409s] [ 79%] Built target isaac_ros2_messages__rosidl_typesupport_fastrtps_c
+[4.426s] [ 79%] Built target isaac_ros2_messages
+[4.447s] [ 80%] Built target isaac_ros2_messages__py
+[4.459s] [35m[1mConsolidate compiler generated dependencies of target isaac_ros2_messages__rosidl_generator_py[0m
+[4.473s] [ 82%] [32mBuilding C object CMakeFiles/isaac_ros2_messages__rosidl_generator_py.dir/rosidl_generator_py/isaac_ros2_messages/srv/_isaac_pose_s.c.o[0m
+[4.475s] [ 84%] [32mBuilding C object CMakeFiles/isaac_ros2_messages__rosidl_generator_py.dir/rosidl_generator_py/isaac_ros2_messages/srv/_set_prim_attribute_s.c.o[0m
+[4.476s] [ 88%] [32mBuilding C object CMakeFiles/isaac_ros2_messages__rosidl_generator_py.dir/rosidl_generator_py/isaac_ros2_messages/srv/_get_prims_s.c.o[0m
+[4.476s] [ 88%] [32mBuilding C object CMakeFiles/isaac_ros2_messages__rosidl_generator_py.dir/rosidl_generator_py/isaac_ros2_messages/srv/_get_prim_attributes_s.c.o[0m
+[4.476s] [ 88%] [32mBuilding C object CMakeFiles/isaac_ros2_messages__rosidl_generator_py.dir/rosidl_generator_py/isaac_ros2_messages/srv/_get_prim_attribute_s.c.o[0m
+[4.601s] [ 90%] [32m[1mLinking C shared library rosidl_generator_py/isaac_ros2_messages/libisaac_ros2_messages__rosidl_generator_py.so[0m
+[4.634s] [ 90%] Built target isaac_ros2_messages__rosidl_generator_py
+[4.645s] [35m[1mConsolidate compiler generated dependencies of target isaac_ros2_messages__rosidl_typesupport_introspection_c__pyext[0m
+[4.645s] [35m[1mConsolidate compiler generated dependencies of target isaac_ros2_messages__rosidl_typesupport_c__pyext[0m
+[4.645s] [35m[1mConsolidate compiler generated dependencies of target isaac_ros2_messages__rosidl_typesupport_fastrtps_c__pyext[0m
+[4.654s] [ 93%] [32mBuilding C object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_introspection_c__pyext.dir/rosidl_generator_py/isaac_ros2_messages/_isaac_ros2_messages_s.ep.rosidl_typesupport_introspection_c.c.o[0m
+[4.654s] [ 93%] [32mBuilding C object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_c__pyext.dir/rosidl_generator_py/isaac_ros2_messages/_isaac_ros2_messages_s.ep.rosidl_typesupport_c.c.o[0m
+[4.658s] [ 95%] [32mBuilding C object CMakeFiles/isaac_ros2_messages__rosidl_typesupport_fastrtps_c__pyext.dir/rosidl_generator_py/isaac_ros2_messages/_isaac_ros2_messages_s.ep.rosidl_typesupport_fastrtps_c.c.o[0m
+[4.756s] [ 96%] [32m[1mLinking C shared library rosidl_generator_py/isaac_ros2_messages/isaac_ros2_messages_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so[0m
+[4.776s] [ 98%] [32m[1mLinking C shared library rosidl_generator_py/isaac_ros2_messages/isaac_ros2_messages_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so[0m
+[4.791s] [ 98%] Built target isaac_ros2_messages__rosidl_typesupport_fastrtps_c__pyext
+[4.792s] [100%] [32m[1mLinking C shared library rosidl_generator_py/isaac_ros2_messages/isaac_ros2_messages_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so[0m
+[4.818s] [100%] Built target isaac_ros2_messages__rosidl_typesupport_c__pyext
+[4.824s] [100%] Built target isaac_ros2_messages__rosidl_typesupport_introspection_c__pyext

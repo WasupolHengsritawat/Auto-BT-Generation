@@ -7,5 +7,6 @@
 #include "isaac_ros2_messages/srv/detail/isaac_pose__struct.hpp"
 #include "isaac_ros2_messages/srv/detail/isaac_pose__builder.hpp"
 #include "isaac_ros2_messages/srv/detail/isaac_pose__traits.hpp"
+#include "isaac_ros2_messages/srv/detail/isaac_pose__type_support.hpp"
 
 #endif  // ISAAC_ROS2_MESSAGES__SRV__ISAAC_POSE_HPP_

@@ -12,9 +12,11 @@
 /home/absolutezeno/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail/sample_msg__rosidl_typesupport_fastrtps_c.h
 /home/absolutezeno/Auto-BT-Generation/install/custom_message/lib/libcustom_message__rosidl_typesupport_fastrtps_c.so
 /home/absolutezeno/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/sample_msg.hpp
+/home/absolutezeno/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/rosidl_generator_cpp__visibility_control.hpp
 /home/absolutezeno/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail/sample_msg__struct.hpp
 /home/absolutezeno/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail/sample_msg__traits.hpp
 /home/absolutezeno/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail/sample_msg__builder.hpp
+/home/absolutezeno/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail/sample_msg__type_support.hpp
 /home/absolutezeno/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h
 /home/absolutezeno/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail/sample_msg__rosidl_typesupport_fastrtps_cpp.hpp
 /home/absolutezeno/Auto-BT-Generation/install/custom_message/lib/libcustom_message__rosidl_typesupport_fastrtps_cpp.so

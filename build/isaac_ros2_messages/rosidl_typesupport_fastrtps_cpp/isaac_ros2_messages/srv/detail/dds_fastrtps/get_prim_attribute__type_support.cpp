@@ -90,6 +90,8 @@ max_serialized_size_GetPrimAttribute_Request(
 
   const size_t padding = 4;
   const size_t wchar_size = 4;
+  size_t last_member_size = 0;
+  (void)last_member_size;
   (void)padding;
   (void)wchar_size;
 
@@ -123,7 +125,20 @@ max_serialized_size_GetPrimAttribute_Request(
     }
   }
 
-  return current_alignment - initial_alignment;
+  size_t ret_val = current_alignment - initial_alignment;
+  if (is_plain) {
+    // All members are plain, and type is not empty.
+    // We still need to check that the in-memory alignment
+    // is the same as the CDR mandated alignment.
+    using DataType = isaac_ros2_messages::srv::GetPrimAttribute_Request;
+    is_plain =
+      (
+      offsetof(DataType, attribute) +
+      last_member_size
+      ) == ret_val;
+  }
+
+  return ret_val;
 }
 
 static bool _GetPrimAttribute_Request__cdr_serialize(
@@ -336,6 +351,8 @@ max_serialized_size_GetPrimAttribute_Response(
 
   const size_t padding = 4;
   const size_t wchar_size = 4;
+  size_t last_member_size = 0;
+  (void)last_member_size;
   (void)padding;
   (void)wchar_size;
 
@@ -373,6 +390,7 @@ max_serialized_size_GetPrimAttribute_Response(
   {
     size_t array_size = 1;
 
+    last_member_size = array_size * sizeof(uint8_t);
     current_alignment += array_size * sizeof(uint8_t);
   }
 
@@ -389,7 +407,20 @@ max_serialized_size_GetPrimAttribute_Response(
     }
   }
 
-  return current_alignment - initial_alignment;
+  size_t ret_val = current_alignment - initial_alignment;
+  if (is_plain) {
+    // All members are plain, and type is not empty.
+    // We still need to check that the in-memory alignment
+    // is the same as the CDR mandated alignment.
+    using DataType = isaac_ros2_messages::srv::GetPrimAttribute_Response;
+    is_plain =
+      (
+      offsetof(DataType, message) +
+      last_member_size
+      ) == ret_val;
+  }
+
+  return ret_val;
 }
 
 static bool _GetPrimAttribute_Response__cdr_serialize(

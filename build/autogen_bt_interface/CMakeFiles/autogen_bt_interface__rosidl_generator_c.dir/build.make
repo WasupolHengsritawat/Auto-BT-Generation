@@ -117,7 +117,7 @@ rosidl_generator_c/autogen_bt_interface/srv/charging_request.h: /opt/ros/humble/
 rosidl_generator_c/autogen_bt_interface/srv/charging_request.h: /opt/ros/humble/share/builtin_interfaces/msg/Duration.idl
 rosidl_generator_c/autogen_bt_interface/srv/charging_request.h: /opt/ros/humble/share/builtin_interfaces/msg/Time.idl
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating C code for ROS interfaces"
-	/usr/bin/python3.10 /opt/ros/humble/share/rosidl_generator_c/cmake/../../../lib/rosidl_generator_c/rosidl_generator_c --generator-arguments-file /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_generator_c__arguments.json
+	/home/absolutezeno/isaaclab/bin/python3 /opt/ros/humble/share/rosidl_generator_c/cmake/../../../lib/rosidl_generator_c/rosidl_generator_c --generator-arguments-file /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_generator_c__arguments.json
 
 rosidl_generator_c/autogen_bt_interface/srv/detail/charging_request__functions.h: rosidl_generator_c/autogen_bt_interface/srv/charging_request.h
 	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_c/autogen_bt_interface/srv/detail/charging_request__functions.h

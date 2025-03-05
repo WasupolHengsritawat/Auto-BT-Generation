@@ -15,6 +15,7 @@ set(CMAKE_MULTIPLE_OUTPUT_PAIRS
   "/home/absolutezeno/Auto-BT-Generation/build/custom_message/rosidl_generator_cpp/custom_message/msg/detail/sample_msg__builder.hpp" "/home/absolutezeno/Auto-BT-Generation/build/custom_message/rosidl_generator_cpp/custom_message/msg/sample_msg.hpp"
   "/home/absolutezeno/Auto-BT-Generation/build/custom_message/rosidl_generator_cpp/custom_message/msg/detail/sample_msg__struct.hpp" "/home/absolutezeno/Auto-BT-Generation/build/custom_message/rosidl_generator_cpp/custom_message/msg/sample_msg.hpp"
   "/home/absolutezeno/Auto-BT-Generation/build/custom_message/rosidl_generator_cpp/custom_message/msg/detail/sample_msg__traits.hpp" "/home/absolutezeno/Auto-BT-Generation/build/custom_message/rosidl_generator_cpp/custom_message/msg/sample_msg.hpp"
+  "/home/absolutezeno/Auto-BT-Generation/build/custom_message/rosidl_generator_cpp/custom_message/msg/detail/sample_msg__type_support.hpp" "/home/absolutezeno/Auto-BT-Generation/build/custom_message/rosidl_generator_cpp/custom_message/msg/sample_msg.hpp"
   )
 
 

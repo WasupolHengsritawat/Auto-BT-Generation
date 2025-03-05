@@ -4,3 +4,6 @@ autogen_bt_interface.egg-info/PKG-INFO
 autogen_bt_interface.egg-info/SOURCES.txt
 autogen_bt_interface.egg-info/dependency_links.txt
 autogen_bt_interface.egg-info/top_level.txt
+autogen_bt_interface/srv/__init__.py
+autogen_bt_interface/srv/_charging_request.py
+autogen_bt_interface/srv/_picking_request.py

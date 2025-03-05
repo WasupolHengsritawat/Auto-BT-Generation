@@ -7,5 +7,6 @@
 #include "autogen_bt_interface/srv/detail/charging_request__struct.hpp"
 #include "autogen_bt_interface/srv/detail/charging_request__builder.hpp"
 #include "autogen_bt_interface/srv/detail/charging_request__traits.hpp"
+#include "autogen_bt_interface/srv/detail/charging_request__type_support.hpp"
 
 #endif  // AUTOGEN_BT_INTERFACE__SRV__CHARGING_REQUEST_HPP_

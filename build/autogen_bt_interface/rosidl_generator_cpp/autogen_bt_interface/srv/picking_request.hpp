@@ -7,5 +7,6 @@
 #include "autogen_bt_interface/srv/detail/picking_request__struct.hpp"
 #include "autogen_bt_interface/srv/detail/picking_request__builder.hpp"
 #include "autogen_bt_interface/srv/detail/picking_request__traits.hpp"
+#include "autogen_bt_interface/srv/detail/picking_request__type_support.hpp"
 
 #endif  // AUTOGEN_BT_INTERFACE__SRV__PICKING_REQUEST_HPP_

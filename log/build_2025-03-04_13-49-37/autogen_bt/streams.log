@@ -1,0 +1,18 @@
+[0.985s] Invoking command in '/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts/autogen_bt': PYTHONPATH=/home/absolutezeno/Auto-BT-Generation/build/autogen_bt/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/absolutezeno/Auto-BT-Generation/install/autogen_bt/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../../build/autogen_bt build --build-base /home/absolutezeno/Auto-BT-Generation/build/autogen_bt/build install --record /home/absolutezeno/Auto-BT-Generation/build/autogen_bt/install.log --single-version-externally-managed
+[1.180s] running egg_info
+[1.181s] writing ../../../../build/autogen_bt/autogen_bt.egg-info/PKG-INFO
+[1.181s] writing dependency_links to ../../../../build/autogen_bt/autogen_bt.egg-info/dependency_links.txt
+[1.181s] writing requirements to ../../../../build/autogen_bt/autogen_bt.egg-info/requires.txt
+[1.181s] writing top-level names to ../../../../build/autogen_bt/autogen_bt.egg-info/top_level.txt
+[1.182s] reading manifest file '../../../../build/autogen_bt/autogen_bt.egg-info/SOURCES.txt'
+[1.183s] writing manifest file '../../../../build/autogen_bt/autogen_bt.egg-info/SOURCES.txt'
+[1.183s] running build
+[1.183s] running build_py
+[1.183s] running install
+[1.184s] running install_lib
+[1.185s] running install_egg_info
+[1.186s] removing '/home/absolutezeno/Auto-BT-Generation/install/autogen_bt/lib/python3.10/site-packages/autogen_bt-0.1.0-py3.10.egg-info' (and everything under it)
+[1.186s] Copying ../../../../build/autogen_bt/autogen_bt.egg-info to /home/absolutezeno/Auto-BT-Generation/install/autogen_bt/lib/python3.10/site-packages/autogen_bt-0.1.0-py3.10.egg-info
+[1.187s] running install_scripts
+[1.205s] writing list of installed files to '/home/absolutezeno/Auto-BT-Generation/build/autogen_bt/install.log'
+[1.225s] Invoked command in '/home/absolutezeno/Auto-BT-Generation/src/IsaacLab-autogenBT/exts/autogen_bt' returned '0': PYTHONPATH=/home/absolutezeno/Auto-BT-Generation/build/autogen_bt/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/absolutezeno/Auto-BT-Generation/install/autogen_bt/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../../build/autogen_bt build --build-base /home/absolutezeno/Auto-BT-Generation/build/autogen_bt/build install --record /home/absolutezeno/Auto-BT-Generation/build/autogen_bt/install.log --single-version-externally-managed

@@ -258,7 +258,7 @@ endif()
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   execute_process(
         COMMAND
-        "/usr/bin/python3.10" "-m" "compileall"
+        "/home/absolutezeno/isaaclab/bin/python3" "-m" "compileall"
         "/home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface/local/lib/python3.10/dist-packages/autogen_bt_interface"
       )
 endif()

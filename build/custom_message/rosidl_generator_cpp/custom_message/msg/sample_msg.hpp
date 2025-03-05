@@ -7,5 +7,6 @@
 #include "custom_message/msg/detail/sample_msg__struct.hpp"
 #include "custom_message/msg/detail/sample_msg__builder.hpp"
 #include "custom_message/msg/detail/sample_msg__traits.hpp"
+#include "custom_message/msg/detail/sample_msg__type_support.hpp"
 
 #endif  // CUSTOM_MESSAGE__MSG__SAMPLE_MSG_HPP_
