@@ -150,7 +150,7 @@ class EnvironmentSubscriber(Node):
         env_id (int): Environment identifier.
     """
     def __init__(self, env_id):
-        super().__init__('environment_origin_subscriber')
+        super().__init__(f'env_{env_id}_origin_subscriber')
         self.env_id = env_id
         self.origin = None
         self.subscription = self.create_subscription(Point, f'/env_{env_id}/origin', self.origin_callback, 10)
@@ -166,7 +166,7 @@ class EnvironmentSubscriber(Node):
         self.origin = [msg.x, msg.y]
         self.received_event.set()
 
-def create_tree(env_id, node):
+def create_tree(env_id, origin_offset, verbose = True):
     """
     Create the behavior tree after obtaining the correct environment origin.
     
@@ -178,29 +178,27 @@ def create_tree(env_id, node):
         py_trees.composites.Selector: Root node of the behavior tree.
     """
     # Use received origin
-    node.received_event.wait()
-    origin_offset = node.origin if node.origin else [0, 0]
     target_graph, full_graph, robot_graph = graph_init(origin_offset)
  
     # Define behavior nodes 
-    patrol_node = PatrolNode(name = "PatrolNode", full_graph = full_graph, robot_graph = robot_graph, env_id = env_id)
-    find_target_node = FindTargetNode(name='FindTarget', target_graph=target_graph, robot_graph=robot_graph, env_id=env_id)
-    go_to_nearest_target = GoToNearestTarget(name="GoToNearestTarget",robot_graph=robot_graph, env_id=env_id)
-    go_to_charger_node =GoToChargerNode(name="GoToCharger", robot_graph=robot_graph, env_id=env_id)
-    go_to_spawn_node = GoToSpawnNode(name='GoToSpawnNode', robot_graph=robot_graph, env_id=env_id)
-    picking_object_node = PickObject(name = 'PickObject', robot_graph=robot_graph, env_id=env_id)
-    drop_object_node = DropObject(name='DropObject', env_id=env_id)
-    charge_node = Charge(name='Charge', robot_graph = robot_graph, env_id=env_id)
+    patrol_node = PatrolNode(name = "PatrolNode", full_graph = full_graph, robot_graph = robot_graph, env_id = env_id, verbose=verbose)
+    find_target_node = FindTargetNode(name='FindTarget', target_graph=target_graph, robot_graph=robot_graph, env_id=env_id, verbose=verbose)
+    go_to_nearest_target = GoToNearestTarget(name="GoToNearestTarget",robot_graph=robot_graph, env_id=env_id, verbose=verbose)
+    go_to_charger_node =GoToChargerNode(name="GoToCharger", robot_graph=robot_graph, env_id=env_id, verbose=verbose)
+    go_to_spawn_node = GoToSpawnNode(name='GoToSpawnNode', robot_graph=robot_graph, env_id=env_id, verbose=verbose)
+    picking_object_node = PickObject(name = 'PickObject', robot_graph=robot_graph, env_id=env_id, verbose=verbose)
+    drop_object_node = DropObject(name='DropObject', env_id=env_id, verbose=verbose)
+    charge_node = Charge(name='Charge', robot_graph = robot_graph, env_id=env_id, verbose=verbose)
     
     # define condition nodes
-    is_robot_at_the_charger_node = IsRobotAtTheCharger(name='IsRobotAtTheCharger', env_id=env_id)
-    is_robot_at_the_spawn_node = IsRobotAtTheSpawn(name='IsRobotAtTheSpawn', env_id=env_id)
-    is_battery_on_proper_level = IsBatteryOnProperLevel(name='IsBatteryOnProperLevel', env_id=env_id)
-    are_object_existed_on_internal_map = AreObjectsExistOnInternalMap(name='AreObjectExistsOnInternalMap', env_id=env_id)
-    are_object_nearby_node = AreObjectNearby('AreObjectNearby', env_id=env_id)
-    is_object_in_hand_node = IsObjectInHand('IsObjectInHand', env_id=env_id)
-    is_nearby_object_not_at_goal = IsNearbyObjectNotAtGoal('IsNearbyObjectNotAtGoal', robot_graph=robot_graph, goal_node=[0], env_id=env_id)
-    are_five_objects_at_spawn = AreFiveObjectsAtSpawn('AreFiveObjectsAtSpawn', robot_graph=robot_graph, env_id=env_id)
+    is_robot_at_the_charger_node = IsRobotAtTheCharger(name='IsRobotAtTheCharger', env_id=env_id, verbose=verbose)
+    is_robot_at_the_spawn_node = IsRobotAtTheSpawn(name='IsRobotAtTheSpawn', env_id=env_id, verbose=verbose)
+    is_battery_on_proper_level = IsBatteryOnProperLevel(name='IsBatteryOnProperLevel', env_id=env_id, verbose=verbose)
+    are_object_existed_on_internal_map = AreObjectsExistOnInternalMap(name='AreObjectExistsOnInternalMap', env_id=env_id, verbose=verbose)
+    are_object_nearby_node = AreObjectNearby('AreObjectNearby', env_id=env_id, verbose=verbose)
+    is_object_in_hand_node = IsObjectInHand('IsObjectInHand', env_id=env_id, verbose=verbose)
+    is_nearby_object_not_at_goal = IsNearbyObjectNotAtGoal('IsNearbyObjectNotAtGoal', robot_graph=robot_graph, goal_node=[0], env_id=env_id, verbose=verbose)
+    are_five_objects_at_spawn = AreFiveObjectsAtSpawn('AreFiveObjectsAtSpawn', robot_graph=robot_graph, env_id=env_id, verbose=verbose)
 
     # Define tree structure
     parallel_1 = py_trees.composites.Parallel("Parallel_1", policy=py_trees.common.ParallelPolicy.SuccessOnAll(synchronise=False))
@@ -275,13 +273,15 @@ def main(args=None):
     node = EnvironmentSubscriber(env_id)
     executor_thread = threading.Thread(target=rclpy.spin_once, args=(node,))
     executor_thread.start()
-    
-    root = create_tree(env_id, node)
+
+    node.received_event.wait()
+    origin_offset = node.origin if node.origin else [0, 0]
+    root = create_tree(env_id, origin_offset)
     tree = BehaviourTree(root)
     
     # Setup behavior tree
     try:
-        tree.setup(timeout=15)
+        tree.setup(node_name=f"env_{env_id}_tree", timeout=15)
     except py_trees_ros.exceptions.TimedOutError as e:
         console.logerror(console.red + "failed to setup the tree, aborting [{}]".format(str(e)) + console.reset)
         tree.shutdown()

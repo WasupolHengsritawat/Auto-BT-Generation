@@ -65,7 +65,7 @@ def move_to_target(pid, robot_position, robot_orientation, target_position, cmd_
 
     # Constants for the trapezoidal velocity profile
     max_velocity = 2.0  # Maximum linear velocity
-    acceleration = 1.5  # Acceleration rate
+    acceleration = 2.0  # Acceleration rate
     deceleration = 0.7  # Deceleration rate
 
     # Initialize static variable for current velocity
@@ -172,7 +172,7 @@ def add_node_to_robot_graph(u, robot_graph, full_graph):
                 break
 
 class PIDController:
-    def __init__(self, K_p = 1.0, K_i = 0.0, K_d = 0.0, output_limits=(None, None)):
+    def __init__(self, K_p = 5.0, K_i = 0.0, K_d = 0.0, output_limits=(None, None)):
         """
         Initialize the PID controller.
 
@@ -228,12 +228,13 @@ class PIDController:
 # Behavior Nodes ==========================================================================================================================================
 
 class PatrolNode(py_trees.behaviour.Behaviour):
-    def __init__(self, name, full_graph, robot_graph, env_id):
+    def __init__(self, name, full_graph, robot_graph, env_id, verbose = False):
         super().__init__(name)
         self.full_graph = full_graph
         self.robot_graph = robot_graph
 
         self.env_id = env_id
+        self.verbose = verbose
         self.battery_level = None
 
         self.robot_pos = None
@@ -241,7 +242,7 @@ class PatrolNode(py_trees.behaviour.Behaviour):
         self.cmd_vel_publisher = None
 
         self.path = []
-        self.angular_controller = PIDController(K_p = 5, K_i = 2, output_limits=(-2.7,2.7))
+        self.angular_controller = PIDController(K_p = 5, K_i = 2, output_limits=(-2,2))
         
     def setup(self, **kwargs):
         """
@@ -286,7 +287,7 @@ class PatrolNode(py_trees.behaviour.Behaviour):
             if robot_current_node_adj_unvisited == []:  # All of the current adjacent node is visited -> use the graph adjacent node instead
                 graph_adj_nodes = robot_graph_adj_nodes(self.robot_graph, self.full_graph)
                 if graph_adj_nodes == []:
-                    self.logger.info(f"The map has been finished.") 
+                    if self.verbose: self.logger.info(f"The map has been finished.") 
                     return py_trees.common.Status.RUNNING 
                 else:
                     final_target_node = np.random.choice(graph_adj_nodes)
@@ -302,7 +303,7 @@ class PatrolNode(py_trees.behaviour.Behaviour):
 
             # Move to target
             status = move_to_target(self.angular_controller, self.robot_pos, self.robot_rot, target_pos, self.cmd_vel_publisher)
-            self.logger.info(f"status: {'Finished' if status else f'Running to {target_node}'}")
+            if self.verbose: self.logger.info(f"status: {'Finished' if status else f'Running to {target_node}'}")
 
             if status: # Finished moving to target
                 # Update the robot graph
@@ -324,10 +325,10 @@ class PatrolNode(py_trees.behaviour.Behaviour):
 
         self.path = []
         
-        self.logger.debug(f"{self.name}: terminate({new_status})")
+        if self.verbose: self.logger.debug(f"{self.name}: terminate({new_status})")
 
 class FindTargetNode(py_trees.behaviour.Behaviour):
-    def __init__(self, name, target_graph, robot_graph, env_id):
+    def __init__(self, name, target_graph, robot_graph, env_id, verbose = False):
         super().__init__(name)
         self.blackboard = self.attach_blackboard_client(name=name)
         self.blackboard.register_key(key="target_in_robot_graph", access=py_trees.common.Access.WRITE)
@@ -336,6 +337,7 @@ class FindTargetNode(py_trees.behaviour.Behaviour):
         self.robot_graph = robot_graph
 
         self.env_id = env_id
+        self.verbose = verbose
         self.battery_level = None
 
         self.target_pos = [None, None, None, None, None]
@@ -404,7 +406,7 @@ class FindTargetNode(py_trees.behaviour.Behaviour):
         for u in valid_target:
             add_node_to_robot_graph(u, self.robot_graph, self.target_graph)
             if u in self.robot_graph.nodes:
-                self.logger.info(f'Add target node {u} to the robot graph -> robot graph size: {self.robot_graph.number_of_nodes()}')
+                if self.verbose: self.logger.info(f'Add target node {u} to the robot graph -> robot graph size: {self.robot_graph.number_of_nodes()}')
                 self.blackboard.target_in_robot_graph = self.blackboard.target_in_robot_graph + 1
 
         return py_trees.common.Status.RUNNING
@@ -414,14 +416,15 @@ class FindTargetNode(py_trees.behaviour.Behaviour):
         Stop the robot on termination.
         """
         
-        self.logger.debug(f"{self.name}: terminate({new_status})")
+        if self.verbose: self.logger.debug(f"{self.name}: terminate({new_status})")
 
 class GoToChargerNode(py_trees.behaviour.Behaviour):
-    def __init__(self, name, robot_graph, env_id):
+    def __init__(self, name, robot_graph, env_id, verbose = False):
         super().__init__(name)
         self.robot_graph = robot_graph
 
         self.env_id = env_id
+        self.verbose = verbose
         self.battery_level = None
 
         self.final_target_node = 1
@@ -480,7 +483,7 @@ class GoToChargerNode(py_trees.behaviour.Behaviour):
 
             # Move to target
             status = move_to_target(self.angular_controller, self.robot_pos, self.robot_rot, target_pos, self.cmd_vel_publisher)
-            self.logger.info(f"status: {'Finished' if status else f'Running to {target_node}'}")
+            if self.verbose: self.logger.info(f"status: {'Finished' if status else f'Running to {target_node}'}")
 
             if status: # Finished moving to target
                 # remove the newly visited target from the path
@@ -502,14 +505,15 @@ class GoToChargerNode(py_trees.behaviour.Behaviour):
 
         self.path = []
         
-        self.logger.debug(f"{self.name}: terminate({new_status})")
+        if self.verbose: self.logger.debug(f"{self.name}: terminate({new_status})")
 
 class GoToSpawnNode(py_trees.behaviour.Behaviour):
-    def __init__(self, name, robot_graph, env_id):
+    def __init__(self, name, robot_graph, env_id, verbose = False):
         super().__init__(name)
         self.robot_graph = robot_graph
 
         self.env_id = env_id
+        self.verbose = verbose
         self.battery_level = None
 
         self.final_target_node = 0
@@ -568,7 +572,7 @@ class GoToSpawnNode(py_trees.behaviour.Behaviour):
 
             # Move to target
             status = move_to_target(self.angular_controller, self.robot_pos, self.robot_rot, target_pos, self.cmd_vel_publisher)
-            self.logger.info(f"status: {'Finished' if status else f'Running to {target_node}'}")
+            if self.verbose: self.logger.info(f"status: {'Finished' if status else f'Running to {target_node}'}")
 
             if status: # Finished moving to target
                 # remove the newly visited target from the path
@@ -590,10 +594,10 @@ class GoToSpawnNode(py_trees.behaviour.Behaviour):
 
         self.path = []
         
-        self.logger.debug(f"{self.name}: terminate({new_status})")
+        if self.verbose: self.logger.debug(f"{self.name}: terminate({new_status})")
 
 class GoToNearestTarget(py_trees.behaviour.Behaviour):
-    def __init__(self, name, robot_graph, env_id):
+    def __init__(self, name, robot_graph, env_id, verbose = False):
         super().__init__(name)
         self.blackboard = self.attach_blackboard_client(name=name)
 
@@ -607,6 +611,7 @@ class GoToNearestTarget(py_trees.behaviour.Behaviour):
         self.robot_graph = robot_graph
 
         self.env_id = env_id
+        self.verbose = verbose
 
         self.path = []
         self.angular_controller = PIDController(K_p = 5, K_i = 2, output_limits=(-2.7,2.7))
@@ -673,7 +678,7 @@ class GoToNearestTarget(py_trees.behaviour.Behaviour):
 
             # Move to target
             status = move_to_target(self.angular_controller, self.robot_pos, self.robot_rot, target_pos, self.cmd_vel_publisher)
-            self.logger.info(f"status: {'Finished' if status else f'Running to {target_node}'}")
+            if self.verbose: self.logger.info(f"status: {'Finished' if status else f'Running to {target_node}'}")
 
             if status: # Finished moving to target
                 # remove the newly visited target from the path
@@ -695,14 +700,15 @@ class GoToNearestTarget(py_trees.behaviour.Behaviour):
 
         self.path = []
         
-        self.logger.debug(f"{self.name}: terminate({new_status})")
+        if self.verbose: self.logger.debug(f"{self.name}: terminate({new_status})")
 
 class PickObject(py_trees.behaviour.Behaviour):
-    def __init__(self, name, robot_graph, env_id):
+    def __init__(self, name, robot_graph, env_id, verbose = False):
         super().__init__(name)
         self.robot_graph = robot_graph
 
         self.env_id = env_id
+        self.verbose = verbose
         self.battery_level = None
 
         self.robot_pos = None
@@ -784,7 +790,7 @@ class PickObject(py_trees.behaviour.Behaviour):
         for i, target in enumerate(self.target_pos):
             if target is not None:
                 distance = np.linalg.norm(np.array(self.robot_pos) - np.array(target))
-                print(f'object {i}: {distance}')
+                # print(f'object {i}: {distance}')
                 if distance < nearest_distance and distance <= 0.5:
                     nearest_distance = distance
                     selected_target = i
@@ -794,7 +800,7 @@ class PickObject(py_trees.behaviour.Behaviour):
 
         # Picking the nearest target
         self.set_pick_request(selected_target, True)
-        self.logger.info(f"{self.name}: picking object {selected_target} at {self.target_pos[selected_target]}")
+        if self.verbose: self.logger.info(f"{self.name}: picking object {selected_target} at {self.target_pos[selected_target]}")
         self.blackboard.object_in_hand = selected_target
 
         # Remove picked target from the robot graph
@@ -811,12 +817,13 @@ class PickObject(py_trees.behaviour.Behaviour):
         Stop the robot on termination.
         """
         
-        self.logger.debug(f"{self.name}: terminate({new_status})")
+        if self.verbose: self.logger.debug(f"{self.name}: terminate({new_status})")
 
 class DropObject(py_trees.behaviour.Behaviour):
-    def __init__(self, name, env_id):
+    def __init__(self, name, env_id, verbose = False):
         super().__init__(name)
         self.env_id = env_id
+        self.verbose = verbose
         self.battery_level = None
 
         self.blackboard = self.attach_blackboard_client(name=name)
@@ -877,10 +884,10 @@ class DropObject(py_trees.behaviour.Behaviour):
         Stop the robot on termination.
         """
         
-        self.logger.debug(f"{self.name}: terminate({new_status})")
+        if self.verbose: self.logger.debug(f"{self.name}: terminate({new_status})")
 
 class Charge(py_trees.behaviour.Behaviour):
-    def __init__(self, name, robot_graph, env_id):
+    def __init__(self, name, robot_graph, env_id, verbose = False):
         super().__init__(name)
         self.blackboard = self.attach_blackboard_client(name=name)
         self.blackboard.register_key(key="is_charging", access=py_trees.common.Access.WRITE)
@@ -888,6 +895,7 @@ class Charge(py_trees.behaviour.Behaviour):
         self.robot_graph = robot_graph
 
         self.env_id = env_id
+        self.verbose = verbose
         self.battery_level = None
 
         self.charger_node = 1
@@ -933,35 +941,37 @@ class Charge(py_trees.behaviour.Behaviour):
         if self.robot_pos is None or self.robot_rot is None or self.battery_level is None:
             return py_trees.common.Status.RUNNING   
         
-        if self.battery_level < 0.1 or euclidean_distance(self.charger_loc, self.robot_pos) >= 0.2:
+        if self.battery_level < 0.1 or euclidean_distance(self.charger_loc, self.robot_pos) >= 0.3:
+            if self.verbose: self.logger.info('Robot is not at the charger.')
             return py_trees.common.Status.FAILURE
         
         if self.battery_level < 100:
+            if self.verbose: self.logger.info(f'Charging -> {self.battery_level}%')
             self.set_charging_request(True)
             self.blackboard.is_charging = True
+            return py_trees.common.Status.RUNNING
         else:
+            if self.verbose: self.logger.info(f'Finished charging at {self.battery_level}%')
             self.set_charging_request(False)
             self.blackboard.is_charging = False
             return py_trees.common.Status.SUCCESS
-        
-        return py_trees.common.Status.RUNNING
     
     def terminate(self, new_status):
         """
         Stop the robot on termination.
         """
+        if self.verbose: self.logger.debug(f"{self.name}: terminate({new_status})")
         self.set_charging_request(False)
         self.blackboard.is_charging = False
-        
-        self.logger.debug(f"{self.name}: terminate({new_status})")
 
 # Condition Nodes =========================================================================================================================================
 
 class AreObjectsExistOnInternalMap(py_trees.behaviour.Behaviour):
-    def __init__(self, name, env_id):
+    def __init__(self, name, env_id, verbose = False):
         super().__init__(name)
         self.blackboard = self.attach_blackboard_client(name=name)
         self.env_id = env_id
+        self.verbose = verbose
 
         try:
             self.blackboard.register_key(key="target_in_robot_graph", access=py_trees.common.Access.READ)
@@ -999,16 +1009,19 @@ class AreObjectsExistOnInternalMap(py_trees.behaviour.Behaviour):
         Stop the robot on termination.
         """
         
-        self.logger.debug(f"{self.name}: terminate({new_status})")
+        if self.verbose: self.logger.debug(f"{self.name}: terminate({new_status})")
 
 class IsRobotAtTheCharger(py_trees.behaviour.Behaviour):
-    def __init__(self, name, env_id):
+    def __init__(self, name, robot_graph, env_id, verbose = False):
         super().__init__(name)
         self.env_id = env_id
+        self.verbose = verbose
 
         self.robot_pos = None
 
-        self.ref_loc = ( -2.00,  0.17)
+        self.robot_graph = robot_graph
+        self.ref_node = 1
+        self.ref_loc = self.robot_graph.nodes[self.ref_node]['pos']
         
     def setup(self, **kwargs):
         """
@@ -1035,7 +1048,7 @@ class IsRobotAtTheCharger(py_trees.behaviour.Behaviour):
             return py_trees.common.Status.FAILURE   
     
         if euclidean_distance(self.ref_loc, self.robot_pos) < 0.2:
-            self.logger.info('Robot is at the charger')
+            if self.verbose: self.logger.info('Robot is at the charger')
             return py_trees.common.Status.SUCCESS  
             
         return py_trees.common.Status.FAILURE
@@ -1045,16 +1058,19 @@ class IsRobotAtTheCharger(py_trees.behaviour.Behaviour):
         Stop the robot on termination.
         """
         
-        self.logger.debug(f"{self.name}: terminate({new_status})")
+        if self.verbose: self.logger.debug(f"{self.name}: terminate({new_status})")
 
 class IsRobotAtTheSpawn(py_trees.behaviour.Behaviour):
-    def __init__(self, name, env_id):
+    def __init__(self, name, robot_graph, env_id, verbose = False):
         super().__init__(name)
         self.env_id = env_id
+        self.verbose = verbose
 
         self.robot_pos = None
 
-        self.ref_loc = ( 0.00,  0.00)
+        self.robot_graph = robot_graph
+        self.ref_node = 0
+        self.ref_loc = self.robot_graph.nodes[self.ref_node]['pos']
         
     def setup(self, **kwargs):
         """
@@ -1081,7 +1097,7 @@ class IsRobotAtTheSpawn(py_trees.behaviour.Behaviour):
             return py_trees.common.Status.FAILURE   
     
         if euclidean_distance(self.ref_loc, self.robot_pos) < 0.2:
-            self.logger.info('Robot is at the spawn')
+            if self.verbose: self.logger.info('Robot is at the spawn')
             return py_trees.common.Status.SUCCESS  
             
         return py_trees.common.Status.FAILURE
@@ -1091,10 +1107,10 @@ class IsRobotAtTheSpawn(py_trees.behaviour.Behaviour):
         Stop the robot on termination.
         """
         
-        self.logger.debug(f"{self.name}: terminate({new_status})")
+        if self.verbose: self.logger.debug(f"{self.name}: terminate({new_status})")
 
 class IsBatteryOnProperLevel(py_trees.behaviour.Behaviour):
-    def __init__(self, name, env_id):
+    def __init__(self, name, env_id, verbose = False):
         super().__init__(name)
         self.blackboard = self.attach_blackboard_client(name=name)
 
@@ -1106,6 +1122,7 @@ class IsBatteryOnProperLevel(py_trees.behaviour.Behaviour):
             self.blackboard.is_charging = False
 
         self.env_id = env_id
+        self.verbose = verbose
         self.battery_level = None
         
     def setup(self, **kwargs):
@@ -1129,37 +1146,45 @@ class IsBatteryOnProperLevel(py_trees.behaviour.Behaviour):
         """
         Main behavior logic.
         """
-        try:
-            if self.blackboard.is_charging:
-                if self.battery_level < 100:
-                    self.logger.info('Low Battery')
+        if self.battery_level is not None:
+            try:
+                if self.blackboard.is_charging:
+                    if self.battery_level < 100:
+                        if self.verbose: self.logger.info('Low Battery')
+                        return py_trees.common.Status.FAILURE
+                    else:
+                        if self.verbose: self.logger.info('Finished Charging')
+                        return py_trees.common.Status.SUCCESS
+                else:
+                    if self.battery_level < 30:
+                        if self.verbose: self.logger.info('Low Battery')
+                        return py_trees.common.Status.FAILURE
+                    else:
+                        return py_trees.common.Status.SUCCESS 
+            except: 
+                if self.verbose: self.logger.info('self.blackboard.is_charging not available')
+
+                if self.battery_level < 30:
+                    if self.verbose: self.logger.info('Low Battery')
                     return py_trees.common.Status.FAILURE
                 else:
                     return py_trees.common.Status.SUCCESS
-            else:
-                if self.battery_level < 30:
-                    self.logger.info('Low Battery')
-                    return py_trees.common.Status.FAILURE
-                else:
-                    return py_trees.common.Status.SUCCESS 
-        except:  
-            if self.battery_level < 30:
-                self.logger.info('Low Battery')
-                return py_trees.common.Status.FAILURE
-            else:
-                return py_trees.common.Status.SUCCESS
+        else:
+            if self.verbose: self.logger.info('battery level topic not available')
+            return py_trees.common.Status.INVALID
     
     def terminate(self, new_status):
         """
         Stop the robot on termination.
         """
         
-        self.logger.debug(f"{self.name}: terminate({new_status})")
+        if self.verbose: self.logger.debug(f"{self.name}: terminate({new_status})")
 
 class AreObjectNearby(py_trees.behaviour.Behaviour):
-    def __init__(self, name, env_id):
+    def __init__(self, name, env_id, verbose = False):
         super().__init__(name)
         self.env_id = env_id
+        self.verbose = verbose
 
         self.robot_pos = None
         self.target_pos = [None, None, None, None, None]
@@ -1211,7 +1236,7 @@ class AreObjectNearby(py_trees.behaviour.Behaviour):
     
         for target_pos in self.target_pos:
             if euclidean_distance(target_pos, self.robot_pos) < 0.4:
-                self.logger.info('There exists target nearby.')
+                if self.verbose: self.logger.info('There exists target nearby.')
                 return py_trees.common.Status.SUCCESS  
             
         return py_trees.common.Status.FAILURE
@@ -1221,14 +1246,15 @@ class AreObjectNearby(py_trees.behaviour.Behaviour):
         Stop the robot on termination.
         """
         
-        self.logger.debug(f"{self.name}: terminate({new_status})")
+        if self.verbose: self.logger.debug(f"{self.name}: terminate({new_status})")
 
 class IsNearbyObjectNotAtGoal(py_trees.behaviour.Behaviour):
-    def __init__(self, name, robot_graph, goal_node, env_id):
+    def __init__(self, name, robot_graph, goal_node, env_id, verbose = False):
         super().__init__(name)
         self.robot_graph = robot_graph
 
         self.env_id = env_id
+        self.verbose = verbose
 
         self.robot_pos = None
         self.target_pos = [None, None, None, None, None]
@@ -1285,12 +1311,12 @@ class IsNearbyObjectNotAtGoal(py_trees.behaviour.Behaviour):
 
                 for goal in self.goal_node:
                     if euclidean_distance(target_pos, self.robot_graph.nodes[goal]['pos']) < 0.4:
-                        self.logger.info('The nearby target has reached the goal.')
+                        if self.verbose: self.logger.info('The nearby target has reached the goal.')
                         return py_trees.common.Status.FAILURE  
     
                 return py_trees.common.Status.SUCCESS  
             
-        self.logger.info('There is no object nearby...')
+        if self.verbose: self.logger.info('There is no object nearby...')
         return py_trees.common.Status.FAILURE
     
     def terminate(self, new_status):
@@ -1298,13 +1324,14 @@ class IsNearbyObjectNotAtGoal(py_trees.behaviour.Behaviour):
         Stop the robot on termination.
         """
         
-        self.logger.debug(f"{self.name}: terminate({new_status})")
+        if self.verbose: self.logger.debug(f"{self.name}: terminate({new_status})")
 
 class IsObjectInHand(py_trees.behaviour.Behaviour):
-    def __init__(self, name, env_id):
+    def __init__(self, name, env_id, verbose = False):
         super().__init__(name)
         self.blackboard = self.attach_blackboard_client(name=name)
         self.env_id = env_id
+        self.verbose = verbose
 
         try:
             self.blackboard.register_key(key="object_in_hand", access=py_trees.common.Access.READ)
@@ -1342,19 +1369,28 @@ class IsObjectInHand(py_trees.behaviour.Behaviour):
         Stop the robot on termination.
         """
         
-        self.logger.debug(f"{self.name}: terminate({new_status})")
+        if self.verbose: self.logger.debug(f"{self.name}: terminate({new_status})")
 
 class AreFiveObjectsAtSpawn(py_trees.behaviour.Behaviour):
-    def __init__(self, name, robot_graph, env_id):
+    def __init__(self, name, robot_graph, env_id, verbose = False):
         super().__init__(name)
+        self.blackboard = self.attach_blackboard_client(name=name)
         self.robot_graph = robot_graph
 
         self.env_id = env_id
+        self.verbose = verbose
 
         self.spawn_node = 0
 
         self.robot_pos = None
         self.target_pos = [None, None, None, None, None]
+
+        try:
+            self.blackboard.register_key(key="object_in_hand", access=py_trees.common.Access.READ)
+            self.blackboard.object_in_hand
+        except:
+            self.blackboard.register_key(key="object_in_hand", access=py_trees.common.Access.WRITE)
+            self.blackboard.object_in_hand = None
         
     def setup(self, **kwargs):
         """
@@ -1375,7 +1411,8 @@ class AreFiveObjectsAtSpawn(py_trees.behaviour.Behaviour):
         self.node.create_subscription(PointStamped, f"/env_{self.env_id}/target4/tf", self.target_4_trans_callback, 10)
 
         self.obj_at_spawn_pub = self.node.create_publisher(UInt8, f"/env_{self.env_id}/object_at_spawn", 10)
-        
+        self.obj_found_pub = self.node.create_publisher(UInt8, f"/env_{self.env_id}/object_found", 10)
+
         return True
     
     def robot_trans_callback(self, msg):
@@ -1402,18 +1439,32 @@ class AreFiveObjectsAtSpawn(py_trees.behaviour.Behaviour):
         """
         if None in self.target_pos or self.robot_pos == None:
             return py_trees.common.Status.FAILURE   
-     
+
+        # Count and publish number of objects at sapwn
         object_in_spawn = 0
         for target_pos in self.target_pos:
             if euclidean_distance(target_pos, self.robot_graph.nodes[self.spawn_node]['pos']) < 0.4:
                 object_in_spawn += 1
                 
-        msg = UInt8()
-        msg.data = object_in_spawn
-        self.obj_at_spawn_pub.publish(msg)
+        obj_at_spawn_msg = UInt8()
+        obj_at_spawn_msg.data = object_in_spawn
+        self.obj_at_spawn_pub.publish(obj_at_spawn_msg)
+
+        # Count and publish number of objects found
+        found_obj_in_map = 0
+        for i in range(20,30):
+            if i in self.robot_graph.nodes:
+                found_obj_in_map += 1
+        
+        if self.blackboard.object_in_hand != None:
+            found_obj_in_map += 1
+
+        obj_found_pub_msg = UInt8()
+        obj_found_pub_msg.data = found_obj_in_map + object_in_spawn
+        self.obj_found_pub.publish(obj_found_pub_msg)
 
         if object_in_spawn == 5:
-            self.logger.info(f'There exists five objects at the spawn.')
+            if self.verbose: self.logger.info(f'There exists five objects at the spawn.')
             return py_trees.common.Status.SUCCESS
         else:
             return py_trees.common.Status.FAILURE
@@ -1423,13 +1474,14 @@ class AreFiveObjectsAtSpawn(py_trees.behaviour.Behaviour):
         Stop the robot on termination.
         """
         
-        self.logger.debug(f"{self.name}: terminate({new_status})")
+        if self.verbose: self.logger.debug(f"{self.name}: terminate({new_status})")
 # =========================================================================================================================================================
 
 class MoveNode(py_trees.behaviour.Behaviour):
-    def __init__(self, name, target, env_id):
+    def __init__(self, name, target, env_id, verbose = False):
         super().__init__(name)
         self.env_id = env_id
+        self.verbose = verbose
 
         self.target = target
 
@@ -1440,7 +1492,7 @@ class MoveNode(py_trees.behaviour.Behaviour):
         self.robot_trans_subscriber = None
         self.cmd_vel_publisher = None
 
-        self.angular_controller = PIDController(K_p = 2.0, K_i = 0.5)
+        self.angular_controller = PIDController(K_p = 5.0, K_i = 0.5)
         
     def setup(self, **kwargs):
         """
@@ -1448,7 +1500,7 @@ class MoveNode(py_trees.behaviour.Behaviour):
         """
         try:
             self.node = kwargs['node']
-            self.logger.info(f"Successfully setup {self.name}")
+            if self.verbose: self.logger.info(f"Successfully setup {self.name}")
         except KeyError as e:
             error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
             raise KeyError(error_message) from e  # 'direct cause' traceability
@@ -1491,7 +1543,7 @@ class MoveNode(py_trees.behaviour.Behaviour):
     #     # Distance to the target
     #     distance_to_target = math.sqrt((x_target - x_robot)**2 + (y_target - y_robot)**2)
         
-    #     self.logger.info(f'linear error: {distance_to_target} angular error: {angular_error}')
+    #     if self.verbose: self.logger.info(f'linear error: {distance_to_target} angular error: {angular_error}')
 
     #     # Compute angular velocity using the PID controller
     #     angular_velocity = self.angular_controller.compute(angular_error)
@@ -1517,7 +1569,7 @@ class MoveNode(py_trees.behaviour.Behaviour):
     #     twist_msg = Twist()
     #     twist_msg.linear.x = linear_velocity
     #     twist_msg.angular.z = angular_velocity
-    #     self.logger.info(f"publish linear: {linear_velocity} angular: {angular_velocity}")
+    #     if self.verbose: self.logger.info(f"publish linear: {linear_velocity} angular: {angular_velocity}")
     #     self.cmd_vel_publisher.publish(twist_msg)
 
     def update(self):
@@ -1535,4 +1587,4 @@ class MoveNode(py_trees.behaviour.Behaviour):
         Stop the robot on termination.
         """
         
-        self.logger.debug(f"{self.name}: terminate({new_status})")
+        if self.verbose: self.logger.debug(f"{self.name}: terminate({new_status})")

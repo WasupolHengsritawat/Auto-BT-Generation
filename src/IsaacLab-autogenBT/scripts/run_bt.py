@@ -9,7 +9,16 @@ import py_trees
 import py_trees_ros
 import py_trees.console as console
 from py_trees_ros.trees import BehaviourTree
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import Point, Twist
+import argparse
+import subprocess
+
+parser = argparse.ArgumentParser(description="Run your script with arguments.")
+parser.add_argument('--env_id', type=int, help="Environment ID of the behavior tree.")
+parser.add_argument('--bt_string', type=str, help="Behavior tree in string format.")
+parser.add_argument('--verbose', type=bool, default=False, help="Display behavior tree execution status in terminal.")
+
+args_cli = parser.parse_args()
 
 # Import behavior nodes
 cwd = os.getcwd()
@@ -142,7 +151,7 @@ def graph_init(offset):
      
     return target_graph, full_graph, robot_graph
 
-class EnvironmentSubscriber(Node):
+class EnvironmentManager(Node):
     """
     ROS2 Node to receive environment origin for a given env_id.
     
@@ -150,7 +159,7 @@ class EnvironmentSubscriber(Node):
         env_id (int): Environment identifier.
     """
     def __init__(self, env_id):
-        super().__init__('environment_origin_subscriber')
+        super().__init__(f'env_{env_id}_origin_subscriber')
         self.env_id = env_id
         self.origin = None
         self.subscription = self.create_subscription(Point, f'/env_{env_id}/origin', self.origin_callback, 10)
@@ -166,7 +175,7 @@ class EnvironmentSubscriber(Node):
         self.origin = [msg.x, msg.y]
         self.received_event.set()
 
-def create_tree(env_id, node):
+def create_tree(env_id, tree_string, origin_offset, verbose = False):
     """
     Create the behavior tree after obtaining the correct environment origin.
     
@@ -178,89 +187,90 @@ def create_tree(env_id, node):
         py_trees.composites.Selector: Root node of the behavior tree.
     """
     # Use received origin
-    node.received_event.wait()
-    origin_offset = node.origin if node.origin else [0, 0]
     target_graph, full_graph, robot_graph = graph_init(origin_offset)
  
     # Define behavior nodes 
-    patrol_node = PatrolNode(name = "PatrolNode", full_graph = full_graph, robot_graph = robot_graph, env_id = env_id)
-    find_target_node = FindTargetNode(name='FindTarget', target_graph=target_graph, robot_graph=robot_graph, env_id=env_id)
-    go_to_nearest_target = GoToNearestTarget(name="GoToNearestTarget",robot_graph=robot_graph, env_id=env_id)
-    go_to_charger_node =GoToChargerNode(name="GoToCharger", robot_graph=robot_graph, env_id=env_id)
-    go_to_spawn_node = GoToSpawnNode(name='GoToSpawnNode', robot_graph=robot_graph, env_id=env_id)
-    picking_object_node = PickObject(name = 'PickObject', robot_graph=robot_graph, env_id=env_id)
-    drop_object_node = DropObject(name='DropObject', env_id=env_id)
-    charge_node = Charge(name='Charge', robot_graph = robot_graph, env_id=env_id)
+    patrol_node = PatrolNode(name = "PatrolNode", full_graph = full_graph, robot_graph = robot_graph, env_id = env_id, verbose=verbose)
+    find_target_node = FindTargetNode(name='FindTarget', target_graph=target_graph, robot_graph=robot_graph, env_id=env_id, verbose=verbose)
+    go_to_nearest_target = GoToNearestTarget(name="GoToNearestTarget",robot_graph=robot_graph, env_id=env_id, verbose=verbose)
+    go_to_charger_node =GoToChargerNode(name="GoToCharger", robot_graph=robot_graph, env_id=env_id, verbose=verbose)
+    go_to_spawn_node = GoToSpawnNode(name='GoToSpawnNode', robot_graph=robot_graph, env_id=env_id, verbose=verbose)
+    picking_object_node = PickObject(name = 'PickObject', robot_graph=robot_graph, env_id=env_id, verbose=verbose)
+    drop_object_node = DropObject(name='DropObject', env_id=env_id, verbose=verbose)
+    charge_node = Charge(name='Charge', robot_graph = robot_graph, env_id=env_id, verbose=verbose)
     
     # define condition nodes
-    is_robot_at_the_charger_node = IsRobotAtTheCharger(name='IsRobotAtTheCharger', env_id=env_id)
-    is_robot_at_the_spawn_node = IsRobotAtTheSpawn(name='IsRobotAtTheSpawn', env_id=env_id)
-    is_battery_on_proper_level = IsBatteryOnProperLevel(name='IsBatteryOnProperLevel', env_id=env_id)
-    are_object_existed_on_internal_map = AreObjectsExistOnInternalMap(name='AreObjectExistsOnInternalMap', env_id=env_id)
-    are_object_nearby_node = AreObjectNearby('AreObjectNearby', env_id=env_id)
-    is_object_in_hand_node = IsObjectInHand('IsObjectInHand', env_id=env_id)
-    is_nearby_object_not_at_goal = IsNearbyObjectNotAtGoal('IsNearbyObjectNotAtGoal', robot_graph=robot_graph, goal_node=[0], env_id=env_id)
-    are_five_objects_at_spawn = AreFiveObjectsAtSpawn('AreFiveObjectsAtSpawn', robot_graph=robot_graph, env_id=env_id)
+    is_robot_at_the_charger_node = IsRobotAtTheCharger(name='IsRobotAtTheCharger', env_id=env_id, robot_graph=robot_graph, verbose=verbose)
+    is_robot_at_the_spawn_node = IsRobotAtTheSpawn(name='IsRobotAtTheSpawn', env_id=env_id, robot_graph=robot_graph, verbose=verbose)
+    is_battery_on_proper_level = IsBatteryOnProperLevel(name='IsBatteryOnProperLevel', env_id=env_id, verbose=verbose)
+    are_object_existed_on_internal_map = AreObjectsExistOnInternalMap(name='AreObjectExistsOnInternalMap', env_id=env_id, verbose=verbose)
+    are_object_nearby_node = AreObjectNearby('AreObjectNearby', env_id=env_id, verbose=verbose)
+    is_object_in_hand_node = IsObjectInHand('IsObjectInHand', env_id=env_id, verbose=verbose)
+    is_nearby_object_not_at_goal = IsNearbyObjectNotAtGoal('IsNearbyObjectNotAtGoal', robot_graph=robot_graph, goal_node=[0], env_id=env_id, verbose=verbose)
+    are_five_objects_at_spawn = AreFiveObjectsAtSpawn('AreFiveObjectsAtSpawn', robot_graph=robot_graph, env_id=env_id, verbose=verbose)
 
-    # Define tree structure
-    parallel_1 = py_trees.composites.Parallel("Parallel_1", policy=py_trees.common.ParallelPolicy.SuccessOnAll(synchronise=False))
-    parallel_1.add_child(patrol_node)
-    parallel_1.add_child(find_target_node)
+                    # Behaviors
+    behavior_dict = {'a': patrol_node,
+                     'b': find_target_node,
+                     'c': go_to_nearest_target,
+                     'd': go_to_charger_node,
+                     'e': go_to_spawn_node,
+                     'f': picking_object_node,
+                     'g': drop_object_node,
+                     'h': charge_node,
+                    # Conditions
+                     'A': is_robot_at_the_charger_node,
+                     'B': is_robot_at_the_spawn_node,
+                     'C': is_battery_on_proper_level,
+                     'D': are_object_existed_on_internal_map,
+                     'E': are_object_nearby_node,
+                     'F': is_object_in_hand_node,
+                     'G': is_nearby_object_not_at_goal,
+                     'H': are_five_objects_at_spawn,
+                     }
+    
+    cond_num = 0
 
-    selector_1 = py_trees.composites.Selector("Selector_1", memory=False)
-    selector_1.add_child(are_object_existed_on_internal_map)
-    selector_1.add_child(parallel_1)
+    def string2tree(tree_string, cond_num):
+        # Select Condition Node as Parent Node
+        condition_node = tree_string[1]
+        if condition_node == '0':
+            parent = py_trees.composites.Sequence(f"Sequence_{cond_num}", memory=False)
+        elif condition_node == '1':
+            parent = py_trees.composites.Selector(f"Selector_{cond_num}", memory=False)
+        elif condition_node == '2':
+            parent = py_trees.composites.Parallel(f"Parallel_{cond_num}", policy=py_trees.common.ParallelPolicy.SuccessOnAll(synchronise=False))
+    
+        cond_num += 1
+        record = False
 
-    sequence_1 = py_trees.composites.Sequence("Sequence_1", memory=False)
-    sequence_1.add_child(selector_1)
-    sequence_1.add_child(go_to_nearest_target)
+        for n in tree_string[2:]:
+            if record:
+                subtree_string += n
+                if n == '(':
+                    n_open += 1
+                elif n == ')':
+                    n_open -= 1
 
-    sequence_6 = py_trees.composites.Sequence("Sequence_6", memory=False)
-    sequence_6.add_child(are_object_nearby_node)
-    sequence_6.add_child(is_nearby_object_not_at_goal)
+                if n_open == 0:
+                    record = False
+                    parent.add_child(string2tree(subtree_string, cond_num))
+            else:
+                if n == '(':
+                    subtree_string = '('
+                    n_open = 1
+                    record = True
+                elif n == ')':
+                    pass
+                else:
+                    if n in behavior_dict.keys():
+                        parent.add_child(behavior_dict[n])
+                    else:
+                        print('[Error] Undefined char in tree_string')
 
-    selector_2 = py_trees.composites.Selector("Selector_2", memory=False)
-    selector_2.add_child(sequence_6)
-    selector_2.add_child(sequence_1)
-
-    sequence_2 = py_trees.composites.Sequence("Sequence_2", memory=False)
-    sequence_2.add_child(selector_2)
-    sequence_2.add_child(picking_object_node)
-
-    selector_3 = py_trees.composites.Selector("Selector_3", memory=False)
-    selector_3.add_child(is_object_in_hand_node)
-    selector_3.add_child(sequence_2)
-
-    selector_4 = py_trees.composites.Selector("Selector_4", memory=False)
-    selector_4.add_child(is_robot_at_the_charger_node)
-    selector_4.add_child(go_to_charger_node)
-
-    sequence_3 = py_trees.composites.Sequence("Sequence_4", memory=False)
-    sequence_3.add_child(selector_4)
-    sequence_3.add_child(charge_node)
-
-    selector_5 = py_trees.composites.Selector("Selector_5", memory=False)
-    selector_5.add_child(is_battery_on_proper_level)
-    selector_5.add_child(sequence_3)
-
-    selector_6 = py_trees.composites.Selector("Selector_6", memory=False)
-    selector_6.add_child(is_robot_at_the_spawn_node)
-    selector_6.add_child(go_to_spawn_node)
-
-    sequence_4 = py_trees.composites.Sequence("Sequence_4", memory=False)
-    sequence_4.add_child(selector_3)
-    sequence_4.add_child(selector_6)
-    sequence_4.add_child(drop_object_node)
-
-    sequence_5 = py_trees.composites.Sequence("Sequence_5", memory=False)
-    sequence_5.add_child(selector_5)
-    sequence_5.add_child(sequence_4)
-
-    selector_7 = py_trees.composites.Selector("Selector_7", memory=False)
-    selector_7.add_child(are_five_objects_at_spawn)
-    selector_7.add_child(sequence_5)
-
-    return selector_7
+        return parent
+    
+    return string2tree(tree_string, cond_num)
 
 def main(args=None):
     """
@@ -270,18 +280,23 @@ def main(args=None):
         args (list, optional): Command-line arguments passed to ROS2.
     """
     rclpy.init(args=args)
-    env_id = 2
+
+    env_id = args_cli.env_id
+    tree_string = args_cli.bt_string
     
-    node = EnvironmentSubscriber(env_id)
-    executor_thread = threading.Thread(target=rclpy.spin_once, args=(node,))
+    env_node = EnvironmentManager(env_id)
+    executor_thread = threading.Thread(target=rclpy.spin_once, args=(env_node,))
     executor_thread.start()
-    
-    root = create_tree(env_id, node)
-    tree = BehaviourTree(root)
-    
+
+    env_node.received_event.wait()
+    origin_offset = env_node.origin if env_node.origin else [0, 0]
+    root = create_tree(env_id, tree_string, origin_offset, verbose=args_cli.verbose)
+
+    node = rclpy.create_node(node_name=f"env_{env_id}_tree")
+    tree = BehaviourTree(root=root)
     # Setup behavior tree
     try:
-        tree.setup(timeout=15)
+        tree.setup(node=node, timeout=15)
     except py_trees_ros.exceptions.TimedOutError as e:
         console.logerror(console.red + "failed to setup the tree, aborting [{}]".format(str(e)) + console.reset)
         tree.shutdown()
@@ -293,6 +308,11 @@ def main(args=None):
         rclpy.try_shutdown()
         sys.exit(1)
     
+    # Set parameters so tree can publish /env_{env_id}_tree/snapshots ros2 topic
+    node.set_parameters([
+        rclpy.parameter.Parameter("default_snapshot_stream", rclpy.Parameter.Type.BOOL, True)
+    ])
+    
     tree.tick_tock(period_ms=1000.0)
     
     try:
@@ -300,7 +320,13 @@ def main(args=None):
     except (KeyboardInterrupt, rclpy.executors.ExternalShutdownException):
         pass
     finally:
+        # Clean up
+        subprocess.Popen(["ros2", "topic", "pub", f"/env_{env_id}/robot/cmd_vel", "geometry_msgs/msg/Twist", 
+                          '{"linear": {"x": 0.0, "y": 0.0, "z": 0.0}, '
+                          '"angular": {"x": 0.0, "y": 0.0, "z": 0.0} }',"--once"])
+        
         tree.shutdown()
+        env_node.destroy_node()
         rclpy.try_shutdown()
 
 if __name__ == '__main__':

@@ -6,14 +6,16 @@ from threading import Thread
 from autogen_bt_interface.srv import ChargingRequest
 
 class BatteryNode(Node):
-    def __init__(self, name: str, discharge_rate: float, charge_rate: float, robot_name: str = "robot"):
+    def __init__(self, name: str, discharge_rate: float, charge_rate: float, robot_name: str = "robot", verbose = False):
         super().__init__(f'{name}_battery_node')
 
-        self.battery_level = 100.0  # Initial battery percentage
+        self.initial_battery_level = 100.0 # Initial battery percentage
+        self.battery_level = self.initial_battery_level
         self.is_charging = False
         self.name = name
         self.discharge_rate = discharge_rate
         self.charge_rate = charge_rate
+        self.verbose = verbose
 
         if  len(robot_name) != 0 and robot_name[0] != '/':
             robot_name = '/' + robot_name
@@ -32,9 +34,9 @@ class BatteryNode(Node):
     def charge_callback(self, req, res):
         self.is_charging = req.status.data
         if self.is_charging:
-            self.get_logger().info(f"{self.name}: Charging started.")
+            if self.verbose: self.get_logger().info(f"{self.name}: Charging started.")
         else:
-            self.get_logger().info(f"{self.name}: Charging stopped.")
+            if self.verbose: self.get_logger().info(f"{self.name}: Charging stopped.")
 
         return ChargingRequest.Response()
 
@@ -52,8 +54,11 @@ class BatteryNode(Node):
         # self.get_logger().info(f"{self.name}: Battery level: {self.battery_level:.2f}%")
 
         if self.battery_level <= 0.0:
-            self.get_logger().warn(f"{self.name}: Battery empty! Please recharge.")
+            if self.verbose: self.get_logger().warn(f"{self.name}: Battery empty! Please recharge.")
 
+    def reset(self):
+        self.battery_level = self.initial_battery_level
+        self.is_charging = False
 
 class BatteryManager:
     def __init__(self, battery_names, discharge_rate: float, charge_rate: float, robot_name: str = "robot"):
@@ -71,6 +76,10 @@ class BatteryManager:
 
         self.executor_thread = Thread(target=self.run_executor, daemon=True)
         self.executor_thread.start()
+
+    def reset(self):
+        for battery in self.batteries:
+            battery.reset()
 
     def run_executor(self):
         executor = rclpy.executors.MultiThreadedExecutor()

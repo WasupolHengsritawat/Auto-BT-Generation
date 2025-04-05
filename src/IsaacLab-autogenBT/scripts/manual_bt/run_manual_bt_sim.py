@@ -116,6 +116,22 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
     # note: we only do this here for readability.
     robot = scene["robot"]
 
+    # battery init
+    battery_names = []
+    for i in range(scene.num_envs):
+        # Create ROS2 omnigraph
+        create_controller_omnigraph(i)
+
+        # Declare battery name for each robot
+        battery_names.append(f'env_{i}')
+
+    # Battery configuration
+    discharge_rate = 0.05   # % per second
+    charge_rate = 5.0       # % per second
+
+    # Initialize the battery manager
+    battery_manager = BatteryManager(battery_names, discharge_rate, charge_rate)
+    
     # target init
     # Initialize the object group manager
     object_group_names = []
@@ -143,7 +159,6 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
 
         # Reset
         if count % 400000 == 0:
-        # if count % 400 == 0:
             # Reset Counter
             count = 0
 
@@ -166,10 +181,13 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
             )
             robot.write_joint_state_to_sim(joint_pos,joint_vel)
 
-            # # Random New Target Spawn Location =======================================
+            # Random New Target Spawn Location =========================================
             object_group_manager.repos(get_random_object_pos(scene.num_envs) + object_pos_offset)
+
+            # Reset Battery Level ======================================================
+            battery_manager.reset()
+
             # Reset Scene ==============================================================
-            
             scene.reset()
             print("[INFO]: Resetting robot state...")
 
@@ -192,23 +210,8 @@ def main():
     scene_cfg = ManualBTSceneCfg(num_envs=args_cli.num_envs, env_spacing=args_cli.env_spacing)
     scene = InteractiveScene(scene_cfg)
 
-    battery_names = []
-    for i in range(scene.num_envs):
-        # Create ROS2 omnigraph
-        create_controller_omnigraph(i)
-
-        # Declare battery name for each robot
-        battery_names.append(f'env_{i}')
-
-    # Battery configuration
-    discharge_rate = 0.05   # % per second
-    charge_rate = 5.0       # % per second
-
     # Initialize ROS2 node
     rclpy.init()
-
-    # Initialize the battery manager
-    battery_manager = BatteryManager(battery_names, discharge_rate, charge_rate)
 
     # Play the simulator
     sim.reset()
@@ -221,8 +224,6 @@ def main():
     finally:
         # Gracefully stop all battery nodes
         rclpy.shutdown()
-        battery_manager.stop()
-        print("ROS2 nodes stopped.")
 
 if __name__ == "__main__":
     # run the main function

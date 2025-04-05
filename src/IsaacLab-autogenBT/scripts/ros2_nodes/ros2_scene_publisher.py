@@ -1,6 +1,6 @@
 from rclpy.node import Node
 from rclpy.qos import QoSProfile
-from geometry_msgs.msg import TransformStamped, Point
+from geometry_msgs.msg import TransformStamped, Point, Twist
 from sensor_msgs.msg import JointState
 
 def pub_scene_data(num_envs, base_node, scene):
@@ -28,7 +28,7 @@ class SceneNode(Node):
             self.env_origin_pub.append(self.create_publisher(Point, f'env_{i}/origin', qos_profile))
             self.robot_joint_state_pub.append(self.create_publisher(JointState, f'env_{i}/robot/joint_state', qos_profile))
             self.robot_transform_pub.append(self.create_publisher(TransformStamped, f'env_{i}/robot/tf', qos_profile))
-    
+
     def publish_env_origin(self, env_origin, env_ind):
         msg = Point()
         msg.x = float(env_origin[0])
