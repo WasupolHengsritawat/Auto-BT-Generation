@@ -58,7 +58,7 @@ from ros2_nodes.ros2_scene_publisher import pub_scene_data, SceneNode
 from ros2_nodes.ros2_battery import BatteryManager
 from ros2_nodes.ros2_object import ObjectGroupManager
 from ros2_nodes.ros2_drive import RobotDriverManager
-from ros2_nodes.ros2_bt_tracker import BTStatusTracker
+from ros2_nodes.ros2_bt_tracker import BTStatusTrackerNode
 
 def get_random_object_pos(num_env):
     """
@@ -117,42 +117,47 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
 
     # battery init
     battery_names = []
-    bt_status_tracker = []
     for i in range(scene.num_envs):
         # Declare battery name for each robot
         battery_names.append(f'env_{i}')
         
-    
     # Battery configuration
     discharge_rate = 0.05   # % per second
     charge_rate = 5.0       # % per second
 
     # Initialize the battery manager
-    # battery_manager = BatteryManager(battery_names, discharge_rate, charge_rate)
+    battery_manager = BatteryManager(battery_names, discharge_rate, charge_rate)
+
+    # Initialize BT status tracker
+    bt_tracker = BTStatusTrackerNode(num_envs=scene.num_envs)
     
-    # target init
+    # Initialize the robot driver manager
+    driver_manager = RobotDriverManager(num_envs=scene.num_envs)
+    joint_names = [
+        "front_left_wheel_joint", "rear_left_wheel_joint",
+        "front_right_wheel_joint", "rear_right_wheel_joint"
+    ]
+    
     # Initialize the object group manager
     object_group_names = []
     for env_id in range(scene.num_envs):
         # Declare object group name for each environment
         object_group_names.append(f'env_{env_id}')
 
-    # # Initialize the robot driver manager
-    # driver_manager = RobotDriverManager(num_envs=scene.num_envs)
-    # joint_names = [
-    #     "front_left_wheel_joint", "rear_left_wheel_joint",
-    #     "front_right_wheel_joint", "rear_right_wheel_joint"
-    # ]
-
     # Calculate opject position offset
     object_pos_offset = scene.env_origins.repeat([get_random_object_pos(scene.num_envs).shape[1],1,1])
     object_pos_offset = torch.transpose(object_pos_offset, 0, 1)
 
-    # object_group_manager = ObjectGroupManager(object_group_names, get_random_object_pos(scene.num_envs) + object_pos_offset,scene)
+    object_group_manager = ObjectGroupManager(object_group_names, get_random_object_pos(scene.num_envs) + object_pos_offset,scene)
 
     # Define simulation stepping
     sim_dt = sim.get_physics_dt()
-    count = 0
+    sim_step = 0
+    last_status = [None] * scene.num_envs
+    current_status = [None] * scene.num_envs
+    idle_step_count = [0 for _ in range(scene.num_envs)]
+    is_idled = [False for _ in range(scene.num_envs)]
+    elapsed_step = [0 for _ in range(scene.num_envs)]
 
     # # Initialize time tracking variables
     # sim_time = 0.0
@@ -161,13 +166,51 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
     # Initialize ROS2 node
     base_node = SceneNode(scene.num_envs)
 
+    def is_sim_terminated():
+        output = False
+
+        ### Condition 1: Idle ###
+        # Update idle step count
+        for env_id in range(scene.num_envs):
+            if bt_tracker.get_status(env_id) != 'RUNNING':
+                idle_step_count[env_id] += 1
+            else:
+                # Reset if not idle consecutively
+                idle_step_count[env_id] = 0
+                is_idled[env_id] = False # This is rarely happened
+
+            # A environment is considered terminated if idle consecutively for more than 200 simulation steps
+            if idle_step_count[env_id] > 200:
+                is_idled[env_id] = True
+                elapsed_step[env_id] = sim_step # Record elapse step of an environment
+        
+        # Terminate if all environment are idled
+        if np.array(is_idled).all():
+            output = True
+            print('[INFO]: Terminated due to idle')
+        
+        ### Condition 2: Timeout ###
+        if sim_step > 200000:
+            output = True
+            print('[INFO]: Terminated due to timeout')
+
+        return output
+
     # Simulation loop
     while simulation_app.is_running():
         # Publish Transformation Data
         pub_scene_data(scene.num_envs, base_node, scene)
 
-        # driver_manager.apply_all(robot, joint_names)
-        # robot.write_data_to_sim()
+        driver_manager.apply(robot, joint_names)
+        robot.write_data_to_sim()
+
+        rclpy.spin_once(bt_tracker, timeout_sec=0.0)
+        # print("[BT0 status]: ", bt_tracker.get_status(0))
+        for env_id in range(scene.num_envs):
+            current_status[env_id] = bt_tracker.get_status(env_id)
+            if current_status[env_id] != last_status[env_id]:
+                print(f"[BT {env_id} STATUS]: {last_status[env_id]} - {current_status[env_id]} at count {sim_step}")
+                last_status[env_id] = current_status[env_id]
 
         # # Update simulation time
         # sim_time += sim_dt
@@ -180,46 +223,52 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
         #     rtf = sim_time / elapsed_real_time
         #     print(f"Real-Time Factor: {rtf:.2f}")
 
-        # Reset
-        if count % 400000 == 0:
-            # Reset Counter
-            count = 0
+        # # Reset
+        # if sim_step % 400000 == 0:
+        #     # Reset Counter
+        #     sim_step = 0
 
-            # Reset Robot Root state ====================================================
-            robot_root_state = robot.data.default_root_state.clone()
-            robot_root_state[:, :3] += scene.env_origins
+        #     # Reset Robot Root state ====================================================
+        #     robot_root_state = robot.data.default_root_state.clone()
+        #     robot_root_state[:, :3] += scene.env_origins
 
-            # initial position referenced by env
-            robot_root_state[:, :3] += torch.tensor([0.0, 0.0, 0.7],device=args_cli.device)
+        #     # initial position referenced by env
+        #     robot_root_state[:, :3] += torch.tensor([0.0, 0.0, 0.7],device=args_cli.device)
 
-            # initial orientation
-            robot_root_state[:, 3:7] += torch.tensor(robot_rot,device=args_cli.device)
+        #     # initial orientation
+        #     robot_root_state[:, 3:7] += torch.tensor(robot_rot,device=args_cli.device)
 
-            robot.write_root_state_to_sim(robot_root_state)
+        #     robot.write_root_state_to_sim(robot_root_state)
 
-            # Reset Robot Joint State
-            joint_pos, joint_vel = (
-                robot.data.default_joint_pos.clone(),
-                robot.data.default_joint_vel.clone(),
-            )
-            robot.write_joint_state_to_sim(joint_pos,joint_vel)
+        #     # Reset Robot Joint State
+        #     joint_pos, joint_vel = (
+        #         robot.data.default_joint_pos.clone(),
+        #         robot.data.default_joint_vel.clone(),
+        #     )
+        #     robot.write_joint_state_to_sim(joint_pos,joint_vel)
 
-            # Random New Target Spawn Location =========================================
-            # object_group_manager.repos(get_random_object_pos(scene.num_envs) + object_pos_offset)
+        #     # Random New Target Spawn Location =========================================
+        #     object_group_manager.repos(get_random_object_pos(scene.num_envs) + object_pos_offset)
 
-            # Reset Battery Level ======================================================
-            # battery_manager.reset()
+        #     # Reset Battery Level ======================================================
+        #     battery_manager.reset()
 
-            # Reset Scene ==============================================================
-            scene.reset()
-            print("[INFO]: Resetting robot state...")
+        #     # Reset Scene ==============================================================
+        #     scene.reset()
+        #     print("[INFO]: Resetting robot state...")
 
         # Perform step
         sim.step()
         # Increment counter
-        count += 1
+        sim_step += 1
         # Update buffers
         scene.update(sim_dt)
+
+        # Check if the simulation must be terminated
+        if is_sim_terminated():
+            print(f'[INFO]: is_idled -> {is_idled}')
+            print(f'[INFO]: elapsed_step -> {elapsed_step}')
+            break
 
 def main():
     """Main function."""
@@ -240,7 +289,7 @@ def main():
     sim.reset()
     # Now we are ready!
     print("[INFO]: Setup complete...")
-    print(args_cli.device)
+    print(f"[INFO]: Currently running on {args_cli.device}")
 
     try:
         # Run the simulator

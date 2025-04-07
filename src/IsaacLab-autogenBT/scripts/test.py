@@ -56,7 +56,7 @@ def stop_BTs(verbose=False):
     if verbose: print("All BT processes have been terminated.")
 
 if __name__ == "__main__":
-    num_envs = 3  # Set the number of parallel executions you want
+    num_envs = 50  # Set the number of parallel executions you want
     # bt_string_array = ['(0)'] * num_envs
     # bt_string_array[1] = '(1H(0(1C(0(1Ad)h))(0(1F(0(1(0EG)(0(1D(2ab))c))f))(1Be)g)))'
 
