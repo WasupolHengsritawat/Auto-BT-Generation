@@ -633,6 +633,15 @@ class MultiBTEnv(gym.Env):
                 insert_index = valid_indices[node_location]
                 self.current_bt[env_id] = '(' + bt_string[:insert_index] + node + bt_string[insert_index:] + ')'
     
+    def set_bt(self, env_id, bt_string):
+        """
+        Forcefully set the current BT string of an environment before modifying it.
+
+        :param env_id: Index of the environment.
+        :param bt_string: BT string to restore as state.
+        """
+        self.current_bt[env_id] = bt_string
+
 ###
 #  Monte-Carlo Tree Search
 ###
@@ -775,23 +784,20 @@ class ParallelMCTS:
         """
         actions = []
         priors = []
-        for node in nodes:
-            # Get valid node locations
-            bt_string = node.state[1:-1] if node.state.startswith('(') else node.state
-            valid_locs = [j for j in range(len(bt_string)+1) if j == len(bt_string) or not bt_string[j].isdigit()]  # Valid insert positions
 
-            # All possible actions
+        for node in nodes:
+            # Get valid node locations from BT string
+            bt_string = node.state[1:-1] if node.state.startswith('(') else node.state
+            valid_locs = [j for j in range(len(bt_string)+1) if j == len(bt_string) or not bt_string[j].isdigit()]
             all_actions = [(nt, loc) for nt in range(self.env.num_node_types) for loc in range(len(valid_locs))]
 
-            # Remove previously expanded actions
             explored = {child.action for child in node.children}
-            unexplored = [a for a in all_actions if a not in explored]  # Remove previously expanded
+            unexplored = [a for a in all_actions if a not in explored]
 
             if not unexplored:
-                actions.append((19, 0))  # Fallback stop action
+                actions.append((19, 0))  # fallback stop
                 priors.append(1.0)
             else:
-                # Get policy probabilities
                 with torch.no_grad():
                     action1_probs, action2_probs = self.policy_net.predict_from_bt_string(node.state)
                     action1_probs = action1_probs.cpu().numpy()
@@ -805,25 +811,29 @@ class ParallelMCTS:
                     action1_probs = (1 - epsilon) * action1_probs + epsilon * dirichlet_noise1
                     action2_probs = (1 - epsilon) * action2_probs + epsilon * dirichlet_noise2
 
-                # Compute joint probabilities
                 combined_probs = np.array([
                     action1_probs[nt] * action2_probs[loc] for nt, loc in unexplored
                 ])
-                combined_probs /= (np.sum(combined_probs) + 1e-8)  # Normalize
+                combined_probs /= (np.sum(combined_probs) + 1e-8)
 
-                # Sample one action from distribution
                 selected_idx = np.random.choice(len(unexplored), p=combined_probs)
-                actions.append(unexplored[selected_idx])
-                priors.append(combined_probs[selected_idx])  # Save prior for PUCT
+                selected_action = unexplored[selected_idx]
+                actions.append(selected_action)
+                priors.append(combined_probs[selected_idx])
 
-        # Execute actions in parallel environments
+                # Restore correct state before modifying BT
+                self.env.set_bt(env_id=node.env_id, bt_string=node.state)
+                self.env.modify_bt(node.env_id, selected_action[0], selected_action[1])
+
+        # Now that env.current_bt reflects correct BTs, run them
         obs, rews, _, _ = self.env.step(actions)
 
         for node, action, new_state, reward, prior in zip(nodes, actions, obs, rews, priors):
             child = MCTSNode(state=new_state, env_id=node.env_id, parent=node, action=action)
-            child.value = reward  # Save reward directly
-            child.prior = prior   # Save policy prior
+            child.value = reward
+            child.prior = prior
             node.children.append(child)
+
 
     def simulate(self, nodes):
         """
