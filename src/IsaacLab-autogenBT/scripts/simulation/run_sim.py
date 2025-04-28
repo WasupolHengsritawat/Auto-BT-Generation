@@ -47,7 +47,7 @@ from omni.isaac.lab.utils import configclass
 # Import local files
 # Get the absolute path to the directory containing this script and the root of the project
 script_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.abspath(os.path.join(script_dir, ".."))
+project_root = os.path.abspath(os.path.join(script_dir, "..", ".."))
 
 # Add it to sys.path 
 sys.path.insert(0, project_root)
@@ -180,7 +180,7 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
                 is_idled[env_id] = False # This is rarely happened
 
             # A environment is considered terminated if idle consecutively for more than 200 simulation steps
-            if idle_step_count[env_id] > 200:
+            if idle_step_count[env_id] > 200 and not is_idled[env_id]:
                 is_idled[env_id] = True
                 elapsed_step[env_id] = sim_step # Record elapse step of an environment
         
@@ -223,39 +223,39 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
         #     rtf = sim_time / elapsed_real_time
         #     print(f"Real-Time Factor: {rtf:.2f}")
 
-        # # Reset
-        # if sim_step % 400000 == 0:
-        #     # Reset Counter
-        #     sim_step = 0
+        # Reset
+        if sim_step % 400 == 0:
+            # Reset Counter
+            sim_step = 0
 
-        #     # Reset Robot Root state ====================================================
-        #     robot_root_state = robot.data.default_root_state.clone()
-        #     robot_root_state[:, :3] += scene.env_origins
+            # Reset Robot Root state ====================================================
+            robot_root_state = robot.data.default_root_state.clone()
+            robot_root_state[:, :3] += scene.env_origins
 
-        #     # initial position referenced by env
-        #     robot_root_state[:, :3] += torch.tensor([0.0, 0.0, 0.7],device=args_cli.device)
+            # initial position referenced by env
+            robot_root_state[:, :3] += torch.tensor([0.0, 0.0, 0.7],device=args_cli.device)
 
-        #     # initial orientation
-        #     robot_root_state[:, 3:7] += torch.tensor(robot_rot,device=args_cli.device)
+            # initial orientation
+            robot_root_state[:, 3:7] += torch.tensor(robot_rot,device=args_cli.device)
 
-        #     robot.write_root_state_to_sim(robot_root_state)
+            robot.write_root_state_to_sim(robot_root_state)
 
-        #     # Reset Robot Joint State
-        #     joint_pos, joint_vel = (
-        #         robot.data.default_joint_pos.clone(),
-        #         robot.data.default_joint_vel.clone(),
-        #     )
-        #     robot.write_joint_state_to_sim(joint_pos,joint_vel)
+            # Reset Robot Joint State
+            joint_pos, joint_vel = (
+                robot.data.default_joint_pos.clone(),
+                robot.data.default_joint_vel.clone(),
+            )
+            robot.write_joint_state_to_sim(joint_pos,joint_vel)
 
-        #     # Random New Target Spawn Location =========================================
-        #     object_group_manager.repos(get_random_object_pos(scene.num_envs) + object_pos_offset)
+            # Random New Target Spawn Location =========================================
+            object_group_manager.repos(get_random_object_pos(scene.num_envs) + object_pos_offset)
 
-        #     # Reset Battery Level ======================================================
-        #     battery_manager.reset()
+            # Reset Battery Level ======================================================
+            battery_manager.reset()
 
-        #     # Reset Scene ==============================================================
-        #     scene.reset()
-        #     print("[INFO]: Resetting robot state...")
+            # Reset Scene ==============================================================
+            scene.reset()
+            print("[INFO]: Resetting robot state...")
 
         # Perform step
         sim.step()
@@ -264,11 +264,11 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
         # Update buffers
         scene.update(sim_dt)
 
-        # Check if the simulation must be terminated
-        if is_sim_terminated():
-            print(f'[INFO]: is_idled -> {is_idled}')
-            print(f'[INFO]: elapsed_step -> {elapsed_step}')
-            break
+        # # Check if the simulation must be terminated
+        # if is_sim_terminated():
+        #     print(f'[INFO]: is_idled -> {is_idled}')
+        #     print(f'[INFO]: elapsed_step -> {elapsed_step}')
+        #     break
 
 def main():
     """Main function."""

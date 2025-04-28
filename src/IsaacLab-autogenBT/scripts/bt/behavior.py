@@ -13,7 +13,7 @@ from ikpy.link import OriginLink, URDFLink
 import networkx as nx
 import random
 import math
-import code 
+import sys 
 
 from autogen_bt_interface.srv import ChargingRequest, PickingRequest
 
@@ -276,6 +276,9 @@ class PatrolNode(py_trees.behaviour.Behaviour):
         
         if self.battery_level < 0.1:
             return py_trees.common.Status.FAILURE
+        
+        if set(self.full_graph.nodes).issubset(set(self.robot_graph.nodes)):
+            return py_trees.common.Status.SUCCESS
     
         if self.path == []: # Plan to go to adjacent unvisited area 
 
@@ -343,6 +346,8 @@ class FindTargetNode(py_trees.behaviour.Behaviour):
         self.target_pos = [None, None, None, None, None]
 
         self.target_spawn_pool_size = 10
+
+        self.is_counted = []
         
     def setup(self, **kwargs):
         """
@@ -406,8 +411,14 @@ class FindTargetNode(py_trees.behaviour.Behaviour):
         for u in valid_target:
             add_node_to_robot_graph(u, self.robot_graph, self.target_graph)
             if u in self.robot_graph.nodes:
-                if self.verbose: self.logger.info(f'Add target node {u} to the robot graph -> robot graph size: {self.robot_graph.number_of_nodes()}')
-                self.blackboard.target_in_robot_graph = self.blackboard.target_in_robot_graph + 1
+                if not(u in self.is_counted):
+                    if self.verbose: self.logger.info(f'Add target node {u} to the robot graph -> robot graph size: {self.robot_graph.number_of_nodes()}')
+                    self.blackboard.target_in_robot_graph = self.blackboard.target_in_robot_graph + 1
+                    self.is_counted.append(u)
+            else:
+                if u in self.is_counted:
+                    self.is_counted.remove(u)
+            
 
         return py_trees.common.Status.RUNNING
     
@@ -615,6 +626,10 @@ class GoToNearestTarget(py_trees.behaviour.Behaviour):
 
         self.path = []
         self.angular_controller = PIDController(K_p = 5, K_i = 2, output_limits=(-2.7,2.7))
+
+        self.robot_pos = None
+        self.robot_rot = None
+        self.battery_level = None
         
     def setup(self, **kwargs):
         """
@@ -873,6 +888,9 @@ class DropObject(py_trees.behaviour.Behaviour):
         if self.battery_level < 0.1:
             return py_trees.common.Status.FAILURE
 
+        if object_in_hand is None:
+            object_in_hand = 4294967295
+        
         self.set_pick_request(object_in_hand, False)
         self.blackboard.register_key(key="object_in_hand", access=py_trees.common.Access.WRITE)
         self.blackboard.object_in_hand = None
@@ -1171,7 +1189,8 @@ class IsBatteryOnProperLevel(py_trees.behaviour.Behaviour):
                     return py_trees.common.Status.SUCCESS
         else:
             if self.verbose: self.logger.info('battery level topic not available')
-            return py_trees.common.Status.INVALID
+            # return py_trees.common.Status.INVALID
+            return py_trees.common.Status.SUCCESS
     
     def terminate(self, new_status):
         """
@@ -1231,7 +1250,7 @@ class AreObjectNearby(py_trees.behaviour.Behaviour):
         """
         Main behavior logic.
         """
-        if None in self.target_pos or self.robot_pos == None:
+        if None in self.target_pos or self.robot_pos is None:
             return py_trees.common.Status.FAILURE   
     
         for target_pos in self.target_pos:
@@ -1303,7 +1322,7 @@ class IsNearbyObjectNotAtGoal(py_trees.behaviour.Behaviour):
         """
         Main behavior logic.
         """
-        if None in self.target_pos or self.robot_pos == None:
+        if None in self.target_pos or self.robot_pos is None:
             return py_trees.common.Status.FAILURE   
     
         for target_pos in self.target_pos:
@@ -1437,7 +1456,7 @@ class AreFiveObjectsAtSpawn(py_trees.behaviour.Behaviour):
         """
         Main behavior logic.
         """
-        if None in self.target_pos or self.robot_pos == None:
+        if None in self.target_pos or self.robot_pos is None:
             return py_trees.common.Status.FAILURE   
 
         # Count and publish number of objects at sapwn

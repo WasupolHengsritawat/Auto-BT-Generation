@@ -226,7 +226,6 @@ class MultiBTEnv(gym.Env):
         :param num_envs: Number of parallel environments (agents).
         """
         super().__init__()
-        rclpy.init()
         self.node = Node('multi_bt_env')
         self.num_envs = num_envs
 
@@ -307,9 +306,6 @@ class MultiBTEnv(gym.Env):
         # Design scene
         scene_cfg = ManualBTSceneCfg(num_envs=args_cli.num_envs, env_spacing=args_cli.env_spacing)
         self.scene = InteractiveScene(scene_cfg)
-
-        # Initialize ROS2 node
-        rclpy.init()
 
         # Play the simulator
         self.sim.reset()

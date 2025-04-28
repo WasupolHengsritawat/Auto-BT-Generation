@@ -12,6 +12,8 @@ from py_trees_ros.trees import BehaviourTree
 from geometry_msgs.msg import Point, Twist
 import argparse
 import subprocess
+from rclpy.executors import ExternalShutdownException
+from rclpy.context import Context
 
 parser = argparse.ArgumentParser(description="Run your script with arguments.")
 parser.add_argument('--env_id', type=int, help="Environment ID of the behavior tree.")
@@ -22,7 +24,7 @@ args_cli = parser.parse_args()
 
 # Import behavior nodes
 cwd = os.getcwd()
-sys.path.insert(0, f'{cwd}/src/IsaacLab-autogenBT/scripts')
+sys.path.insert(0, f'{cwd}/src/IsaacLab-autogenBT/scripts/bt')
 from behavior import (
     PatrolNode, MoveNode, GoToChargerNode, FindTargetNode, 
     AreObjectsExistOnInternalMap, GoToNearestTarget, AreObjectNearby, 
@@ -158,11 +160,12 @@ class EnvironmentManager(Node):
     Args:
         env_id (int): Environment identifier.
     """
-    def __init__(self, env_id):
-        super().__init__(f'env_{env_id}_origin_subscriber')
+    def __init__(self, env_id, context=None):
+        super().__init__(f'env_{env_id}_origin_subscriber', context=context)
         self.env_id = env_id
         self.origin = None
         self.subscription = self.create_subscription(Point, f'/env_{env_id}/origin', self.origin_callback, 10)
+        self.cmd_vel_publishers = self.create_publisher(Twist, f"/env_{env_id}/robot/cmd_vel", 10)
         self.received_event = threading.Event()
 
     def origin_callback(self, msg):
@@ -174,6 +177,9 @@ class EnvironmentManager(Node):
         """
         self.origin = [msg.x, msg.y]
         self.received_event.set()
+
+    def publish_zero_cmd_vel(self):
+        self.cmd_vel_publishers.publish(Twist())
 
 def create_tree(env_id, tree_string, origin_offset, verbose = False):
     """
@@ -188,50 +194,32 @@ def create_tree(env_id, tree_string, origin_offset, verbose = False):
     """
     # Use received origin
     target_graph, full_graph, robot_graph = graph_init(origin_offset)
- 
-    # Define behavior nodes 
-    patrol_node = PatrolNode(name = "PatrolNode", full_graph = full_graph, robot_graph = robot_graph, env_id = env_id, verbose=verbose)
-    find_target_node = FindTargetNode(name='FindTarget', target_graph=target_graph, robot_graph=robot_graph, env_id=env_id, verbose=verbose)
-    go_to_nearest_target = GoToNearestTarget(name="GoToNearestTarget",robot_graph=robot_graph, env_id=env_id, verbose=verbose)
-    go_to_charger_node =GoToChargerNode(name="GoToCharger", robot_graph=robot_graph, env_id=env_id, verbose=verbose)
-    go_to_spawn_node = GoToSpawnNode(name='GoToSpawnNode', robot_graph=robot_graph, env_id=env_id, verbose=verbose)
-    picking_object_node = PickObject(name = 'PickObject', robot_graph=robot_graph, env_id=env_id, verbose=verbose)
-    drop_object_node = DropObject(name='DropObject', env_id=env_id, verbose=verbose)
-    charge_node = Charge(name='Charge', robot_graph = robot_graph, env_id=env_id, verbose=verbose)
-    
-    # define condition nodes
-    is_robot_at_the_charger_node = IsRobotAtTheCharger(name='IsRobotAtTheCharger', env_id=env_id, robot_graph=robot_graph, verbose=verbose)
-    is_robot_at_the_spawn_node = IsRobotAtTheSpawn(name='IsRobotAtTheSpawn', env_id=env_id, robot_graph=robot_graph, verbose=verbose)
-    is_battery_on_proper_level = IsBatteryOnProperLevel(name='IsBatteryOnProperLevel', env_id=env_id, verbose=verbose)
-    are_object_existed_on_internal_map = AreObjectsExistOnInternalMap(name='AreObjectExistsOnInternalMap', env_id=env_id, verbose=verbose)
-    are_object_nearby_node = AreObjectNearby('AreObjectNearby', env_id=env_id, verbose=verbose)
-    is_object_in_hand_node = IsObjectInHand('IsObjectInHand', env_id=env_id, verbose=verbose)
-    is_nearby_object_not_at_goal = IsNearbyObjectNotAtGoal('IsNearbyObjectNotAtGoal', robot_graph=robot_graph, goal_node=[0], env_id=env_id, verbose=verbose)
-    are_five_objects_at_spawn = AreFiveObjectsAtSpawn('AreFiveObjectsAtSpawn', robot_graph=robot_graph, env_id=env_id, verbose=verbose)
 
                     # Behaviors
-    behavior_dict = {'a': patrol_node,
-                     'b': find_target_node,
-                     'c': go_to_nearest_target,
-                     'd': go_to_charger_node,
-                     'e': go_to_spawn_node,
-                     'f': picking_object_node,
-                     'g': drop_object_node,
-                     'h': charge_node,
+    behavior_dict = {'a': lambda ind: PatrolNode(name = f"PatrolNode_{ind}", full_graph = full_graph, robot_graph = robot_graph, env_id = env_id, verbose=verbose),
+                     'b': lambda ind: FindTargetNode(name=f'FindTarget_{ind}', target_graph=target_graph, robot_graph=robot_graph, env_id=env_id, verbose=verbose),
+                     'c': lambda ind: GoToNearestTarget(name=f"GoToNearestTarget_{ind}",robot_graph=robot_graph, env_id=env_id, verbose=verbose),
+                     'd': lambda ind: GoToChargerNode(name=f"GoToCharger_{ind}", robot_graph=robot_graph, env_id=env_id, verbose=verbose),
+                     'e': lambda ind: GoToSpawnNode(name=f'GoToSpawnNode_{ind}', robot_graph=robot_graph, env_id=env_id, verbose=verbose),
+                     'f': lambda ind: PickObject(name = f'PickObject_{ind}', robot_graph=robot_graph, env_id=env_id, verbose=verbose),
+                     'g': lambda ind: DropObject(name=f'DropObject_{ind}', env_id=env_id, verbose=verbose),
+                     'h': lambda ind: Charge(name=f'Charge_{ind}', robot_graph = robot_graph, env_id=env_id, verbose=verbose),
                     # Conditions
-                     'A': is_robot_at_the_charger_node,
-                     'B': is_robot_at_the_spawn_node,
-                     'C': is_battery_on_proper_level,
-                     'D': are_object_existed_on_internal_map,
-                     'E': are_object_nearby_node,
-                     'F': is_object_in_hand_node,
-                     'G': is_nearby_object_not_at_goal,
-                     'H': are_five_objects_at_spawn,
+                     'A': lambda ind: IsRobotAtTheCharger(name=f'IsRobotAtTheCharger_{ind}', env_id=env_id, robot_graph=robot_graph, verbose=verbose),
+                     'B': lambda ind: IsRobotAtTheSpawn(name=f'IsRobotAtTheSpawn_{ind}', env_id=env_id, robot_graph=robot_graph, verbose=verbose),
+                     'C': lambda ind: IsBatteryOnProperLevel(name=f'IsBatteryOnProperLevel_{ind}', env_id=env_id, verbose=verbose),
+                     'D': lambda ind: AreObjectsExistOnInternalMap(name=f'AreObjectExistsOnInternalMap_{ind}', env_id=env_id, verbose=verbose),
+                     'E': lambda ind: AreObjectNearby(f'AreObjectNearby_{ind}', env_id=env_id, verbose=verbose),
+                     'F': lambda ind: IsObjectInHand(f'IsObjectInHand_{ind}', env_id=env_id, verbose=verbose),
+                     'G': lambda ind: IsNearbyObjectNotAtGoal(f'IsNearbyObjectNotAtGoal_{ind}', robot_graph=robot_graph, goal_node=[0], env_id=env_id, verbose=verbose),
+                     'H': lambda ind: AreFiveObjectsAtSpawn(f'AreFiveObjectsAtSpawn_{ind}', robot_graph=robot_graph, env_id=env_id, verbose=verbose),
                      }
-    
-    cond_num = 0
 
     def string2tree(tree_string, cond_num):
+        # If a single behavior node is passed, return the corresponding behavior node
+        if len(tree_string) == 1:
+            return behavior_dict[tree_string[0]]
+        
         # Select Condition Node as Parent Node
         condition_node = tree_string[1]
         if condition_node == '0':
@@ -244,6 +232,7 @@ def create_tree(env_id, tree_string, origin_offset, verbose = False):
         cond_num += 1
         record = False
 
+        child_num = 0
         for n in tree_string[2:]:
             if record:
                 subtree_string += n
@@ -264,70 +253,92 @@ def create_tree(env_id, tree_string, origin_offset, verbose = False):
                     pass
                 else:
                     if n in behavior_dict.keys():
-                        parent.add_child(behavior_dict[n])
+                        parent.add_child(behavior_dict[n](child_num))
+                        child_num += 1
                     else:
                         print('[Error] Undefined char in tree_string')
 
         return parent
     
-    return string2tree(tree_string, cond_num)
-
-def main(args=None):
-    """
-    Main function to initialize ROS2, create the behavior tree, and execute it.
+    if tree_string=='':
+        return None
     
-    Args:
-        args (list, optional): Command-line arguments passed to ROS2.
-    """
-    rclpy.init(args=args)
+    return string2tree(tree_string, 0)
 
+def main():
     env_id = args_cli.env_id
     tree_string = args_cli.bt_string
-    
-    env_node = EnvironmentManager(env_id)
-    executor_thread = threading.Thread(target=rclpy.spin_once, args=(env_node,))
+
+    # Create a custom context
+    my_context = Context()
+    rclpy.init(context=my_context)
+
+    env_node = EnvironmentManager(env_id, context=my_context)
+    stop_event = threading.Event()
+
+    def spin_env_node(node, stop_event):
+        try:
+            executor = rclpy.executors.SingleThreadedExecutor(context=my_context)
+            executor.add_node(node)
+            while rclpy.ok(context=my_context) and not stop_event.is_set():
+                executor.spin_once(timeout_sec=0.1)
+        except Exception as e:
+            if args_cli.verbose: print(f"[WARN] Spin thread exception: {e}")
+        finally:
+            if args_cli.verbose: print(f"[INFO] Spin thread for {node.get_name()} exited cleanly.")
+
+    executor_thread = threading.Thread(target=spin_env_node, args=(env_node, stop_event))
     executor_thread.start()
 
+    # ==== WAIT FOR ORIGIN ====
     env_node.received_event.wait()
     origin_offset = env_node.origin if env_node.origin else [0, 0]
+
+    # ==== NOW STOP ENV NODE ====
+    stop_event.set()
+    executor_thread.join()
+    env_node.destroy_node()
+
+    # ==== Build and Spin the BT ====
     root = create_tree(env_id, tree_string, origin_offset, verbose=args_cli.verbose)
 
-    node = rclpy.create_node(node_name=f"env_{env_id}_tree")
-    tree = BehaviourTree(root=root)
-    # Setup behavior tree
-    try:
-        tree.setup(node=node, timeout=15)
-    except py_trees_ros.exceptions.TimedOutError as e:
-        console.logerror(console.red + "failed to setup the tree, aborting [{}]".format(str(e)) + console.reset)
-        tree.shutdown()
-        rclpy.try_shutdown()
-        sys.exit(1)
-    except KeyboardInterrupt:
-        console.logerror("tree setup interrupted")
-        tree.shutdown()
-        rclpy.try_shutdown()
-        sys.exit(1)
-    
-    # Set parameters so tree can publish /env_{env_id}_tree/snapshots ros2 topic
-    node.set_parameters([
-        rclpy.parameter.Parameter("default_snapshot_stream", rclpy.Parameter.Type.BOOL, True)
-    ])
-    
-    tree.tick_tock(period_ms=1000.0)
-    
-    try:
-        rclpy.spin(tree.node)
-    except (KeyboardInterrupt, rclpy.executors.ExternalShutdownException):
-        pass
-    finally:
-        # Clean up
-        subprocess.Popen(["ros2", "topic", "pub", f"/env_{env_id}/robot/cmd_vel", "geometry_msgs/msg/Twist", 
-                          '{"linear": {"x": 0.0, "y": 0.0, "z": 0.0}, '
-                          '"angular": {"x": 0.0, "y": 0.0, "z": 0.0} }',"--once"])
-        
-        tree.shutdown()
-        env_node.destroy_node()
-        rclpy.try_shutdown()
+    if root is not None:
+        node = rclpy.create_node(node_name=f"env_{env_id}_tree", context=my_context)
+        tree = BehaviourTree(root=root)
+        try:
+            tree.setup(node=node, timeout=15)
+        except py_trees_ros.exceptions.TimedOutError as e:
+            console.logerror(console.red + "failed to setup the tree, aborting [{}]".format(str(e)) + console.reset)
+            tree.shutdown()
+            node.destroy_node()
+            return
+        except KeyboardInterrupt:
+            console.logerror("tree setup interrupted")
+            tree.shutdown()
+            node.destroy_node()
+            return
+
+        node.set_parameters([
+            rclpy.parameter.Parameter("default_snapshot_stream", rclpy.Parameter.Type.BOOL, True)
+        ])
+
+        if args_cli.verbose: print(f"[INFO] running tree {args_cli.env_id}")
+        tree.tick_tock(period_ms=1000.0)
+
+        try:
+            executor = rclpy.executors.SingleThreadedExecutor(context=my_context)
+            executor.add_node(tree.node)
+            executor.spin()
+        except (ExternalShutdownException, KeyboardInterrupt):
+            if args_cli.verbose: print("[INFO] Shutdown requested (External or Ctrl+C).")
+            if hasattr(tree, "timer") and tree.timer is not None:
+                tree.timer.cancel()
+                tree.timer = None
+        finally:
+            tree.shutdown()
+            node.destroy_node()
+
+    # IMPORTANT: don't shutdown context! Just let process die naturally
 
 if __name__ == '__main__':
     main()

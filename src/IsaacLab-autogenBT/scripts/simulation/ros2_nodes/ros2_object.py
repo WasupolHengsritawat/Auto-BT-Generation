@@ -93,10 +93,11 @@ class ObjectGroupManagerNode(Node):
             obj_id = req.obj_id.data
             status = req.status.data
 
-            if status:
-                self.objs_by_env[env_id][obj_id].pick(host)
-            else:
-                self.objs_by_env[env_id][obj_id].drop()
+            if obj_id < len(self.objs_by_env[env_id]):
+                if status:
+                    self.objs_by_env[env_id][obj_id].pick(host)
+                else:
+                    self.objs_by_env[env_id][obj_id].drop()
 
             return PickingRequest.Response()
         return callback
