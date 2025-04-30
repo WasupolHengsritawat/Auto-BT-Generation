@@ -2,8 +2,7 @@
 #  Monte-Carlo Tree Search
 ###
 import numpy as np
-import random
-import math
+from tqdm import trange
 
 class MCTSNode:
     def __init__(self, state, env, policy_net, parent_edge=None):
@@ -37,10 +36,16 @@ class MCTSNode:
             self.all_actions = [(19,0)]
 
         # Get prior porbabilities from the policy network
-        nt_probs, loc_probs = self.policy_net.predict(state) 
+        nt_probs, loc_probs, pred_rew = self.policy_net.predict(state)
+
+        # Ensure probs are detached from GPU
+        nt_probs = nt_probs.detach().cpu().numpy()
+        loc_probs = loc_probs.detach().cpu().numpy()
 
         # Initialize edges for each action
-        self.edges = [MCTSEdge(self, (nt, loc), (nt_probs[nt] * loc_probs[loc]).item()) for nt, loc in self.all_actions]
+        self.edges = [MCTSEdge(self, (nt, loc), float(nt_probs[nt] * loc_probs[loc]))
+                    for nt, loc in self.all_actions]
+
     
 class MCTSEdge:
     def __init__(self, parent, action, prior):
@@ -103,8 +108,10 @@ class MCTS:
         """
         root = MCTSNode(state=root_state, env=self.env, policy_net=self.policy_net)
 
-        for i in range(self.num_simulations):
-            if self.verbose: print(f"[INFO] MCTS iteration {i}...")
+        progress = trange(self.num_simulations, desc="[MCTS] Running search", disable=not self.verbose)
+        for i in progress:
+            if self.verbose:
+                progress.set_postfix(iteration=i)
 
             # Select a leaf node
             selected_edges = self.select(root, dirichlet_noise_at_root=True)
@@ -128,11 +135,13 @@ class MCTS:
             nt_probs[nt] += edge.visits
             loc_probs[loc] += edge.visits
 
-        nt_probs /= np.sum(nt_probs)
-        loc_probs /= np.sum(loc_probs)
+        nt_prob_numerator = [nt_prob ** (1/(temperature)) for nt_prob in nt_probs] 
+        nt_prob_denominator = sum(nt_prob_numerator)
+        nt_probs = [num / nt_prob_denominator for num in nt_prob_numerator]
 
-        nt_probs = nt_probs ** (1.0 / temperature)
-        loc_probs = loc_probs ** (1.0 / temperature)
+        loc_prob_numerator = [loc_prob ** (1/(temperature)) for loc_prob in loc_probs] 
+        loc_prob_denominator = sum(loc_prob_numerator)
+        loc_probs = [num / loc_prob_denominator for num in loc_prob_numerator]
 
         return nt_probs, loc_probs
 
@@ -153,17 +162,17 @@ class MCTS:
                 # Add Dirichlet noise at root node
                 if is_root_flag:
                     actual_prior = []
-                    # Add Dirichlet noise to the prior probabilities
                     dirichlet_noise = np.random.dirichlet([0.03] * len(node.edges))
                     for i, edge in enumerate(node.edges):
-                        actual_prior.append(edge.prior) # Store the original prior
-                        edge.prior = (1 - epsilon) * edge.prior + epsilon * dirichlet_noise[i]
+                        actual_prior.append(edge.prior)  # store original prior
+                        edge.prior = float((1 - epsilon) * edge.prior + epsilon * dirichlet_noise[i])
 
                 # Select the edge with the highest PUCT value
                 node_visits = sum([edge.visits for edge in node.edges])
-                scores = np.array([edge.q + self.exploration_weight * edge.prior * np.sqrt(node_visits) / (1 + edge.visits)
-                    for edge in node.edges
-                ])
+                scores = np.array([
+                            float(edge.q + self.exploration_weight * edge.prior * np.sqrt(node_visits) / (1 + edge.visits))
+                            for edge in node.edges
+                        ])
                 max_score = np.max(scores)
 
                 # Get indices of all edges with the maximal score
@@ -221,71 +230,13 @@ class MCTS:
         :return: List of simulation-derived rewards.
         """
         states = [node.state for node in nodes]
-        dones = [False for _ in range(self.env.num_envs)]
-
-        # Make sure that the BT string is matched with the state in leaf node
-        for env_id in range(self.env.num_envs):
-            self.env.set_bt(env_id=env_id, bt_string=states[env_id])
             
-        # Expand the BT until it reaches a terminal state (stop action or max depth)
-        while True:
-            actions = []
-            for env_id in range(self.env.num_envs):
-                state = states[env_id]
-                
-                # If the BT Contruction is done, select stop action
-                if nodes[env_id].is_terminated or dones[env_id]:
-                    actions.append((19, 0))
-                    continue
-
-                # Get the action probablities from the policy network
-                nt_probs, loc_probs = self.policy_net.predict(state) 
-
-                # Convert torch tensors to numpy arrays
-                nt_probs = nt_probs.detach().cpu().numpy()
-                loc_probs = loc_probs.detach().cpu().numpy()
-
-                # Mask to get only valid node locations
-                bt_string = state
-                valid_locs_on_string = [j for j in range(1,len(bt_string)) if j == len(bt_string) or not bt_string[j].isdigit()] # Find valid location on BT string
-
-                # If the BT is empty, only the root node is valid
-                if bt_string == '':
-                    valid_locs_on_string = [0]
-
-                loc_probs = loc_probs[:len(valid_locs_on_string)]
-
-                # If there are no valid locations, select stop action
-                if loc_probs.size == 0:
-                    actions.append((19, 0))
-                    continue
-
-                max_nt_probs = np.max(nt_probs)
-                max_loc_probs = np.max(loc_probs)
-
-                best_nt_indices = np.where(nt_probs == max_nt_probs)[0]
-                best_loc_indices = np.where(loc_probs == max_loc_probs)[0]
-
-                # Randomly select one of the best indices
-                selected_nt = np.random.choice(best_nt_indices)
-                selected_loc = np.random.choice(best_loc_indices)
-
-                actions.append((selected_nt, selected_loc))
-
-            # Perform the action in the environment (add node to BT)
-            obs, _, dones, infos =  self.env.step_without_sim(actions) 
-
-            # Update the state for each node
-            states = obs
-
-            # Check if the BTs construction is done
-            if all(dones):
-                break
-
-        # Get the reward by runnung the BT in IsaacSim Simulation
-        if self.verbose: print(f"[INFO] \tEvaluating {self.env.current_bt}")
-        _, rews, _, infos =  self.env.evaluate_bt_in_sim()
-        if self.verbose: print(f"[INFO] \tFinished Evaluation") 
+        # Evaluate the BTs using the policy network
+        rews = []
+        for env_id in range(self.env.num_envs):
+            state = states[env_id]
+            nt_probs, loc_probs, pred_rew = self.policy_net.predict(state)
+            rews.append(float(pred_rew.detach().cpu().item()))
 
         return rews
 

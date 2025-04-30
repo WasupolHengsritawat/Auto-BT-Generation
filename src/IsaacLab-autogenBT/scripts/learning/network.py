@@ -122,17 +122,10 @@ def string_to_tree_node(tree_string, node_id=0):
 
 class RvNN(nn.Module):
     """
-    Recursive Neural Network for encoding Behavior Trees and predicting
-    two discrete action probability distributions:
-        1. Node type to expand
-        2. Node location to apply expansion
-
-    Args:
-        node_type_vocab_size (int): Total number of node types (typically 20).
-        embed_size (int): Size of the embedding vector for each node.
-        hidden_size (int): Size of the hidden vector in recursive processing.
-        action1_size (int): Output size for action 1 (node type prediction).
-        action2_size (int): Output size for action 2 (location prediction).
+    Recursive Neural Network for encoding Behavior Trees and predicting:
+        1. Node type to expand (classification)
+        2. Node location to apply expansion (classification)
+        3. Scalar reward (regression)
     """
     def __init__(self, node_type_vocab_size, embed_size, hidden_size, action1_size, action2_size, device):
         super(RvNN, self).__init__()
@@ -145,8 +138,12 @@ class RvNN(nn.Module):
 
         self.output_action1 = nn.Linear(hidden_size, action1_size, device=self.device)
         self.output_action2 = nn.Linear(hidden_size, action2_size, device=self.device)
+        self.reward_head = nn.Linear(hidden_size, 1, device=self.device)
 
         self.child_gru = nn.GRU(hidden_size, hidden_size, batch_first=True)
+
+        self.loss_fn = nn.CrossEntropyLoss()
+        self.loss_fn_reward = nn.MSELoss()
 
     def forward(self, node):
         """
@@ -178,10 +175,10 @@ class RvNN(nn.Module):
 
         # Encode children recursively
         child_states = [self._encode_node(child).unsqueeze(0) for child in node.children]
-        child_seq = torch.cat(child_states, dim=0).unsqueeze(0)  # shape: [1, num_children, hidden_size]
+        child_seq = torch.cat(child_states, dim=0).unsqueeze(0)  # [1, num_children, hidden_size]
 
-        _, last_hidden = self.child_gru(child_seq)  # shape: [1, 1, hidden_size]
-        child_encoding = last_hidden.squeeze(0).squeeze(0)  # shape: [hidden_size]
+        _, last_hidden = self.child_gru(child_seq)  # [1, 1, hidden_size]
+        child_encoding = last_hidden.squeeze(0).squeeze(0)
 
         embed = self.node_embedding(torch.tensor([node.node_type], device=self.device))
         concat = torch.cat([embed.squeeze(0), child_encoding])  # [embed + child_hidden]
@@ -190,93 +187,104 @@ class RvNN(nn.Module):
 
     def predict(self, bt_string):
         """
-        Predict probability distributions for two actions from a BT string.
+        Predict two action probability distributions and scalar reward.
 
         Args:
-            bt_string (str): A string representing a Behavior Tree (e.g., "(0a(1bC)").
+            bt_string (str): A string representing a Behavior Tree.
 
         Returns:
-            Tuple[Tensor, Tensor]: Probabilities for action1 (node type), action2 (location).
+            Tuple[Tensor, Tensor, Tensor]: 
+                - Probabilities for action1 (node type)
+                - Probabilities for action2 (location)
+                - Scalar reward prediction
         """
         root = string_to_tree_node(bt_string)
         h = self.forward(root)
 
         action1_logits = self.output_action1(h)
         action2_logits = self.output_action2(h)
+        reward_pred = self.reward_head(h).squeeze(0)  # scalar output
 
         action1_probs = torch.softmax(action1_logits, dim=0)
         action2_probs = torch.softmax(action2_logits, dim=0)
 
-        return action1_probs, action2_probs
-    
+        return action1_probs, action2_probs, reward_pred
+
     def train_loop(self, train_loader, optimizer, num_epochs=10, val_loader=None, l2_weight=1e-4):
         """
         Train the RvNN model on the given dataset.
 
         Args:
-            train_loader (DataLoader): DataLoader for training data.
-            optimizer (torch.optim.Optimizer): Optimizer for training.
-            num_epochs (int): Number of epochs to train.
-            val_loader (DataLoader, optional): DataLoader for validation data. Default is None.
-            l2_weight (float): Weight for L2 regularization. Default is 1e-4.
-
-        Returns:
-            None
+            train_loader (DataLoader): DataLoader with (bt_string, action1, action2, reward).
+            optimizer (torch.optim.Optimizer): Optimizer to use.
+            num_epochs (int): Number of training epochs.
+            val_loader (DataLoader, optional): Validation DataLoader.
+            l2_weight (float): L2 regularization weight.
         """
         for epoch in range(num_epochs):
-            self.train()  # Enable dropout, batchnorm, etc.
+            self.train()
             train_loss = 0.0
             train_correct1 = 0
             train_correct2 = 0
+            reward_mse_total = 0.0
 
-            for bt_strings, action1_targets, action2_targets in train_loader:
+            for bt_strings, action1_targets, action2_targets, reward_targets in train_loader:
                 for i, bt_string in enumerate(bt_strings):
                     optimizer.zero_grad()
 
-                    # Predict logits
-                    action1_logits, action2_logits = self.predict(bt_string)
+                    # Predictions
+                    action1_logits, action2_logits, reward_pred = self.predict(bt_string)
 
-                    # Convert one-hot target to index
+                    # Targets
                     target1 = action1_targets[i].argmax().unsqueeze(0)
                     target2 = action2_targets[i].argmax().unsqueeze(0)
+                    reward_target = reward_targets[i].float().to(self.device)
 
-                    # Compute loss
+                    # Losses
                     loss1 = self.loss_fn(action1_logits.unsqueeze(0), target1)
                     loss2 = self.loss_fn(action2_logits.unsqueeze(0), target2)
+                    loss3 = self.loss_fn_reward(reward_pred, reward_target)
 
-                    # L2 Regularization
                     l2_reg = sum((param**2).sum() for param in self.parameters())
-                    loss = loss1 + loss2 + l2_weight * l2_reg
+                    loss = loss1 + loss2 + loss3 + l2_weight * l2_reg
 
-                    # Backward & optimize
                     loss.backward()
                     optimizer.step()
 
                     train_loss += loss.item()
                     train_correct1 += (action1_logits.argmax().item() == target1.item())
                     train_correct2 += (action2_logits.argmax().item() == target2.item())
+                    reward_mse_total += (reward_pred.item() - reward_target.item()) ** 2
 
             n_train = len(train_loader.dataset)
             avg_loss = train_loss / n_train
             acc1 = train_correct1 / n_train
             acc2 = train_correct2 / n_train
-            print(f"Epoch {epoch+1}/{num_epochs} | Train Loss: {avg_loss:.4f} | Acc1: {acc1:.2%} | Acc2: {acc2:.2%}")
+            reward_mse = reward_mse_total / n_train
+            print(f"Epoch {epoch+1}/{num_epochs} | Train Loss: {avg_loss:.4f} | Acc1: {acc1:.2%} | Acc2: {acc2:.2%} | Reward MSE: {reward_mse:.4f}")
 
-            # Validation if available
+            # Validation loop
             if val_loader:
                 self.eval()
                 val_correct1 = 0
                 val_correct2 = 0
+                val_reward_mse = 0.0
+
                 with torch.no_grad():
-                    for bt_strings, action1_targets, action2_targets in val_loader:
+                    for bt_strings, action1_targets, action2_targets, reward_targets in val_loader:
                         for i, bt_string in enumerate(bt_strings):
-                            action1_logits, action2_logits = self.predict(bt_string)
+                            action1_logits, action2_logits, reward_pred = self.predict(bt_string)
+
                             target1 = action1_targets[i].argmax()
                             target2 = action2_targets[i].argmax()
+                            reward_target = reward_targets[i].float().to(self.device)
+
                             val_correct1 += (action1_logits.argmax().item() == target1.item())
                             val_correct2 += (action2_logits.argmax().item() == target2.item())
+                            val_reward_mse += (reward_pred.item() - reward_target.item()) ** 2
 
                 n_val = len(val_loader.dataset)
                 val_acc1 = val_correct1 / n_val
                 val_acc2 = val_correct2 / n_val
-                print(f"              | Val Acc1: {val_acc1:.2%} | Val Acc2: {val_acc2:.2%}")
+                val_reward_mse /= n_val
+                print(f"              | Val Acc1: {val_acc1:.2%} | Val Acc2: {val_acc2:.2%} | Val Reward MSE: {val_reward_mse:.4f}")

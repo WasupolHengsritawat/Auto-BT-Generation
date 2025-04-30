@@ -97,15 +97,13 @@ from std_msgs.msg import UInt8
 from tqdm import tqdm
 
 class MultiBTEnv(gym.Env):
-    def __init__(self, num_envs, env_spacing, device, simulation_app, verbose = False):
+    def __init__(self, num_envs, simulation_app = None, env_spacing = None, device = None, verbose = False):
         """
         Initialize multiple BT environments and connect to ROS2 simulation.
 
         :param num_envs: Number of parallel environments (agents).
         """
         super().__init__()
-        rclpy.init()
-        self.node = Node('multi_bt_env')
         self.num_envs = num_envs
         self.env_spacing = env_spacing
         self.device = device
@@ -125,7 +123,22 @@ class MultiBTEnv(gym.Env):
                               -250,  # Battery dead penalty term 
                                 -1]  # Tree complexity penalty term
 
-        self._create_sim()  # Create and initialize the simulation
+        if self.simulation_app is not None:
+            self._create_sim()  # Create and initialize the simulation
+
+            # ROS2 Communication - Reward Related
+            for i in range(num_envs):
+                self.node.create_subscription(UInt8, f'/env_{i}/object_at_spawn', lambda msg, idx=i: self._set_attr(idx, 'object_at_spawn', msg.data), 10)
+                self.node.create_subscription(UInt8, f'/env_{i}/object_found', lambda msg, idx=i: self._set_attr(idx, 'object_found', msg.data), 10)
+
+            # Local Variables for Each Simulation
+            self.sim_step = 0
+            self.object_at_spawn = [0 for _ in range(num_envs)]
+            self.object_found = [0 for _ in range(num_envs)]
+            self.idle_step_count = [0 for _ in range(num_envs)]
+            self.is_idled = [False for _ in range(num_envs)]
+            self.is_task_success = [False for _ in range(num_envs)]
+            self.elapsed_step = [0 for _ in range(num_envs)]
 
         # Action Space: (Node Type, Node Location)
         self.num_node_types = 20  # 20 possible node types
@@ -139,20 +152,6 @@ class MultiBTEnv(gym.Env):
         # Local Variables for Each Environment
         self.current_bt = ['' for _ in range(num_envs)]
         self.number_of_nodes_in_bt = [0 for _ in range(num_envs)]
-
-        # Local Variables for Each Simulation
-        self.sim_step = 0
-        self.object_at_spawn = [0 for _ in range(num_envs)]
-        self.object_found = [0 for _ in range(num_envs)]
-        self.idle_step_count = [0 for _ in range(num_envs)]
-        self.is_idled = [False for _ in range(num_envs)]
-        self.is_task_success = [False for _ in range(num_envs)]
-        self.elapsed_step = [0 for _ in range(num_envs)]
-
-        # ROS2 Communication - Reward Related
-        for i in range(num_envs):
-            self.node.create_subscription(UInt8, f'/env_{i}/object_at_spawn', lambda msg, idx=i: self._set_attr(idx, 'object_at_spawn', msg.data), 10)
-            self.node.create_subscription(UInt8, f'/env_{i}/object_found', lambda msg, idx=i: self._set_attr(idx, 'object_found', msg.data), 10)
 
     def _set_attr(self, idx, attr, value):
         """
@@ -177,6 +176,9 @@ class MultiBTEnv(gym.Env):
         - BT status tracker.
         - Scene node for multi-agent control.
         """
+        rclpy.init()
+        self.node = Node('multi_bt_env')
+
         sim_cfg = sim_utils.SimulationCfg(device=self.device, dt = 1/30)
         self.sim = SimulationContext(sim_cfg)
 

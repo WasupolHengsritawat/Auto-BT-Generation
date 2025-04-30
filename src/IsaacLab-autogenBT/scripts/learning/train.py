@@ -21,7 +21,9 @@ parser = argparse.ArgumentParser(description="Train an RL agent with RSL-RL.")
 # parser.add_argument("--video", action="store_true", default=False, help="Record videos during training.")
 # parser.add_argument("--video_length", type=int, default=200, help="Length of the recorded video (in steps).")
 # parser.add_argument("--video_interval", type=int, default=2000, help="Interval between video recordings (in steps).")
-parser.add_argument("--num_envs", type=int, default=10, help="Number of environments to spawn.")
+parser.add_argument("--num_search_agents", type=int, default=100, help="Number of search agents.")
+parser.add_argument("--num_search_times", type=int, default=200, help="Number of search agents.")
+parser.add_argument("--num_eval_agents", type=int, default=10, help="Number of evaluation agents.")
 parser.add_argument("--env_spacing", type=int, default=40, help="Space between environments.")
 # parser.add_argument("--task", type=str, default=None, help="Name of the task.")
 # parser.add_argument("--seed", type=int, default=None, help="Seed used for the environment")
@@ -89,7 +91,7 @@ from mcts import MCTS
 from network import RvNN
 
 class BTDataset(Dataset):
-    def __init__(self, bt_strings, action1_probs, action2_probs, device):
+    def __init__(self, bt_strings, action1_probs, action2_probs, rewards, device):
         """
         :param bt_strings: List of behavior tree strings
         :param action1_probs: List of node type distributions (numpy or list)
@@ -98,6 +100,7 @@ class BTDataset(Dataset):
         self.bt_strings = bt_strings
         self.action1_probs = action1_probs
         self.action2_probs = action2_probs
+        self.rewards = rewards
         self.device = device
 
     def __len__(self):
@@ -108,7 +111,8 @@ class BTDataset(Dataset):
         return (
             self.bt_strings[idx],
             torch.tensor(self.action1_probs[idx], dtype=torch.float32, device=self.device),
-            torch.tensor(self.action2_probs[idx], dtype=torch.float32, device=self.device)
+            torch.tensor(self.action2_probs[idx], dtype=torch.float32, device=self.device),
+            torch.tensor(self.rewards[idx], dtype=torch.float32, device=self.device)
         )
     
 def modify_bt(current_bt, node_type, node_location):
@@ -163,10 +167,10 @@ def modify_bt(current_bt, node_type, node_location):
         
     return current_bt
 
-def dataset_generation(num_envs, num_search, policy_net, device='cuda:0',verbose = False):
+def dataset_generation(num_search_agents, num_search, eval_env, policy_net, num_node_to_explore = 10, device='cuda:0',verbose = False):
     policy_net = policy_net.to(device)
 
-    env = MultiBTEnv(num_envs=num_envs, env_spacing=args_cli.env_spacing, device=device, simulation_app=simulation_app)
+    env = MultiBTEnv(num_envs=num_search_agents)
     mcts = MCTS(env, policy_net, num_simulations=num_search, exploration_weight=1.0, device=device, verbose=True)
 
     bt_string = ''
@@ -178,8 +182,14 @@ def dataset_generation(num_envs, num_search, policy_net, device='cuda:0',verbose
     number_of_nodes = 0
 
     while True:
+        # Calculate the temperature
+        if number_of_nodes < num_node_to_explore:
+            temperature = 1.0
+        else:
+            temperature = 1/(number_of_nodes - (num_node_to_explore - 1))
+
         # Get the action probabilities from MCTS search
-        nt_probs, loc_probs = mcts.run_search(bt_string)
+        nt_probs, loc_probs = mcts.run_search(root_state=bt_string,temperature=temperature)
 
         # Store the sample data
         bt_strings.append(bt_string)
@@ -204,11 +214,23 @@ def dataset_generation(num_envs, num_search, policy_net, device='cuda:0',verbose
 
         if verbose: print(f"[INFO] Dataset << {bt_string}, ({selected_nt}, {selected_loc})")
 
+    for env_id in range(eval_env.num_envs):
+        eval_env.set_bt(env_id=env_id, bt_string=bt_string)
+
+    # Get the reward by runnung the BT in IsaacSim Simulation
+    if verbose: print(f"[INFO] \tEvaluating {bt_string}")
+    _, rews, _, infos =  eval_env.evaluate_bt_in_sim()
+    rew = np.mean(rews)
+    if verbose: print(f"[INFO] \tFinished Evaluation >> reward: {rew}")
+
+    # Convert rewards to numpy array
+    rewards = np.array([rew] * len(bt_strings))
+    
     # Convert list of np.array to a single np.array
     action1_probs = np.array(action1_probs)
     action2_probs = np.array(action2_probs)
 
-    return BTDataset(bt_strings, action1_probs, action2_probs, device=device)
+    return BTDataset(bt_strings, action1_probs, action2_probs, rewards, device=device)
 
 if __name__ == "__main__":
     # rclpy.init()
@@ -226,10 +248,12 @@ if __name__ == "__main__":
 
     # Optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+
+    eval_env = MultiBTEnv(num_envs=args_cli.num_eval_agents, simulation_app=simulation_app, env_spacing=args_cli.env_spacing, device=device)
     
-    for _ in range(1):
+    for _ in range(100):
         # Create the dataset
-        dataset = dataset_generation(num_envs=args_cli.num_envs, num_search=1, policy_net=model, device=device)
+        dataset = dataset_generation(num_search_agents=args_cli.num_search_agents, num_search=args_cli.num_search_times, eval_env = eval_env, policy_net=model, device=device, verbose=True)
 
         train_loader = DataLoader(dataset, batch_size=4, shuffle=True)
 
