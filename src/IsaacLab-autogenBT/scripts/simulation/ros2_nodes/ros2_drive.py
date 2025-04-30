@@ -79,6 +79,9 @@ class RobotDriverManagerNode(Node):
 
         robot_asset.set_joint_velocity_target(joint_ids=joint_ids, target=formatted_velocities)
 
+    def reset_wheel_velocities(self):
+        self.wheel_velocities = np.zeros((self.num_envs, 2))
+
 
 class RobotDriverManager:
     def __init__(self, num_envs: int, wheel_distance=0.37558, wheel_radius=0.098, max_wheel_speed=500.0):
@@ -115,6 +118,9 @@ class RobotDriverManager:
         )
 
         robot_asset.set_joint_velocity_target(joint_ids=joint_ids, target=formatted_velocities)
+
+    def reset(self):
+        self.node.reset_wheel_velocities()
 
     def stop(self):
         """

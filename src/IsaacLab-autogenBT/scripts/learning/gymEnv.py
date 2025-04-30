@@ -539,6 +539,11 @@ class MultiBTEnv(gym.Env):
 
             # Check if the simulation must be terminated
             if self._is_sim_terminated():
+                self.driver_manager.reset()
+                self.driver_manager.apply(self.robot, self.joint_names)
+                self.robot.write_data_to_sim()
+                self.sim.step()
+                self.scene.update(self.sim_dt)
                 break
 
         pbar.close()

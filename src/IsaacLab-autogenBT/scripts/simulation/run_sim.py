@@ -257,6 +257,10 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
             scene.reset()
             print("[INFO]: Resetting robot state...")
 
+            driver_manager.reset()
+            driver_manager.apply(robot, joint_names)
+            robot.write_data_to_sim()
+
         # Perform step
         sim.step()
         # Increment counter
@@ -264,7 +268,7 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
         # Update buffers
         scene.update(sim_dt)
 
-        # # Check if the simulation must be terminated
+        # Check if the simulation must be terminated
         # if is_sim_terminated():
         #     print(f'[INFO]: is_idled -> {is_idled}')
         #     print(f'[INFO]: elapsed_step -> {elapsed_step}')

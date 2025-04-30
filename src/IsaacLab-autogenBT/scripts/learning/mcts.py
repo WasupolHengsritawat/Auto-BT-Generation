@@ -22,10 +22,19 @@ class MCTSNode:
         self.parent_edge = parent_edge                # Parent node
 
         # Get all possible actions
-        bt_string = state[1:-1] if state.startswith('(') else state
-        valid_locs_on_string = [j for j in range(len(bt_string)+1) if j == len(bt_string) or not bt_string[j].isdigit()] # Find valid location on BT string
+        bt_string = state
+        valid_locs_on_string = [j for j in range(1,len(bt_string)) if j == len(bt_string) or not bt_string[j].isdigit()] # Find valid location on BT string
         valid_locs = range(len(valid_locs_on_string))
+
+        # If the BT is empty, only the root node is valid
+        if bt_string == '':
+            valid_locs = [0]
+
         self.all_actions = [(nt, loc) for nt in range(self.env.num_node_types) for loc in range(len(valid_locs))]
+
+        # If there are no valid locations, only the stop action is valid
+        if self.all_actions == []:
+            self.all_actions = [(19,0)]
 
         # Get prior porbabilities from the policy network
         nt_probs, loc_probs = self.policy_net.predict(state) 
@@ -237,9 +246,19 @@ class MCTS:
                 loc_probs = loc_probs.detach().cpu().numpy()
 
                 # Mask to get only valid node locations
-                bt_string = state[1:-1] if state.startswith('(') else state
-                valid_locs_on_string = [j for j in range(len(bt_string)+1) if j == len(bt_string) or not bt_string[j].isdigit()] # Find valid location on BT string
+                bt_string = state
+                valid_locs_on_string = [j for j in range(1,len(bt_string)) if j == len(bt_string) or not bt_string[j].isdigit()] # Find valid location on BT string
+
+                # If the BT is empty, only the root node is valid
+                if bt_string == '':
+                    valid_locs_on_string = [0]
+
                 loc_probs = loc_probs[:len(valid_locs_on_string)]
+
+                # If there are no valid locations, select stop action
+                if loc_probs.size == 0:
+                    actions.append((19, 0))
+                    continue
 
                 max_nt_probs = np.max(nt_probs)
                 max_loc_probs = np.max(loc_probs)

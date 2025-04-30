@@ -296,8 +296,6 @@ def main():
 
     # ==== NOW STOP ENV NODE ====
     stop_event.set()
-    executor_thread.join()
-    env_node.destroy_node()
 
     # ==== Build and Spin the BT ====
     root = create_tree(env_id, tree_string, origin_offset, verbose=args_cli.verbose)
@@ -331,14 +329,13 @@ def main():
             executor.spin()
         except (ExternalShutdownException, KeyboardInterrupt):
             if args_cli.verbose: print("[INFO] Shutdown requested (External or Ctrl+C).")
-            if hasattr(tree, "timer") and tree.timer is not None:
-                tree.timer.cancel()
-                tree.timer = None
         finally:
+            if args_cli.verbose: print("[INFO] Cleaning up...")
             tree.shutdown()
             node.destroy_node()
 
-    # IMPORTANT: don't shutdown context! Just let process die naturally
+            executor_thread.join()
+            env_node.destroy_node()
 
 if __name__ == '__main__':
     main()

@@ -151,8 +151,6 @@ def modify_bt(current_bt, node_type, node_location):
         return node
 
     if node != None:
-        valid_indices = []
-
         # Iterate over all potential insertion positions (0 to len(s))
         valid_indices = [j for j in range(1,len(bt_string)) if j == len(bt_string) or not bt_string[j].isdigit()]
 
@@ -233,15 +231,15 @@ if __name__ == "__main__":
         # Create the dataset
         dataset = dataset_generation(num_envs=args_cli.num_envs, num_search=1, policy_net=model, device=device)
 
-        # train_loader = DataLoader(dataset, batch_size=4, shuffle=True)
+        train_loader = DataLoader(dataset, batch_size=4, shuffle=True)
 
-        # # Train the model with or without validation
-        # model.train_loop(
-        #     train_loader=train_loader,
-        #     optimizer=optimizer,
-        #     num_epochs=20,
-        #     l2_weight=1e-4
-        # )
+        # Train the model with or without validation
+        model.train_loop(
+            train_loader=train_loader,
+            optimizer=optimizer,
+            num_epochs=20,
+            l2_weight=1e-4
+        )
     
     print(f"Final Results: {dataset.bt_strings[-1]}")
 
