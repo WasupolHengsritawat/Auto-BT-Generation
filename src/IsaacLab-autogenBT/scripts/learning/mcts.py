@@ -3,6 +3,7 @@
 ###
 import numpy as np
 from tqdm import trange
+import time
 
 class MCTSNode:
     def __init__(self, state, env, policy_net, parent_edge=None):
@@ -66,7 +67,7 @@ class MCTSEdge:
         self.q = 0.0
 
 class MCTS:
-    def __init__(self, env, policy_net, num_simulations=50, exploration_weight=1.0, device='cpu', verbose=False):
+    def __init__(self, env, policy_net, num_simulations=50, exploration_weight=1.0, device='cpu'):
         """
         Monte Carlo Tree Search with PUCT for Behavior Tree generation.
 
@@ -81,9 +82,8 @@ class MCTS:
         self.num_simulations = num_simulations
         self.exploration_weight = exploration_weight
         self.device = device
-        self.verbose = verbose
 
-    def run_search(self, root_state, temperature=1.0):
+    def run_search(self, root_state, temperature=1.0, verbose=False):
         """
         Perform Monte Carlo Tree Search (MCTS) from a shared root Behavior Tree (BT) state.
 
@@ -108,23 +108,49 @@ class MCTS:
         """
         root = MCTSNode(state=root_state, env=self.env, policy_net=self.policy_net)
 
-        progress = trange(self.num_simulations, desc="[MCTS] Running search", disable=not self.verbose)
+        if verbose:
+            select_time_elapsed_avg = 0
+            expand_time_elapsed_avg = 0
+            evaluate_time_elapsed_avg = 0
+            backpropagate_time_elapsed_avg = 0
+
+        progress = trange(self.num_simulations, desc="[MCTS] Running search")
         for i in progress:
-            if self.verbose:
-                progress.set_postfix(iteration=i)
+            progress.set_postfix(iteration=i)
 
             # Select a leaf node
+            if verbose: start_time = time.time()
             selected_edges = self.select(root, dirichlet_noise_at_root=True)
+            if verbose: select_time = time.time()
 
             # Expand the selected leaf node
             self.expand(selected_edges)
             leave_nodes = [edge.child for edge in selected_edges]
+            if verbose: expand_time = time.time()
 
             # Evaluate the expanded nodes
             rewards = self.evaluate(leave_nodes)
+            if verbose: evaluate_time = time.time()
 
             # Backpropagate the results
             self.backpropagate(leave_nodes, rewards)
+            if verbose: backpropagate_time = time.time()
+
+            if verbose:
+                select_time_elapsed_avg += select_time - start_time
+                expand_time_elapsed_avg += expand_time - select_time
+                evaluate_time_elapsed_avg += evaluate_time - expand_time
+                backpropagate_time_elapsed_avg += backpropagate_time - evaluate_time
+
+        if verbose:
+            select_time_elapsed_avg /= self.num_simulations
+            expand_time_elapsed_avg /= self.num_simulations
+            evaluate_time_elapsed_avg /= self.num_simulations
+            backpropagate_time_elapsed_avg /= self.num_simulations
+            print(f"Average time elapsed for selection: {select_time_elapsed_avg:.4f}s")
+            print(f"Average time elapsed for expansion: {expand_time_elapsed_avg:.4f}s")
+            print(f"Average time elapsed for evaluation: {evaluate_time_elapsed_avg:.4f}s")
+            print(f"Average time elapsed for backpropagation: {backpropagate_time_elapsed_avg:.4f}s")
 
         # Collect visit counts and probabilities
         nt_probs = np.zeros(self.env.num_node_types)
@@ -145,7 +171,7 @@ class MCTS:
 
         return nt_probs, loc_probs
 
-    def select(self, node, dirichlet_noise_at_root=True):
+    def select(self, node, dirichlet_noise_at_root=True):    
         """
         Selects edges using PUCT from the root to a leaf for each agent.
 

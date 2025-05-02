@@ -56,8 +56,8 @@ def stop_BTs(verbose=False):
     if verbose: print("All BT processes have been terminated.")
 
 if __name__ == "__main__":
-    num_envs = 3  # Set the number of parallel executions you want
-    bt_string_array = ['(2aa)'] * num_envs
+    num_envs = 10  # Set the number of parallel executions you want
+    bt_string_array = ['a'] * num_envs
     # bt_string_array[1] = '(1H(0(1C(0(1Ad)h))(0(1F(0(1(0EG)(0(1D(2ab))c))f))(1Be)g)))'
 
     # bt_string_array = ['(1H(0(1C(0(1Ad)h))(0(1F(0(1(0EG)(0(1D(2ab))c))f))(1Be)g)))'] * num_envs
@@ -69,11 +69,11 @@ if __name__ == "__main__":
     #     # run_BTs('(1H(0(1C(0(1Ad)h))(0(1F(0(1(0EG)(0(1D(2ab))c))f))(1Be)g)))', env_id=i)
     #     run_BTs('(2aa)', env_id=i)
 
-    # for process in processes:
-    #     process.wait()
+    for process in processes:
+        process.wait()
     
     # Let the BTs run for a specified duration (e.g., 10 seconds)
-    time.sleep(60)
+    # time.sleep(60)
     
     # Stop all running BTs
-    stop_BTs()
+    # stop_BTs()

@@ -70,6 +70,8 @@ def get_random_object_pos(num_env):
     Returns:
         torch.Tensor: Randomly selected target positions.
     """
+    number_of_objects = 8
+
     # Possible target spawn point
     target_spawn_pool = torch.tensor(
                     [[ 14.0, -4.0,  0.1],
@@ -83,7 +85,7 @@ def get_random_object_pos(num_env):
                      [ -2.6,  7.7,  0.1],
                      [  8.0,  6.7,  0.1]],device=args_cli.device)
     
-    target_pos = torch.cat([target_spawn_pool[torch.randperm(len(target_spawn_pool))[:5]].unsqueeze(0) for _ in range(num_env)], dim=0)
+    target_pos = torch.cat([target_spawn_pool[torch.randperm(len(target_spawn_pool))[:number_of_objects]].unsqueeze(0) for _ in range(num_env)], dim=0)
     return target_pos
 
 # Calculate initial rotation
@@ -122,7 +124,7 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
         battery_names.append(f'env_{i}')
         
     # Battery configuration
-    discharge_rate = 0.05   # % per second
+    discharge_rate = 0.15   # % per second
     charge_rate = 5.0       # % per second
 
     # Initialize the battery manager
@@ -190,7 +192,7 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
             print('[INFO]: Terminated due to idle')
         
         ### Condition 2: Timeout ###
-        if sim_step > 200000:
+        if sim_step > 500000:
             output = True
             print('[INFO]: Terminated due to timeout')
 
@@ -224,42 +226,42 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
         #     print(f"Real-Time Factor: {rtf:.2f}")
 
         # Reset
-        if sim_step % 400 == 0:
-            # Reset Counter
-            sim_step = 0
+        # if sim_step % 500000 == 0:
+        #     # Reset Counter
+        #     sim_step = 0
 
-            # Reset Robot Root state ====================================================
-            robot_root_state = robot.data.default_root_state.clone()
-            robot_root_state[:, :3] += scene.env_origins
+        #     # Reset Robot Root state ====================================================
+        #     robot_root_state = robot.data.default_root_state.clone()
+        #     robot_root_state[:, :3] += scene.env_origins
 
-            # initial position referenced by env
-            robot_root_state[:, :3] += torch.tensor([0.0, 0.0, 0.7],device=args_cli.device)
+        #     # initial position referenced by env
+        #     robot_root_state[:, :3] += torch.tensor([0.0, 0.0, 0.7],device=args_cli.device)
 
-            # initial orientation
-            robot_root_state[:, 3:7] += torch.tensor(robot_rot,device=args_cli.device)
+        #     # initial orientation
+        #     robot_root_state[:, 3:7] += torch.tensor(robot_rot,device=args_cli.device)
 
-            robot.write_root_state_to_sim(robot_root_state)
+        #     robot.write_root_state_to_sim(robot_root_state)
 
-            # Reset Robot Joint State
-            joint_pos, joint_vel = (
-                robot.data.default_joint_pos.clone(),
-                robot.data.default_joint_vel.clone(),
-            )
-            robot.write_joint_state_to_sim(joint_pos,joint_vel)
+        #     # Reset Robot Joint State
+        #     joint_pos, joint_vel = (
+        #         robot.data.default_joint_pos.clone(),
+        #         robot.data.default_joint_vel.clone(),
+        #     )
+        #     robot.write_joint_state_to_sim(joint_pos,joint_vel)
 
-            # Random New Target Spawn Location =========================================
-            object_group_manager.repos(get_random_object_pos(scene.num_envs) + object_pos_offset)
+        #     # Random New Target Spawn Location =========================================
+        #     object_group_manager.repos(get_random_object_pos(scene.num_envs) + object_pos_offset)
 
-            # Reset Battery Level ======================================================
-            battery_manager.reset()
+        #     # Reset Battery Level ======================================================
+        #     battery_manager.reset()
 
-            # Reset Scene ==============================================================
-            scene.reset()
-            print("[INFO]: Resetting robot state...")
+        #     # Reset Scene ==============================================================
+        #     scene.reset()
+        #     print("[INFO]: Resetting robot state...")
 
-            driver_manager.reset()
-            driver_manager.apply(robot, joint_names)
-            robot.write_data_to_sim()
+        #     driver_manager.reset()
+        #     driver_manager.apply(robot, joint_names)
+        #     robot.write_data_to_sim()
 
         # Perform step
         sim.step()
@@ -269,10 +271,10 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
         scene.update(sim_dt)
 
         # Check if the simulation must be terminated
-        # if is_sim_terminated():
-        #     print(f'[INFO]: is_idled -> {is_idled}')
-        #     print(f'[INFO]: elapsed_step -> {elapsed_step}')
-        #     break
+        if is_sim_terminated():
+            print(f'[INFO]: is_idled -> {is_idled}')
+            print(f'[INFO]: elapsed_step -> {elapsed_step}')
+            break
 
 def main():
     """Main function."""

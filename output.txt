@@ -1,0 +1,83 @@
+[Warning] [omni.isaac.kit.simulation_app] Modules: ['omni.kit_app'] were loaded before SimulationApp was started and might not be loaded correctly.
+[Warning] [omni.isaac.kit.simulation_app] Please check to make sure no extra omniverse or pxr modules are imported before the call to SimulationApp(...)
+Loading user config located at: '/home/absolutezeno/isaaclab/lib/python3.10/site-packages/omni/data/Kit/Isaac-Sim/4.2/user.config.json'
+[Info] [carb] Logging to file: /home/absolutezeno/isaaclab/lib/python3.10/site-packages/omni/logs/Kit/Isaac-Sim/4.2/kit_20250502_101711.log
+2025-05-02 03:17:11 [0ms] [Warning] [omni.kit.app.plugin] No crash reporter present, dumps uploading isn't available.
+2025-05-02 03:17:15 [3,130ms] [Warning] [gpu.foundation.plugin] Skipping unsupported non-NVIDIA GPU: Intel(R) Iris(R) Xe Graphics (ADL GT2)
+2025-05-02 03:17:15 [3,130ms] [Warning] [gpu.foundation.plugin] Skipping unsupported non-NVIDIA GPU: Intel(R) Iris(R) Xe Graphics (ADL GT2)
+
+|---------------------------------------------------------------------------------------------|
+| Driver Version: 535.183.01    | Graphics API: Vulkan
+|=============================================================================================|
+| GPU | Name                             | Active | LDA | GPU Memory | Vendor-ID | LUID       |
+|     |                                  |        |     |            | Device-ID | UUID       |
+|     |                                  |        |     |            | Bus-ID    |            |
+|---------------------------------------------------------------------------------------------|
+| 0   | NVIDIA GeForce RTX 3070 Ti Lap.. | Yes: 0 |     | 8192    MB | 10de      | 0          |
+|     |                                  |        |     |            | 24a0      | 9d1b7a2c.. |
+|     |                                  |        |     |            | 1         |            |
+|---------------------------------------------------------------------------------------------|
+| 1   | Intel(R) Iris(R) Xe Graphics (.. |        |     | 31980   MB | 8086      | 0          |
+|     |                                  |        |     |            | 46a6      | 8680a646.. |
+|     |                                  |        |     |            | 0         |            |
+|=============================================================================================|
+| OS: 22.04.5 LTS (Jammy Jellyfish) ubuntu, Version: 22.04.5, Kernel: 6.8.0-58-generic
+| XServer Vendor: The X.Org Foundation, XServer Version: 12101004 (1.21.1.4)
+| Processor: 12th Gen Intel(R) Core(TM) i9-12900H | Cores: 14 | Logical: 28
+|---------------------------------------------------------------------------------------------|
+| Total Memory (MB): 63960 | Free Memory: 47288
+| Total Page/Swap (MB): 2047 | Free Page/Swap: 2047
+|---------------------------------------------------------------------------------------------|
+2025-05-02 03:17:15 [3,266ms] [Warning] [gpu.foundation.plugin] IOMMU is enabled.
+2025-05-02 03:17:22 [10,256ms] [Warning] [omni.physx.plugin] PhysicsUSD: Prim at path /World/envs/env_0/Robot/Jackal/front_left_wheel_link/collisions is using obsolete 'customGeometry' attribute. To toggle custom geometry for cylinders, use the physics settings option.
+2025-05-02 03:17:22 [10,256ms] [Warning] [omni.physx.plugin] PhysicsUSD: Prim at path /World/envs/env_0/Robot/Jackal/front_right_wheel_link/collisions is using obsolete 'customGeometry' attribute. To toggle custom geometry for cylinders, use the physics settings option.
+2025-05-02 03:17:22 [10,256ms] [Warning] [omni.physx.plugin] PhysicsUSD: Prim at path /World/envs/env_0/Robot/Jackal/rear_left_wheel_link/collisions is using obsolete 'customGeometry' attribute. To toggle custom geometry for cylinders, use the physics settings option.
+2025-05-02 03:17:22 [10,256ms] [Warning] [omni.physx.plugin] PhysicsUSD: Prim at path /World/envs/env_0/Robot/Jackal/rear_right_wheel_link/collisions is using obsolete 'customGeometry' attribute. To toggle custom geometry for cylinders, use the physics settings option.
+2025-05-02 03:17:22 [10,279ms] [Warning] [omni.physx.tensors.plugin] Duplicate link name 'base_link' in articulation metatype
+2025-05-02 03:17:22 [10,279ms] [Warning] [omni.physx.tensors.plugin] Duplicate link name 'base_link' in articulation metatype
+2025-05-02 03:17:22 [10,280ms] [Warning] [omni.physx.tensors.plugin] Duplicate link name 'base_link' in articulation metatype
+2025-05-02 03:17:22 [10,280ms] [Warning] [omni.physx.tensors.plugin] Duplicate link name 'base_link' in articulation metatype
+2025-05-02 03:17:22 [10,280ms] [Warning] [omni.physx.tensors.plugin] Duplicate link name 'base_link' in articulation metatype
+2025-05-02 03:17:22 [10,280ms] [Warning] [omni.physx.tensors.plugin] Duplicate link name 'base_link' in articulation metatype
+2025-05-02 03:17:22 [10,280ms] [Warning] [omni.physx.tensors.plugin] Duplicate link name 'base_link' in articulation metatype
+2025-05-02 03:17:22 [10,280ms] [Warning] [omni.physx.tensors.plugin] Duplicate link name 'base_link' in articulation metatype
+2025-05-02 03:17:22 [10,280ms] [Warning] [omni.physx.tensors.plugin] Duplicate link name 'base_link' in articulation metatype
+2025-05-02 03:17:22 [10,280ms] [Warning] [omni.physx.tensors.plugin] Duplicate link name 'base_link' in articulation metatype
+2025-05-02 03:17:22 [10,280ms] [Warning] [omni.physx.tensors.plugin] Duplicate link name 'base_link' in articulation metatype
+2025-05-02 03:17:22 [10,280ms] [Warning] [omni.physx.tensors.plugin] Duplicate link name 'base_link' in articulation metatype
+2025-05-02 03:17:22 [10,280ms] [Warning] [omni.physx.tensors.plugin] Duplicate link name 'base_link' in articulation metatype
+2025-05-02 03:17:22 [10,280ms] [Warning] [omni.physx.tensors.plugin] Duplicate link name 'base_link' in articulation metatype
+2025-05-02 03:17:22 [10,280ms] [Warning] [omni.physx.tensors.plugin] Duplicate link name 'base_link' in articulation metatype
+2025-05-02 03:17:22 [10,280ms] [Warning] [omni.physx.tensors.plugin] Duplicate link name 'base_link' in articulation metatype
+2025-05-02 03:17:22 [10,280ms] [Warning] [omni.physx.tensors.plugin] Duplicate link name 'base_link' in articulation metatype
+2025-05-02 03:17:22 [10,280ms] [Warning] [omni.physx.tensors.plugin] Duplicate link name 'base_link' in articulation metatype
+2025-05-02 03:17:22 [10,280ms] [Warning] [omni.physx.tensors.plugin] Duplicate link name 'base_link' in articulation metatype
+2025-05-02 03:17:22 [10,280ms] [Warning] [omni.physx.tensors.plugin] Duplicate link name 'base_link' in articulation metatype
+2025-05-02 03:17:22 [10,445ms] [Warning] [omni.physx.plugin] PhysicsUSD: Prim at path /World/envs/env_0/Robot/Jackal/front_left_wheel_link/collisions is using obsolete 'customGeometry' attribute. To toggle custom geometry for cylinders, use the physics settings option.
+2025-05-02 03:17:22 [10,445ms] [Warning] [omni.physx.plugin] PhysicsUSD: Prim at path /World/envs/env_0/Robot/Jackal/rear_left_wheel_link/collisions is using obsolete 'customGeometry' attribute. To toggle custom geometry for cylinders, use the physics settings option.
+2025-05-02 03:17:22 [10,445ms] [Warning] [omni.physx.plugin] PhysicsUSD: Prim at path /World/envs/env_0/Robot/Jackal/front_right_wheel_link/collisions is using obsolete 'customGeometry' attribute. To toggle custom geometry for cylinders, use the physics settings option.
+2025-05-02 03:17:22 [10,445ms] [Warning] [omni.physx.plugin] PhysicsUSD: Prim at path /World/envs/env_0/Robot/Jackal/rear_right_wheel_link/collisions is using obsolete 'customGeometry' attribute. To toggle custom geometry for cylinders, use the physics settings option.
+[INFO][AppLauncher]: Loading experience file: /home/absolutezeno/IsaacLab/source/apps/isaaclab.python.headless.kit
+[INFO]: Setup complete...
+[INFO]: Currently running on cuda:0
+[INFO] Iteration 1/10
+Average time elapsed for selection: 0.0104s
+Average time elapsed for expansion: 0.0458s
+Average time elapsed for evaluation: 0.0545s
+Average time elapsed for backpropagation: 0.0001s
+[INFO] Dataset 2/50 << (2), (2, 0)
+Average time elapsed for selection: 0.0036s
+Average time elapsed for expansion: 0.0003s
+Average time elapsed for evaluation: 0.0379s
+Average time elapsed for backpropagation: 0.0000s
+[INFO] Dataset 3/50 << (2D), (14, 0)
+Average time elapsed for selection: 0.0059s
+Average time elapsed for expansion: 0.0003s
+Average time elapsed for evaluation: 0.0453s
+Average time elapsed for backpropagation: 0.0000s
+[INFO] Dataset 4/50 << (2DD), (14, 0)
+Average time elapsed for selection: 0.0089s
+Average time elapsed for expansion: 0.0005s
+Average time elapsed for evaluation: 0.0539s
+Average time elapsed for backpropagation: 0.0000s
+[INFO] Dataset 5/50 << (2DDD), (14, 0)

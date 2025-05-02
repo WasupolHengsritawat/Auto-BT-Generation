@@ -3,8 +3,7 @@
 ###
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from torch.utils.data import DataLoader
+from cachetools import LRUCache
 
 # ----------- Behavior Dictionary (char -> node type index) ----------- #
             # Flow Control
@@ -127,7 +126,7 @@ class RvNN(nn.Module):
         2. Node location to apply expansion (classification)
         3. Scalar reward (regression)
     """
-    def __init__(self, node_type_vocab_size, embed_size, hidden_size, action1_size, action2_size, device):
+    def __init__(self, node_type_vocab_size, embed_size, hidden_size, action1_size, action2_size, device, cache_size=10000):
         super(RvNN, self).__init__()
         
         self.device = device
@@ -144,6 +143,15 @@ class RvNN(nn.Module):
 
         self.loss_fn = nn.CrossEntropyLoss()
         self.loss_fn_reward = nn.MSELoss()
+
+        # ✅ LRU Cache for memoization
+        self.memo = LRUCache(maxsize=cache_size)
+
+    def _tree_to_string(self, node):
+        if not node.children:
+            return str(node.node_type)
+        children_str = ','.join([self._tree_to_string(child) for child in node.children])
+        return f"{node.node_type}({children_str})"
 
     def forward(self, node):
         """
@@ -167,22 +175,29 @@ class RvNN(nn.Module):
         Returns:
             torch.Tensor: Encoded hidden state for this subtree.
         """
+        subtree_key = self._tree_to_string(node)
+
+        if subtree_key in self.memo:
+            return self.memo[subtree_key]
+
         if not node.children:
             embed = self.node_embedding(torch.tensor([node.node_type], device=self.device))
             zero_pad = torch.zeros(self.W_c.in_features - embed.size(1), device=self.device)
             h = self.activation(self.W_c(torch.cat([embed.squeeze(0), zero_pad])))
+            self.memo[subtree_key] = h
             return h
 
-        # Encode children recursively
         child_states = [self._encode_node(child).unsqueeze(0) for child in node.children]
-        child_seq = torch.cat(child_states, dim=0).unsqueeze(0)  # [1, num_children, hidden_size]
+        child_seq = torch.cat(child_states, dim=0).unsqueeze(0)
 
-        _, last_hidden = self.child_gru(child_seq)  # [1, 1, hidden_size]
+        _, last_hidden = self.child_gru(child_seq)
         child_encoding = last_hidden.squeeze(0).squeeze(0)
 
         embed = self.node_embedding(torch.tensor([node.node_type], device=self.device))
-        concat = torch.cat([embed.squeeze(0), child_encoding])  # [embed + child_hidden]
+        concat = torch.cat([embed.squeeze(0), child_encoding])
         h = self.activation(self.W_c(concat))
+
+        self.memo[subtree_key] = h
         return h
 
     def predict(self, bt_string):
@@ -210,7 +225,7 @@ class RvNN(nn.Module):
 
         return action1_probs, action2_probs, reward_pred
 
-    def train_loop(self, train_loader, optimizer, num_epochs=10, val_loader=None, l2_weight=1e-4):
+    def train_loop(self, train_loader, optimizer, num_epochs=10, val_loader=None, l2_weight=1e-4, writer=None, global_step=0):
         """
         Train the RvNN model on the given dataset.
 
@@ -232,15 +247,12 @@ class RvNN(nn.Module):
                 for i, bt_string in enumerate(bt_strings):
                     optimizer.zero_grad()
 
-                    # Predictions
                     action1_logits, action2_logits, reward_pred = self.predict(bt_string)
 
-                    # Targets
                     target1 = action1_targets[i].argmax().unsqueeze(0)
                     target2 = action2_targets[i].argmax().unsqueeze(0)
                     reward_target = reward_targets[i].float().to(self.device)
 
-                    # Losses
                     loss1 = self.loss_fn(action1_logits.unsqueeze(0), target1)
                     loss2 = self.loss_fn(action2_logits.unsqueeze(0), target2)
                     loss3 = self.loss_fn_reward(reward_pred, reward_target)
@@ -261,9 +273,16 @@ class RvNN(nn.Module):
             acc1 = train_correct1 / n_train
             acc2 = train_correct2 / n_train
             reward_mse = reward_mse_total / n_train
+
             print(f"Epoch {epoch+1}/{num_epochs} | Train Loss: {avg_loss:.4f} | Acc1: {acc1:.2%} | Acc2: {acc2:.2%} | Reward MSE: {reward_mse:.4f}")
 
-            # Validation loop
+            if writer:
+                writer.add_scalar("Train/Loss", avg_loss, global_step + epoch)
+                writer.add_scalar("Train/Acc1_NodeType", acc1, global_step + epoch)
+                writer.add_scalar("Train/Acc2_Location", acc2, global_step + epoch)
+                writer.add_scalar("Train/Reward_MSE", reward_mse, global_step + epoch)
+
+            # Validation
             if val_loader:
                 self.eval()
                 val_correct1 = 0
@@ -287,4 +306,11 @@ class RvNN(nn.Module):
                 val_acc1 = val_correct1 / n_val
                 val_acc2 = val_correct2 / n_val
                 val_reward_mse /= n_val
+
                 print(f"              | Val Acc1: {val_acc1:.2%} | Val Acc2: {val_acc2:.2%} | Val Reward MSE: {val_reward_mse:.4f}")
+                if writer:
+                    writer.add_scalar("Val/Acc1_NodeType", val_acc1, global_step + epoch)
+                    writer.add_scalar("Val/Acc2_Location", val_acc2, global_step + epoch)
+                    writer.add_scalar("Val/Reward_MSE", val_reward_mse, global_step + epoch)
+
+        return avg_loss  # Return the final average loss for outer-loop logging

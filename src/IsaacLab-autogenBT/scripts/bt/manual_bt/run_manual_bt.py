@@ -19,7 +19,7 @@ from behavior import (
     AreObjectsExistOnInternalMap, GoToNearestTarget, AreObjectNearby, 
     PickObject, Charge, IsRobotAtTheCharger, IsRobotAtTheSpawn, 
     IsBatteryOnProperLevel, IsObjectInHand, DropObject, GoToSpawnNode, 
-    IsNearbyObjectNotAtGoal, AreFiveObjectsAtSpawn
+    IsNearbyObjectNotAtGoal, AreXObjectsAtSpawn
 )
 
 def euclidean_distance(coord1, coord2):
@@ -198,7 +198,7 @@ def create_tree(env_id, origin_offset, verbose = True):
     are_object_nearby_node = AreObjectNearby('AreObjectNearby', env_id=env_id, verbose=verbose)
     is_object_in_hand_node = IsObjectInHand('IsObjectInHand', env_id=env_id, verbose=verbose)
     is_nearby_object_not_at_goal = IsNearbyObjectNotAtGoal('IsNearbyObjectNotAtGoal', robot_graph=robot_graph, goal_node=[0], env_id=env_id, verbose=verbose)
-    are_five_objects_at_spawn = AreFiveObjectsAtSpawn('AreFiveObjectsAtSpawn', robot_graph=robot_graph, env_id=env_id, verbose=verbose)
+    are_five_objects_at_spawn = AreXObjectsAtSpawn('AreFiveObjectsAtSpawn', robot_graph=robot_graph, env_id=env_id, verbose=verbose)
 
     # Define tree structure
     parallel_1 = py_trees.composites.Parallel("Parallel_1", policy=py_trees.common.ParallelPolicy.SuccessOnAll(synchronise=False))

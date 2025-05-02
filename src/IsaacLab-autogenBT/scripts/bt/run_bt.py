@@ -30,7 +30,7 @@ from behavior import (
     AreObjectsExistOnInternalMap, GoToNearestTarget, AreObjectNearby, 
     PickObject, Charge, IsRobotAtTheCharger, IsRobotAtTheSpawn, 
     IsBatteryOnProperLevel, IsObjectInHand, DropObject, GoToSpawnNode, 
-    IsNearbyObjectNotAtGoal, AreFiveObjectsAtSpawn
+    IsNearbyObjectNotAtGoal, AreXObjectsAtSpawn
 )
 
 def euclidean_distance(coord1, coord2):
@@ -212,13 +212,13 @@ def create_tree(env_id, tree_string, origin_offset, verbose = False):
                      'E': lambda ind: AreObjectNearby(f'AreObjectNearby_{ind}', env_id=env_id, verbose=verbose),
                      'F': lambda ind: IsObjectInHand(f'IsObjectInHand_{ind}', env_id=env_id, verbose=verbose),
                      'G': lambda ind: IsNearbyObjectNotAtGoal(f'IsNearbyObjectNotAtGoal_{ind}', robot_graph=robot_graph, goal_node=[0], env_id=env_id, verbose=verbose),
-                     'H': lambda ind: AreFiveObjectsAtSpawn(f'AreFiveObjectsAtSpawn_{ind}', robot_graph=robot_graph, env_id=env_id, verbose=verbose),
+                     'H': lambda ind: AreXObjectsAtSpawn(f'AreFiveObjectsAtSpawn_{ind}', robot_graph=robot_graph, env_id=env_id, target_number=3,verbose=verbose),
                      }
 
     def string2tree(tree_string, cond_num):
         # If a single behavior node is passed, return the corresponding behavior node
         if len(tree_string) == 1:
-            return behavior_dict[tree_string[0]]
+            return behavior_dict[tree_string[0]](0)
         
         # Select Condition Node as Parent Node
         condition_node = tree_string[1]

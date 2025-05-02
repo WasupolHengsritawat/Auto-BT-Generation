@@ -44,6 +44,8 @@ def get_random_object_pos(num_env, device, mode = 'different'):
                  'same' assigns the same set to all.
     :return: A tensor of shape (num_env, 5, 3) containing randomly selected target positions.
     """
+    number_of_objects = 8
+
     # Possible target spawn point
     target_spawn_pool = torch.tensor(
                     [[ 14.0, -4.0,  0.1],
@@ -57,8 +59,8 @@ def get_random_object_pos(num_env, device, mode = 'different'):
                      [ -2.6,  7.7,  0.1],
                      [  8.0,  6.7,  0.1]],device=device)
     
-    if mode == 'different': target_pos = torch.cat([target_spawn_pool[torch.randperm(len(target_spawn_pool))[:5]].unsqueeze(0) for _ in range(num_env)], dim=0)
-    elif mode == 'same'   : target_pos = torch.cat([target_spawn_pool[torch.randperm(len(target_spawn_pool))[:5]].unsqueeze(0)] * num_env, dim=0)
+    if mode == 'different': target_pos = torch.cat([target_spawn_pool[torch.randperm(len(target_spawn_pool))[:number_of_objects]].unsqueeze(0) for _ in range(num_env)], dim=0)
+    elif mode == 'same'   : target_pos = torch.cat([target_spawn_pool[torch.randperm(len(target_spawn_pool))[:number_of_objects]].unsqueeze(0)] * num_env, dim=0)
     
     return target_pos
 
@@ -110,12 +112,12 @@ class MultiBTEnv(gym.Env):
         self.simulation_app = simulation_app
         self.verbose = verbose
 
-        self.object_pos_mode = 'same' # 'same' if want all environment object positions to be the same
-                                      # 'different' for otherwise
+        self.object_pos_mode = 'different'  # 'same' if want all environment object positions to be the same
+                                            # 'different' for otherwise
         self.idle_step_limit = 200
-        self.sim_step_limit = 200000
+        self.sim_step_limit = 160000
         self.nodes_limit = 50
-        self.number_of_target_to_success = 5
+        self.number_of_target_to_success = 3
 
         self.reward_weight = [ 100,  # Number of delivered objects term
                                 70,  # Number of founded objects term
@@ -207,8 +209,8 @@ class MultiBTEnv(gym.Env):
             battery_names.append(f'env_{i}')
             
         # Battery configuration
-        discharge_rate = 0.05   # % per second
-        charge_rate = 5.0       # % per second
+        discharge_rate = 0.15    # % per second
+        charge_rate = 5.0        # % per second
 
         self.battery_manager = BatteryManager(battery_names, discharge_rate, charge_rate)
 

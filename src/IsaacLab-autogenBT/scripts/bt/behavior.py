@@ -733,8 +733,8 @@ class PickObject(py_trees.behaviour.Behaviour):
 
         self.blackboard = self.attach_blackboard_client(name=name)
         self.blackboard.register_key(key="object_in_hand", access=py_trees.common.Access.WRITE)
-        self.blackboard.register_key(key="target_in_robot_graph", access=py_trees.common.Access.READ)
         self.blackboard.register_key(key="target_in_robot_graph", access=py_trees.common.Access.WRITE)
+        self.blackboard.register_key(key="target_in_robot_graph", access=py_trees.common.Access.READ)
 
     def setup(self, **kwargs):
         """
@@ -1390,8 +1390,8 @@ class IsObjectInHand(py_trees.behaviour.Behaviour):
         
         if self.verbose: self.logger.debug(f"{self.name}: terminate({new_status})")
 
-class AreFiveObjectsAtSpawn(py_trees.behaviour.Behaviour):
-    def __init__(self, name, robot_graph, env_id, verbose = False):
+class AreXObjectsAtSpawn(py_trees.behaviour.Behaviour):
+    def __init__(self, name, robot_graph, env_id, target_number=5, verbose = False):
         super().__init__(name)
         self.blackboard = self.attach_blackboard_client(name=name)
         self.robot_graph = robot_graph
@@ -1403,6 +1403,8 @@ class AreFiveObjectsAtSpawn(py_trees.behaviour.Behaviour):
 
         self.robot_pos = None
         self.target_pos = [None, None, None, None, None]
+
+        self.target_number = target_number
 
         try:
             self.blackboard.register_key(key="object_in_hand", access=py_trees.common.Access.READ)
@@ -1482,8 +1484,8 @@ class AreFiveObjectsAtSpawn(py_trees.behaviour.Behaviour):
         obj_found_pub_msg.data = found_obj_in_map + object_in_spawn
         self.obj_found_pub.publish(obj_found_pub_msg)
 
-        if object_in_spawn == 5:
-            if self.verbose: self.logger.info(f'There exists five objects at the spawn.')
+        if object_in_spawn == self.target_number:
+            if self.verbose: self.logger.info(f'There exists {self.target_number} objects at the spawn.')
             return py_trees.common.Status.SUCCESS
         else:
             return py_trees.common.Status.FAILURE

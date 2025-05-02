@@ -21,9 +21,10 @@ parser = argparse.ArgumentParser(description="Train an RL agent with RSL-RL.")
 # parser.add_argument("--video", action="store_true", default=False, help="Record videos during training.")
 # parser.add_argument("--video_length", type=int, default=200, help="Length of the recorded video (in steps).")
 # parser.add_argument("--video_interval", type=int, default=2000, help="Interval between video recordings (in steps).")
-parser.add_argument("--num_search_agents", type=int, default=100, help="Number of search agents.")
+parser.add_argument("--num_search_agents", type=int, default=64, help="Number of search agents.")
 parser.add_argument("--num_search_times", type=int, default=200, help="Number of search agents.")
 parser.add_argument("--num_eval_agents", type=int, default=10, help="Number of evaluation agents.")
+parser.add_argument("--training_iters", type=int, default=100, help="Training iterations.")
 parser.add_argument("--env_spacing", type=int, default=40, help="Space between environments.")
 # parser.add_argument("--task", type=str, default=None, help="Name of the task.")
 # parser.add_argument("--seed", type=int, default=None, help="Seed used for the environment")
@@ -77,6 +78,7 @@ torch.backends.cudnn.benchmark = False
 
 # =====================================================================================================
 from torch.utils.data import Dataset, DataLoader, random_split
+from torch.utils.tensorboard import SummaryWriter
 import numpy as np
 import rclpy
 
@@ -167,11 +169,11 @@ def modify_bt(current_bt, node_type, node_location):
         
     return current_bt
 
-def dataset_generation(num_search_agents, num_search, eval_env, policy_net, num_node_to_explore = 10, device='cuda:0',verbose = False):
+def dataset_generation(num_search_agents, num_search, eval_env, policy_net, num_node_to_explore = 10, device='cuda:0', verbose = False):
     policy_net = policy_net.to(device)
 
     env = MultiBTEnv(num_envs=num_search_agents)
-    mcts = MCTS(env, policy_net, num_simulations=num_search, exploration_weight=1.0, device=device, verbose=True)
+    mcts = MCTS(env, policy_net, num_simulations=num_search, exploration_weight=1.0, device=device)
 
     bt_string = ''
 
@@ -180,6 +182,7 @@ def dataset_generation(num_search_agents, num_search, eval_env, policy_net, num_
     action2_probs = []
 
     number_of_nodes = 0
+    max_nodes = 50
 
     while True:
         # Calculate the temperature
@@ -189,7 +192,7 @@ def dataset_generation(num_search_agents, num_search, eval_env, policy_net, num_
             temperature = 1/(number_of_nodes - (num_node_to_explore - 1))
 
         # Get the action probabilities from MCTS search
-        nt_probs, loc_probs = mcts.run_search(root_state=bt_string,temperature=temperature)
+        nt_probs, loc_probs = mcts.run_search(root_state=bt_string,temperature=temperature, verbose=True)
 
         # Store the sample data
         bt_strings.append(bt_string)
@@ -206,13 +209,13 @@ def dataset_generation(num_search_agents, num_search, eval_env, policy_net, num_
         selected_nt = np.random.choice(best_nt_indices)
         selected_loc = np.random.choice(best_loc_indices)
 
-        if selected_nt == 19 or number_of_nodes >= 50:
+        if selected_nt == 19 or number_of_nodes >= max_nodes:
             break
 
         bt_string = modify_bt(bt_string, selected_nt, selected_loc)
         number_of_nodes += 1
 
-        if verbose: print(f"[INFO] Dataset << {bt_string}, ({selected_nt}, {selected_loc})")
+        if verbose: print(f"[INFO] Dataset {number_of_nodes + 1}/{max_nodes} << {bt_string}, ({selected_nt}, {selected_loc})")
 
     for env_id in range(eval_env.num_envs):
         eval_env.set_bt(env_id=env_id, bt_string=bt_string)
@@ -247,26 +250,59 @@ if __name__ == "__main__":
     )
 
     # Optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
 
     eval_env = MultiBTEnv(num_envs=args_cli.num_eval_agents, simulation_app=simulation_app, env_spacing=args_cli.env_spacing, device=device)
     
-    for _ in range(100):
-        # Create the dataset
-        dataset = dataset_generation(num_search_agents=args_cli.num_search_agents, num_search=args_cli.num_search_times, eval_env = eval_env, policy_net=model, device=device, verbose=True)
+    # TensorBoard writer setup
+    log_dir = os.path.join(project_root, "logs", datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+    writer = SummaryWriter(log_dir=log_dir)
+
+    global_step = 0
+    for iter_i in range(args_cli.training_iters):
+        print(f"[INFO] Iteration {iter_i + 1}/{args_cli.training_iters}")
+
+        # Generate dataset
+        dataset = dataset_generation(
+            num_search_agents=args_cli.num_search_agents,
+            num_search=args_cli.num_search_times,
+            eval_env=eval_env,
+            policy_net=model,
+            device=device,
+            verbose=True
+        )
 
         train_loader = DataLoader(dataset, batch_size=4, shuffle=True)
 
-        # Train the model with or without validation
-        model.train_loop(
+        # Train and log metrics
+        avg_loss = model.train_loop(
             train_loader=train_loader,
             optimizer=optimizer,
             num_epochs=20,
-            l2_weight=1e-4
+            l2_weight=1e-4,
+            writer=writer,
+            global_step=global_step
         )
-    
-    print(f"Final Results: {dataset.bt_strings[-1]}")
 
+        # Log final evaluation reward
+        writer.add_scalar("Eval/FinalReward", dataset.rewards[0].item(), iter_i)
+
+        # Save model after each iteration (optional: adjust to save best only)
+        model_path = os.path.join(log_dir, f"rvnn_iter{iter_i:03d}.pt")
+        torch.save(model.state_dict(), model_path)
+        print(f"[INFO] Model saved at {model_path}")
+
+        global_step += 20  # assuming 20 epochs per iteration
+
+    # Save final model
+    final_model_path = os.path.join(log_dir, "rvnn_final.pt")
+    torch.save(model.state_dict(), final_model_path)
+    print(f"[INFO] Final model saved at {final_model_path}")
+
+    # Close TensorBoard writer
+    writer.close()
+
+    print(f"Final Results: {dataset.bt_strings[-1]}")
     rclpy.try_shutdown()
 
 
