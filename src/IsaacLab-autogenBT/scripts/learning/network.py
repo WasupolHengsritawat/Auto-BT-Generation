@@ -119,6 +119,256 @@ def string_to_tree_node(tree_string, node_id=0):
 
     return TreeNode(name, node_type, children)
 
+class RvNN_mem(nn.Module):
+    """
+    Recursive Neural Network for encoding Behavior Trees and predicting:
+        1. Node type to expand (classification)
+        2. Node location to apply expansion (classification)
+        3. Scalar reward (regression)
+    """
+    def __init__(self, node_type_vocab_size, embed_size, hidden_size, action1_size, action2_size, device, cache_size=10000, parse_cache_size=10000):
+        super(RvNN_mem, self).__init__()
+        
+        self.device = device
+        
+        self.node_embedding = nn.Embedding(node_type_vocab_size, embed_size, device=self.device)
+        self.W_c = nn.Linear(embed_size + hidden_size, hidden_size, device=self.device)
+        self.activation = nn.Tanh()
+
+        self.output_action1 = nn.Linear(hidden_size, action1_size, device=self.device)
+        self.output_action2 = nn.Linear(hidden_size, action2_size, device=self.device)
+        self.reward_head = nn.Linear(hidden_size, 1, device=self.device)
+
+        self.child_gru = nn.GRU(hidden_size, hidden_size, batch_first=True, device=self.device)
+
+        self.loss_fn = nn.CrossEntropyLoss()
+        self.loss_fn_reward = nn.MSELoss()
+
+        # LRU Cache for memoization: key is the subtree string
+        self.memo = LRUCache(maxsize=cache_size)
+        self.tree_parse_memo = LRUCache(maxsize=parse_cache_size)  # parsed TreeNode cache
+
+        self.cache_hits = 0
+        self.cache_misses = 0
+
+    def _parse_tree_node(self, tree_string):
+        """
+        Memoized version of string_to_tree_node.
+        """
+        if tree_string in self.tree_parse_memo:
+            return self.tree_parse_memo[tree_string]
+        node = string_to_tree_node(tree_string)
+        self.tree_parse_memo[tree_string] = node
+        return node
+
+    def forward(self, bt_string):
+        """
+        Forward pass: encode a Behavior Tree string recursively.
+
+        Args:
+            bt_string (str): Behavior Tree string.
+
+        Returns:
+            torch.Tensor: Hidden vector encoding of the tree.
+        """
+        return self._encode_node(bt_string)
+
+    def _encode_node(self, tree_string):
+        """
+        Recursively encode a subtree from its string representation.
+
+        Args:
+            tree_string (str): Subtree string.
+
+        Returns:
+            torch.Tensor: Encoded hidden state.
+        """
+        if tree_string in self.memo:
+            self.cache_hits += 1
+            return self.memo[tree_string].detach().clone().requires_grad_()
+        
+        self.cache_misses += 1  
+
+        node = self._parse_tree_node(tree_string)
+        # node = string_to_tree_node(tree_string)
+
+        if not node.children:
+            embed = self.node_embedding(torch.tensor([node.node_type], device=self.device))
+            zero_pad = torch.zeros(self.W_c.in_features - embed.size(1), device=self.device)
+            h = self.activation(self.W_c(torch.cat([embed.squeeze(0), zero_pad])))
+            self.memo[tree_string] = h
+            return h
+
+        # recursively process each child string
+        child_substrings = self._extract_child_substrings(tree_string)
+        child_states = [self._encode_node(subtree).unsqueeze(0) for subtree in child_substrings]
+        child_seq = torch.cat(child_states, dim=0).unsqueeze(0)
+
+        _, last_hidden = self.child_gru(child_seq)
+        child_encoding = last_hidden.squeeze(0).squeeze(0)
+
+        embed = self.node_embedding(torch.tensor([node.node_type], device=self.device))
+        concat = torch.cat([embed.squeeze(0), child_encoding])
+        h = self.activation(self.W_c(concat))
+
+        self.memo[tree_string] = h
+        return h
+
+    def _extract_child_substrings(self, tree_string):
+        """
+        Parse and extract immediate child subtree strings from a parent string.
+
+        Example:
+            "(0a(1bC))" → ['a', '(1bC)']
+
+        Args:
+            tree_string (str): Parent tree string.
+
+        Returns:
+            list of str: List of child subtree strings.
+        """
+        children = []
+        i = 2  # skip '(' and node type char
+        while i < len(tree_string) - 1:
+            c = tree_string[i]
+            if c == '(':
+                # parse nested subtree
+                depth = 1
+                start = i
+                while depth != 0:
+                    i += 1
+                    if tree_string[i] == '(':
+                        depth += 1
+                    elif tree_string[i] == ')':
+                        depth -= 1
+                subtree = tree_string[start:i+1]
+                children.append(subtree)
+                i += 1
+            elif c in char_to_node_type:
+                children.append(c)
+                i += 1
+            else:
+                print("[Warning] Unknown character during child extraction:", c)
+                i += 1
+        return children
+
+    def predict(self, bt_string):
+        """
+        Predict two action probability distributions and scalar reward.
+
+        Args:
+            bt_string (str): A string representing a Behavior Tree.
+
+        Returns:
+            Tuple[Tensor, Tensor, Tensor]: 
+                - Probabilities for action1 (node type)
+                - Probabilities for action2 (location)
+                - Scalar reward prediction
+        """
+        torch.autograd.set_detect_anomaly(True)
+        h = self.forward(bt_string)
+
+        action1_logits = self.output_action1(h)
+        action2_logits = self.output_action2(h)
+        reward_pred = self.reward_head(h).squeeze(0)
+
+        action1_probs = torch.softmax(action1_logits, dim=0)
+        action2_probs = torch.softmax(action2_logits, dim=0)
+
+        return action1_probs, action2_probs, reward_pred
+
+    def train_loop(self, train_loader, optimizer, num_epochs=10, val_loader=None, l2_weight=1e-4, writer=None, global_step=0):
+        """
+        Train the RvNN model on the given dataset.
+
+        Args:
+            train_loader (DataLoader): DataLoader with (bt_string, action1, action2, reward).
+            optimizer (torch.optim.Optimizer): Optimizer to use.
+            num_epochs (int): Number of training epochs.
+            val_loader (DataLoader, optional): Validation DataLoader.
+            l2_weight (float): L2 regularization weight.
+        """
+        for epoch in range(num_epochs):
+            self.train()
+            train_loss = 0.0
+            train_correct1 = 0
+            train_correct2 = 0
+            reward_mse_total = 0.0
+
+            for bt_strings, action1_targets, action2_targets, reward_targets in train_loader:
+                for i, bt_string in enumerate(bt_strings):
+                    optimizer.zero_grad()
+
+                    action1_logits, action2_logits, reward_pred = self.predict(bt_string)
+
+                    target1 = action1_targets[i].argmax().unsqueeze(0)
+                    target2 = action2_targets[i].argmax().unsqueeze(0)
+                    reward_target = reward_targets[i].float().to(self.device)
+
+                    loss1 = self.loss_fn(action1_logits.unsqueeze(0), target1)
+                    loss2 = self.loss_fn(action2_logits.unsqueeze(0), target2)
+                    loss3 = self.loss_fn_reward(reward_pred, reward_target)
+
+                    l2_reg = sum((param**2).sum() for param in self.parameters())
+                    loss = loss1 + loss2 + loss3 + l2_weight * l2_reg
+
+                    torch.autograd.set_detect_anomaly(True)
+                    loss.backward()
+                    optimizer.step()
+
+                    train_loss += loss.item()
+                    train_correct1 += (action1_logits.argmax().item() == target1.item())
+                    train_correct2 += (action2_logits.argmax().item() == target2.item())
+                    reward_mse_total += (reward_pred.item() - reward_target.item()) ** 2
+
+            n_train = len(train_loader.dataset)
+            avg_loss = train_loss / n_train
+            acc1 = train_correct1 / n_train
+            acc2 = train_correct2 / n_train
+            reward_mse = reward_mse_total / n_train
+
+            print(f"Epoch {epoch+1}/{num_epochs} | Train Loss: {avg_loss:.4f} | Acc1: {acc1:.2%} | Acc2: {acc2:.2%} | Reward MSE: {reward_mse:.4f}")
+
+            if writer:
+                writer.add_scalar("Train/Loss", avg_loss, global_step + epoch)
+                writer.add_scalar("Train/Acc1_NodeType", acc1, global_step + epoch)
+                writer.add_scalar("Train/Acc2_Location", acc2, global_step + epoch)
+                writer.add_scalar("Train/Reward_MSE", reward_mse, global_step + epoch)
+
+            # Validation
+            if val_loader:
+                self.eval()
+                val_correct1 = 0
+                val_correct2 = 0
+                val_reward_mse = 0.0
+
+                with torch.no_grad():
+                    for bt_strings, action1_targets, action2_targets, reward_targets in val_loader:
+                        for i, bt_string in enumerate(bt_strings):
+                            action1_logits, action2_logits, reward_pred = self.predict(bt_string)
+
+                            target1 = action1_targets[i].argmax()
+                            target2 = action2_targets[i].argmax()
+                            reward_target = reward_targets[i].float().to(self.device)
+
+                            val_correct1 += (action1_logits.argmax().item() == target1.item())
+                            val_correct2 += (action2_logits.argmax().item() == target2.item())
+                            val_reward_mse += (reward_pred.item() - reward_target.item()) ** 2
+
+                n_val = len(val_loader.dataset)
+                val_acc1 = val_correct1 / n_val
+                val_acc2 = val_correct2 / n_val
+                val_reward_mse /= n_val
+
+                print(f"              | Val Acc1: {val_acc1:.2%} | Val Acc2: {val_acc2:.2%} | Val Reward MSE: {val_reward_mse:.4f}")
+                if writer:
+                    writer.add_scalar("Val/Acc1_NodeType", val_acc1, global_step + epoch)
+                    writer.add_scalar("Val/Acc2_Location", val_acc2, global_step + epoch)
+                    writer.add_scalar("Val/Reward_MSE", val_reward_mse, global_step + epoch)
+
+        print(f"Cache hits: {self.cache_hits} | Cache misses: {self.cache_misses} | Hit ratio: {100 * self.cache_hits / (self.cache_hits + self.cache_misses + 1e-8):.2f}%")
+        return avg_loss  # Return the final average loss for outer-loop logging
+
 class RvNN(nn.Module):
     """
     Recursive Neural Network for encoding Behavior Trees and predicting:
@@ -126,7 +376,7 @@ class RvNN(nn.Module):
         2. Node location to apply expansion (classification)
         3. Scalar reward (regression)
     """
-    def __init__(self, node_type_vocab_size, embed_size, hidden_size, action1_size, action2_size, device, cache_size=10000):
+    def __init__(self, node_type_vocab_size, embed_size, hidden_size, action1_size, action2_size, device):
         super(RvNN, self).__init__()
         
         self.device = device
@@ -139,19 +389,10 @@ class RvNN(nn.Module):
         self.output_action2 = nn.Linear(hidden_size, action2_size, device=self.device)
         self.reward_head = nn.Linear(hidden_size, 1, device=self.device)
 
-        self.child_gru = nn.GRU(hidden_size, hidden_size, batch_first=True)
+        self.child_gru = nn.GRU(hidden_size, hidden_size, batch_first=True, device=self.device)
 
         self.loss_fn = nn.CrossEntropyLoss()
         self.loss_fn_reward = nn.MSELoss()
-
-        # ✅ LRU Cache for memoization
-        self.memo = LRUCache(maxsize=cache_size)
-
-    def _tree_to_string(self, node):
-        if not node.children:
-            return str(node.node_type)
-        children_str = ','.join([self._tree_to_string(child) for child in node.children])
-        return f"{node.node_type}({children_str})"
 
     def forward(self, node):
         """
@@ -175,29 +416,22 @@ class RvNN(nn.Module):
         Returns:
             torch.Tensor: Encoded hidden state for this subtree.
         """
-        subtree_key = self._tree_to_string(node)
-
-        if subtree_key in self.memo:
-            return self.memo[subtree_key]
-
         if not node.children:
             embed = self.node_embedding(torch.tensor([node.node_type], device=self.device))
             zero_pad = torch.zeros(self.W_c.in_features - embed.size(1), device=self.device)
             h = self.activation(self.W_c(torch.cat([embed.squeeze(0), zero_pad])))
-            self.memo[subtree_key] = h
             return h
 
+        # Encode children recursively
         child_states = [self._encode_node(child).unsqueeze(0) for child in node.children]
-        child_seq = torch.cat(child_states, dim=0).unsqueeze(0)
+        child_seq = torch.cat(child_states, dim=0).unsqueeze(0)  # [1, num_children, hidden_size]
 
-        _, last_hidden = self.child_gru(child_seq)
+        _, last_hidden = self.child_gru(child_seq)  # [1, 1, hidden_size]
         child_encoding = last_hidden.squeeze(0).squeeze(0)
 
         embed = self.node_embedding(torch.tensor([node.node_type], device=self.device))
-        concat = torch.cat([embed.squeeze(0), child_encoding])
+        concat = torch.cat([embed.squeeze(0), child_encoding])  # [embed + child_hidden]
         h = self.activation(self.W_c(concat))
-
-        self.memo[subtree_key] = h
         return h
 
     def predict(self, bt_string):

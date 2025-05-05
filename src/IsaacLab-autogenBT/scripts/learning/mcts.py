@@ -47,7 +47,6 @@ class MCTSNode:
         self.edges = [MCTSEdge(self, (nt, loc), float(nt_probs[nt] * loc_probs[loc]))
                     for nt, loc in self.all_actions]
 
-    
 class MCTSEdge:
     def __init__(self, parent, action, prior):
         """

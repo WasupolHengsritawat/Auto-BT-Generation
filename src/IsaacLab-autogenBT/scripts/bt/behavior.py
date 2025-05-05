@@ -439,6 +439,7 @@ class GoToChargerNode(py_trees.behaviour.Behaviour):
         self.battery_level = None
 
         self.final_target_node = 1
+        self.ref_loc = self.robot_graph.nodes[self.final_target_node]['pos']
 
         self.robot_pos = None
         self.robot_rot = None
@@ -479,9 +480,11 @@ class GoToChargerNode(py_trees.behaviour.Behaviour):
         
         if self.battery_level < 0.1:
             return py_trees.common.Status.FAILURE
+        
+        if euclidean_distance(self.ref_loc, self.robot_pos) < 0.2:
+            return py_trees.common.Status.SUCCESS 
     
         if self.path == []: # Plan to go to adjacent unvisited area 
-
             # Use robot nearest node as the current node and check its unvisited adjacent nodes
             robot_current_node = find_nearest_node(self.robot_pos, self.robot_graph)
 
@@ -528,6 +531,7 @@ class GoToSpawnNode(py_trees.behaviour.Behaviour):
         self.battery_level = None
 
         self.final_target_node = 0
+        self.ref_loc = self.robot_graph.nodes[self.final_target_node]['pos']
 
         self.robot_pos = None
         self.robot_rot = None
@@ -568,6 +572,9 @@ class GoToSpawnNode(py_trees.behaviour.Behaviour):
 
         if self.battery_level < 0.1:
             return py_trees.common.Status.FAILURE 
+        
+        if euclidean_distance(self.ref_loc, self.robot_pos) < 0.2:
+            return py_trees.common.Status.SUCCESS 
     
         if self.path == []: # Plan to go to adjacent unvisited area 
 
@@ -683,6 +690,11 @@ class GoToNearestTarget(py_trees.behaviour.Behaviour):
                 if valid_target_distance < nearest_target_distance:
                     self.final_target_node = valid_target
                     nearest_target_distance = valid_target_distance
+
+            # Check if the robot is already at the target node
+            ref_loc = self.robot_graph.nodes[self.final_target_node]['pos']
+            if euclidean_distance(ref_loc, self.robot_pos) < 0.2:
+                return py_trees.common.Status.SUCCESS 
 
             # Find the shortest path to the final target node
             self.path = nx.shortest_path(self.robot_graph, source=robot_current_node, target=self.final_target_node, weight='weight')

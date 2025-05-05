@@ -2,6 +2,7 @@ import os
 import subprocess
 import time
 from typing import List, Union
+from learning.network import RvNN, RvNN_mem
 
 # Global list to hold the subprocesses running the BTs
 processes = []
@@ -56,8 +57,9 @@ def stop_BTs(verbose=False):
     if verbose: print("All BT processes have been terminated.")
 
 if __name__ == "__main__":
+    # ========== Test the run_BTs function =========
     num_envs = 10  # Set the number of parallel executions you want
-    bt_string_array = ['a'] * num_envs
+    bt_string_array = ['e'] * num_envs
     # bt_string_array[1] = '(1H(0(1C(0(1Ad)h))(0(1F(0(1(0EG)(0(1D(2ab))c))f))(1Be)g)))'
 
     # bt_string_array = ['(1H(0(1C(0(1Ad)h))(0(1F(0(1(0EG)(0(1D(2ab))c))f))(1Be)g)))'] * num_envs
@@ -72,6 +74,7 @@ if __name__ == "__main__":
     for process in processes:
         process.wait()
     
+    # ========== Test the stop_BTs function =========
     # Let the BTs run for a specified duration (e.g., 10 seconds)
     # time.sleep(60)
     
