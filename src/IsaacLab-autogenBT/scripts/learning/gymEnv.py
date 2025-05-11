@@ -144,7 +144,7 @@ class MultiBTEnv(gym.Env):
 
         # Action Space: (Node Type, Node Location)
         self.num_node_types = 20  # 20 possible node types
-        self.max_location_size = 2 * self.nodes_limit - 1 # 99 maximum location size
+        self.max_location_size = (2 * self.nodes_limit - 1) + 1 # Maximum possible locations for child nodes + parent node
         self.action_space = gym.spaces.Tuple([gym.spaces.MultiDiscrete([self.num_node_types, self.max_location_size]) for _ in range(num_envs)])
 
         # Observation Space: String representing BT
@@ -421,13 +421,13 @@ class MultiBTEnv(gym.Env):
 
             done = False
             # Done if agent select to not expand the tree
-            if node_type == 19:
+            if node_type == self.num_node_types - 1:
                 done = True
-            elif 0 <= node_type <= 19:
+            elif 0 <= node_type <= self.num_node_types - 1:
                 self.number_of_nodes_in_bt[env_id] += 1
 
             # Done if the number of nodes in BT exceed the limit
-            if self.number_of_nodes_in_bt[env_id] > 50:
+            if self.number_of_nodes_in_bt[env_id] > self.nodes_limit:
                 done = True
             
             dones.append(done)
@@ -485,13 +485,13 @@ class MultiBTEnv(gym.Env):
 
             done = False
             # Done if agent select to not expand the tree
-            if node_type == 19:
+            if node_type == self.num_node_types - 1:
                 done = True
-            elif 0 <= node_type <= 19:
+            elif 0 <= node_type <= self.num_node_types - 1:
                 self.number_of_nodes_in_bt[env_id] += 1
 
             # Done if the number of nodes in BT exceed the limit
-            if self.number_of_nodes_in_bt[env_id] > 50:
+            if self.number_of_nodes_in_bt[env_id] > self.nodes_limit:
                 done = True
             
             dones.append(done)
@@ -612,11 +612,16 @@ class MultiBTEnv(gym.Env):
                 self.current_bt[env_id] = ''
 
         if node is not None:
-            # Generate list of valid insert positions
-            valid_indices = [j for j in range(1,len(bt_string)) if j == len(bt_string) or not bt_string[j].isdigit()]
-            if 0 <= node_location < len(valid_indices):
-                insert_index = valid_indices[node_location]
-                self.current_bt[env_id] = bt_string[:insert_index] + node + bt_string[insert_index:]
+            # If node location is 0 and node type is a flow control node, we add it as a parent node
+            if node_location == 0 and node_type in [0, 1, 2]:
+                self.current_bt[env_id] = f'({node_type}' + bt_string + ')'
+            else:   
+                # Generate list of valid insert positions
+                valid_indices = [j for j in range(1,len(bt_string)) if j == len(bt_string) or not bt_string[j].isdigit()]
+
+                if 1 <= node_location < len(valid_indices) + 1:
+                    insert_index = valid_indices[node_location - 1]
+                    self.current_bt[env_id] = bt_string[:insert_index] + node + bt_string[insert_index:]
     
     def set_bt(self, env_id, bt_string):
         """

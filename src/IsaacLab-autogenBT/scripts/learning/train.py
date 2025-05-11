@@ -158,15 +158,21 @@ def modify_bt(current_bt, node_type, node_location):
         return node
 
     if node != None:
-        # Iterate over all potential insertion positions (0 to len(s))
-        valid_indices = [j for j in range(1,len(bt_string)) if j == len(bt_string) or not bt_string[j].isdigit()]
 
-        if 0 <=  node_location < len(valid_indices):
-            # Get the actual index in the string where we want to insert the char.
-            insert_index = valid_indices[node_location]
+        # If node location is 0 and node type is a flow control node, we add it as a parent node
+        if node_location == 0 and node_type in [0, 1, 2]:
+            return f'({node_type}' + bt_string + ')'
+        
+        else:
+            # Iterate over all potential insertion positions (0 to len(s))
+            valid_indices = [j for j in range(1,len(bt_string)) if j == len(bt_string) or not bt_string[j].isdigit()]
 
-            # Return the new string with the character inserted.
-            return bt_string[:insert_index] + node + bt_string[insert_index:]
+            if 1 <=  node_location < len(valid_indices) + 1:
+                # Get the actual index in the string where we want to insert the char.
+                insert_index = valid_indices[node_location - 1]
+
+                # Return the new string with the character inserted.
+                return bt_string[:insert_index] + node + bt_string[insert_index:]
         
     return current_bt
 

@@ -28,13 +28,13 @@ class MCTSNode:
 
         # If the BT is empty, only the root node is valid
         if bt_string == '':
-            valid_locs = [0]
+            valid_locs = [1]
 
-        self.all_actions = [(nt, loc) for nt in range(self.env.num_node_types) for loc in range(len(valid_locs))]
+        self.all_actions = [(nt, 0) for nt in range(3)] + [(nt, loc) for nt in range(self.env.num_node_types - 1) for loc in range(1, len(valid_locs) + 1)]
 
         # If there are no valid locations, only the stop action is valid
-        if self.all_actions == []:
-            self.all_actions = [(19,0)]
+        if (self.env.num_node_types - 1, 0) not in self.all_actions:
+            self.all_actions.append((self.env.num_node_types - 1, 0))
 
         # Get prior porbabilities from the policy network
         nt_probs, loc_probs, pred_rew = self.policy_net.predict(state)
