@@ -18,6 +18,7 @@ from rclpy.context import Context
 parser = argparse.ArgumentParser(description="Run your script with arguments.")
 parser.add_argument('--env_id', type=int, help="Environment ID of the behavior tree.")
 parser.add_argument('--bt_string', type=str, help="Behavior tree in string format.")
+parser.add_argument('--number_of_target_to_success', type=int, default=5, help="Behavior tree in string format.")
 parser.add_argument('--verbose', type=bool, default=False, help="Display behavior tree execution status in terminal.")
 
 args_cli = parser.parse_args()
@@ -212,7 +213,7 @@ def create_tree(env_id, tree_string, origin_offset, verbose = False):
                      'E': lambda ind: AreObjectNearby(f'AreObjectNearby_{ind}', env_id=env_id, verbose=verbose),
                      'F': lambda ind: IsObjectInHand(f'IsObjectInHand_{ind}', env_id=env_id, verbose=verbose),
                      'G': lambda ind: IsNearbyObjectNotAtGoal(f'IsNearbyObjectNotAtGoal_{ind}', robot_graph=robot_graph, goal_node=[0], env_id=env_id, verbose=verbose),
-                     'H': lambda ind: AreXObjectsAtSpawn(f'AreFiveObjectsAtSpawn_{ind}', robot_graph=robot_graph, env_id=env_id, target_number=3,verbose=verbose),
+                     'H': lambda ind: AreXObjectsAtSpawn(f'AreFiveObjectsAtSpawn_{ind}', robot_graph=robot_graph, env_id=env_id, target_number=args_cli.number_of_target_to_success,verbose=verbose),
                      }
 
     def string2tree(tree_string, cond_num):

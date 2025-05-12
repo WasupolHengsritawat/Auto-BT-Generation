@@ -70,7 +70,7 @@ def get_random_object_pos(num_env):
     Returns:
         torch.Tensor: Randomly selected target positions.
     """
-    number_of_objects = 8
+    number_of_objects = 10
 
     # Possible target spawn point
     target_spawn_pool = torch.tensor(

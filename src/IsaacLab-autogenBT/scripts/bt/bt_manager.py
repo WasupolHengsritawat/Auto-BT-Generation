@@ -6,7 +6,7 @@ import subprocess
 
 processes = []
 
-def run_BTs(bt_string_array, verbose=False):
+def run_BTs(bt_string_array, number_of_target_to_success = 5, verbose=False):
     """
     Launch BTs as separate subprocesses.
     
@@ -26,7 +26,8 @@ def run_BTs(bt_string_array, verbose=False):
         process = subprocess.Popen([
             'python3', run_bt_file,
             f'--env_id={env_id}',
-            f"--bt_string={bt_string}"
+            f"--bt_string={bt_string}",
+            f"--number_of_target_to_success={number_of_target_to_success}"
         ])
         processes.append(process)
     

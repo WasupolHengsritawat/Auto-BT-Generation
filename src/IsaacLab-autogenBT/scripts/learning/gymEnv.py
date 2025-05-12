@@ -35,7 +35,7 @@ from ros2_nodes.ros2_drive import RobotDriverManager
 from ros2_nodes.ros2_bt_tracker import BTStatusTrackerNode
 from bt_manager import run_BTs, stop_BTs
 
-def get_random_object_pos(num_env, device, mode = 'different'):
+def get_random_object_pos(num_env, device, number_of_objects = 5,mode = 'different'):
     """
     Generate random object target positions from a predefined spawn pool.
 
@@ -86,7 +86,6 @@ class ManualBTSceneCfg(InteractiveSceneCfg):
     # articulation
     robot: ArticulationCfg = JACKAL_UR5_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
 
-
 ###
 #  Gym Environment
 ###
@@ -99,31 +98,42 @@ from std_msgs.msg import UInt8
 from tqdm import tqdm
 
 class MultiBTEnv(gym.Env):
-    def __init__(self, num_envs, simulation_app = None, env_spacing = None, device = None, verbose = False):
+    def __init__(self, node_dict, 
+                 nodes_limit, num_envs, 
+                 simulation_app = None, 
+                 number_of_target_to_success = 5, 
+                 number_of_spawned_objects = 5, 
+                 sim_step_limit = 200000, 
+                 object_pos_mode = 'different', 
+                 env_spacing = None, 
+                 device = None, 
+                 verbose = False):
         """
         Initialize multiple BT environments and connect to ROS2 simulation.
 
         :param num_envs: Number of parallel environments (agents).
         """
         super().__init__()
+        self.node_dict = node_dict
         self.num_envs = num_envs
         self.env_spacing = env_spacing
         self.device = device
         self.simulation_app = simulation_app
         self.verbose = verbose
 
-        self.object_pos_mode = 'different'  # 'same' if want all environment object positions to be the same
-                                            # 'different' for otherwise
+        self.object_pos_mode = object_pos_mode  # 'same' if want all environment object positions to be the same
+                                                # 'different' for otherwise
         self.idle_step_limit = 200
-        self.sim_step_limit = 160000
-        self.nodes_limit = 50
-        self.number_of_target_to_success = 3
+        self.sim_step_limit = sim_step_limit
+        self.nodes_limit = nodes_limit
+        self.number_of_target_to_success = number_of_target_to_success
+        self.number_of_spawned_objects = number_of_spawned_objects
 
-        self.reward_weight = [ 100,  # Number of delivered objects term
-                                70,  # Number of founded objects term
-                               100,  # Bonus time reward if success term
-                              -250,  # Battery dead penalty term 
-                                -1]  # Tree complexity penalty term
+        self.reward_weight = [ 100,     # Number of delivered objects term
+                                70,     # Number of founded objects term
+                               100,     # Bonus time reward if success term
+                              -250,     # Battery dead penalty term 
+                                -0.25]  # Tree complexity penalty term
 
         if self.simulation_app is not None:
             self._create_sim()  # Create and initialize the simulation
@@ -143,7 +153,7 @@ class MultiBTEnv(gym.Env):
             self.elapsed_step = [0 for _ in range(num_envs)]
 
         # Action Space: (Node Type, Node Location)
-        self.num_node_types = 20  # 20 possible node types
+        self.num_node_types = len(self.node_dict.items())  # 20 possible node types
         self.max_location_size = (2 * self.nodes_limit - 1) + 1 # Maximum possible locations for child nodes + parent node
         self.action_space = gym.spaces.Tuple([gym.spaces.MultiDiscrete([self.num_node_types, self.max_location_size]) for _ in range(num_envs)])
 
@@ -221,10 +231,10 @@ class MultiBTEnv(gym.Env):
             object_group_names.append(f'env_{env_id}')
 
         # Calculate opject position offset
-        object_pos_offset = self.scene.env_origins.repeat([get_random_object_pos(self.scene.num_envs, self.device).shape[1],1,1])
+        object_pos_offset = self.scene.env_origins.repeat([get_random_object_pos(self.scene.num_envs, number_of_objects=self.number_of_spawned_objects, device=self.device).shape[1],1,1])
         object_pos_offset = torch.transpose(object_pos_offset, 0, 1)
 
-        self.object_pos_llist = get_random_object_pos(self.scene.num_envs, self.device, mode=self.object_pos_mode) + object_pos_offset
+        self.object_pos_llist = get_random_object_pos(self.scene.num_envs, number_of_objects=self.number_of_spawned_objects, mode=self.object_pos_mode, device=self.device) + object_pos_offset
         self.object_group_manager = ObjectGroupManager(object_group_names, self.object_pos_llist, self.scene)
 
         ### Initialize The Robot Driver Manager ###
@@ -433,7 +443,7 @@ class MultiBTEnv(gym.Env):
             dones.append(done)
 
         obs = self.current_bt
-        run_BTs(bt_with_evaluation_node) # run BTs
+        run_BTs(bt_with_evaluation_node, number_of_target_to_success = self.number_of_target_to_success) # run BTs
 
         pbar = tqdm(total=self.sim_step_limit)
 
@@ -510,7 +520,7 @@ class MultiBTEnv(gym.Env):
         for env_id in range(self.num_envs):
             bt_with_evaluation_node.append('(1H' + self.current_bt[env_id] + ')')   # add evaluation node
 
-        run_BTs(bt_with_evaluation_node) # run BTs
+        run_BTs(bt_with_evaluation_node, number_of_target_to_success = self.number_of_target_to_success) # run BTs
 
         pbar = tqdm(total=self.sim_step_limit)
 
@@ -576,33 +586,7 @@ class MultiBTEnv(gym.Env):
         :param node_type: Type of node to insert (0-19).
         :param node_location: Index in the BT string to insert the node.
         """
-        # Interpret node_type
-                    # Flow Control
-        node_dict = { 0 : '(0)', # sequence_node
-                      1 : '(1)', # selector_node
-                      2 : '(2)', # parallel_node
-                    # Behaviors
-                      3 : 'a',   # patrol_node
-                      4 : 'b',   # find_target_node
-                      5 : 'c',   # go_to_nearest_target
-                      6 : 'd',   # go_to_charger_node
-                      7 : 'e',   # go_to_spawn_node
-                      8 : 'f',   # picking_object_node
-                      9 : 'g',   # drop_object_node
-                     10 : 'h',   # charge_node
-                    # Conditions
-                     11 : 'A',   # is_robot_at_the_charger_node
-                     12 : 'B',   # is_robot_at_the_spawn_node
-                     13 : 'C',   # is_battery_on_proper_level
-                     14 : 'D',   # are_object_existed_on_internal_map
-                     15 : 'E',   # are_object_nearby_node
-                     16 : 'F',   # is_object_in_hand_node
-                     17 : 'G',   # is_nearby_object_not_at_goal
-                     18 : 'H',   # are_five_objects_at_spawn
-                    # Specials
-                     19 : None, #stop node
-                    }
-        node = node_dict[node_type]
+        node = self.node_dict[node_type]
         bt_string = self.current_bt[env_id]
 
         if self.current_bt[env_id] == '':
