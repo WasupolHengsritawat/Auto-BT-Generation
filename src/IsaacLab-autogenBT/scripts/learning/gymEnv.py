@@ -409,6 +409,14 @@ class MultiBTEnv(gym.Env):
 
             rewards.append(reward)
 
+        if self.verbose:
+            print(f"[INFO] Rewards: {rewards}")
+            print(f"[INFO] Object at spawn: {self.object_at_spawn}")
+            print(f"[INFO] Object found: {self.object_found}")
+            print(f"[INFO] Is task success: {self.is_task_success}")
+            print(f"[INFO] Is idled: {self.is_idled}")
+            print(f"[INFO] Elapsed step: {self.elapsed_step}")
+        
         return rewards
 
     def step(self, actions):

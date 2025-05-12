@@ -24,11 +24,11 @@ import code
 ##
 
 # Get current file path
-cwd = os.getcwd()
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
 JACKAL_UR5_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        usd_path=f"{cwd}/src/IsaacLab-autogenBT/assets/jackal_ur5.usd",
+        usd_path=f"{script_dir}/jackal_ur5.usd",
         articulation_props=sim_utils.ArticulationRootPropertiesCfg(enabled_self_collisions=False),
         activate_contact_sensors=True,
     ),

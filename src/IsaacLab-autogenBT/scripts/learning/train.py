@@ -156,7 +156,7 @@ def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, ev
     env = MultiBTEnv(node_dict, 
                      nodes_limit, 
                      num_envs=num_search_agents,
-                     sim_step_limit=sim_step_limit, device=device)
+                     sim_step_limit=sim_step_limit, device=device, verbose=False)
     mcts = MCTS(env, policy_net, num_simulations=num_search, exploration_weight=1.0, device=device)
 
     bt_string = ''

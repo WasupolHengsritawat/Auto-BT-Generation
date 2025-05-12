@@ -50,10 +50,10 @@ def stop_BTs(verbose=False):
 if __name__ == "__main__":
     # ========== Test the run_BTs function =========
     num_envs = 10  # Set the number of parallel executions you want
-    # bt_string_array = ['e'] * num_envs
+    bt_string_array = ['e'] * num_envs
     # bt_string_array[1] = '(1H(0(1C(0(1Ad)h))(0(1F(0(1(0EG)(0(1D(2ab))c))f))(1Be)g)))'
 
-    bt_string_array = ['(1H(0(1F(0(1(0EG)(0(1D(2ab))c))f))(1Be)g))'] * num_envs
+    # bt_string_array = ['(1H(0(1F(0(1(0EG)(0(1D(2ab))c))f))(1Be)g))'] * num_envs
     
     # # Launch the behavior trees
     run_BTs(bt_string_array , number_of_target_to_success=1)
