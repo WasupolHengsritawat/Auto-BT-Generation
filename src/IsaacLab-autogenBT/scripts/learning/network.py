@@ -6,31 +6,52 @@ import torch.nn as nn
 from cachetools import LRUCache
 
 # ----------- Behavior Dictionary (char -> node type index) ----------- #
-            # Flow Control
-node_dict = { 0 : '0', # sequence_node
-              1 : '1', # selector_node
-              2 : '2', # parallel_node
-            # Behaviors
-              3 : 'a',   # patrol_node
-              4 : 'b',   # find_target_node
-              5 : 'c',   # go_to_nearest_target
-              6 : 'd',   # go_to_charger_node
-              7 : 'e',   # go_to_spawn_node
-              8 : 'f',   # picking_object_node
-              9 : 'g',   # drop_object_node
-             10 : 'h',   # charge_node
-            # Conditions
-              11 : 'A',   # is_robot_at_the_charger_node
-              12 : 'B',   # is_robot_at_the_spawn_node
-              13 : 'C',   # is_battery_on_proper_level
-              14 : 'D',   # are_object_existed_on_internal_map
-              15 : 'E',   # are_object_nearby_node
-              16 : 'F',   # is_object_in_hand_node
-              17 : 'G',   # is_nearby_object_not_at_goal
-              18 : 'H',   # are_five_objects_at_spawn
-            # Specials
-              19 : None, #stop node
-            }
+#             # Flow Control
+# node_dict = { 0 : '0', # sequence_node
+#               1 : '1', # selector_node
+#               2 : '2', # parallel_node
+#             # Behaviors
+#               3 : 'a',   # patrol_node
+#               4 : 'b',   # find_target_node
+#               5 : 'c',   # go_to_nearest_target
+#               6 : 'd',   # go_to_charger_node
+#               7 : 'e',   # go_to_spawn_node
+#               8 : 'f',   # picking_object_node
+#               9 : 'g',   # drop_object_node
+#              10 : 'h',   # charge_node
+#             # Conditions
+#               11 : 'A',   # is_robot_at_the_charger_node
+#               12 : 'B',   # is_robot_at_the_spawn_node
+#               13 : 'C',   # is_battery_on_proper_level
+#               14 : 'D',   # are_object_existed_on_internal_map
+#               15 : 'E',   # are_object_nearby_node
+#               16 : 'F',   # is_object_in_hand_node
+#               17 : 'G',   # is_nearby_object_not_at_goal
+#               18 : 'H',   # are_five_objects_at_spawn
+#             # Specials
+#               19 : None, #stop node
+#             }
+
+node_dict = {   0 : '(0)', #patrol_node
+                    1 : '(1)', #find_target_node
+                    2 : '(2)', #go_to_nearest_target
+                # Behaviors
+                    3 : 'a', #patrol_node
+                    4 : 'b', #find_target_node
+                    5 : 'c', #go_to_nearest_target
+                    6 : 'e', #go_to_spawn_node
+                    7 : 'f', #picking_object_node
+                    8 : 'g', #drop_object_node
+                # Conditions
+                    9 : 'B', #is_robot_at_the_spawn_node
+                   10 : 'D', #are_object_existed_on_internal_map
+                   11 : 'E', #are_object_nearby_node
+                   12 : 'F', #is_object_in_hand_node
+                   13 : 'G', #is_nearby_object_not_at_goal
+                   14 : 'H', #are_five_objects_at_spawn
+                # Specials
+                   15 : None, #stop node
+                }
 
 # === Inverted character -> type index ===
 char_to_node_type = {v: k for k, v in node_dict.items() if v is not None}
