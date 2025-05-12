@@ -194,13 +194,13 @@ def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, ev
         selected_nt = np.random.choice(best_nt_indices)
         selected_loc = np.random.choice(best_loc_indices)
 
-        if verbose: print(f"[INFO] Dataset {number_of_nodes + 1}/{nodes_limit} << {bt_strings[-1]}, ({selected_nt}, {selected_loc})")
+        bt_string = modify_bt(node_dict, bt_string, selected_nt, selected_loc)
+        number_of_nodes += 1
+
+        if verbose: print(f"[INFO] Dataset {number_of_nodes}/{nodes_limit} << {bt_strings[-1]}, ({selected_nt}, {selected_loc})")
 
         if selected_nt == (len(node_dict.items()) - 1) or number_of_nodes >= nodes_limit:
             break
-
-        bt_string = modify_bt(node_dict, bt_string, selected_nt, selected_loc)
-        number_of_nodes += 1
 
     for env_id in range(eval_env.num_envs):
         eval_env.set_bt(env_id=env_id, bt_string=bt_string)
