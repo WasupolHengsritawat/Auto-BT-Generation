@@ -106,6 +106,7 @@ class MCTS:
             - loc_prob (np.ndarray): Normalized visit-based probability distribution over node locations.
         """
         root = MCTSNode(state=root_state, env=self.env, policy_net=self.policy_net)
+        print(f"Root possible actions: {root.all_actions}")
 
         if verbose:
             select_time_elapsed_avg = 0
@@ -167,6 +168,9 @@ class MCTS:
         loc_prob_numerator = [loc_prob ** (1/(temperature)) for loc_prob in loc_probs] 
         loc_prob_denominator = sum(loc_prob_numerator)
         loc_probs = [num / loc_prob_denominator for num in loc_prob_numerator]
+
+        print(f"nt_probs: {nt_probs}")
+        print(f"loc_probs: {loc_probs}")
 
         return nt_probs, loc_probs
 

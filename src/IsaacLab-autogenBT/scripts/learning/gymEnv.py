@@ -388,6 +388,9 @@ class MultiBTEnv(gym.Env):
         rewards = []
         for env_id in range(self.num_envs):
             reward = 0
+            ### Check if the task is success ###
+            if self.object_found[env_id] >= self.number_of_target_to_success:
+                self.is_task_success[env_id] = True
 
             ### Term 1: Number of delivered object ###
             reward += self.reward_weight[0] * self.object_at_spawn[env_id]
@@ -396,16 +399,13 @@ class MultiBTEnv(gym.Env):
             reward += self.reward_weight[1] * self.object_found[env_id]
 
             ### Term 3: Time Bonus if task success ###
-            if self.object_found[env_id] >= self.number_of_target_to_success:
-                self.is_task_success[env_id] = True
-            
             reward += self.reward_weight[2] * self.is_task_success[env_id] * self.sim_step_limit/(self.elapsed_step[env_id] + 1e-15)
 
             ### Term 4: Battery Dead Penalty ###
             reward += self.reward_weight[3] * (self.is_idled[env_id] and not(self.is_task_success[env_id]))
 
             ### Term 5: Tree Complexity Penalty ###
-            reward += self.reward_weight[4] * self._BT_complexity(env_id)
+            reward += self.reward_weight[4] * self.is_task_success[env_id] * self._BT_complexity(env_id)
 
             rewards.append(reward)
 
