@@ -1,12 +1,14 @@
 ###
 #  Monte-Carlo Tree Search
 ###
+import json
 import numpy as np
 from tqdm import trange
 import time
+import os
 
 class MCTSNode:
-    def __init__(self, state, env, policy_net, parent_edge=None):
+    def __init__(self, state, env, policy_net, id = 0, parent_edge=None):
         """
         Represents a single state (node) in the MCTS tree for Behavior Tree construction.
 
@@ -15,11 +17,13 @@ class MCTSNode:
         :param policy_net: Neural network (RvNN) that outputs action probabilities.
         :param parent_edge: The edge from the parent node leading to this node.
         """
+        self.id = id
         self.state = state                  # BT string for this node
         self.env = env                      # OpenGym Environment
         self.policy_net = policy_net        # RvNN model for policy and value
-        self.is_terminated = False           # Flag to indicate if this node is terminal
-        self.parent_edge = parent_edge                # Parent node
+        self.is_terminated = False          # Flag to indicate if this node is terminal
+        self.parent_edge = parent_edge      # Parent node
+        self.reward = None
 
         # Get all possible actions
         bt_string = state
@@ -81,8 +85,9 @@ class MCTS:
         self.num_simulations = num_simulations
         self.exploration_weight = exploration_weight
         self.device = device
+        self.node_id = 0
 
-    def run_search(self, root_state, temperature=1.0, verbose=False):
+    def run_search(self, root_state, temperature=1.0, verbose=False, export_path=None):
         """
         Perform Monte Carlo Tree Search (MCTS) from a shared root Behavior Tree (BT) state.
 
@@ -172,6 +177,9 @@ class MCTS:
         print(f"nt_probs: {nt_probs}")
         print(f"loc_probs: {loc_probs}")
 
+        if export_path:
+            self.export_tree(root, export_path)
+
         return nt_probs, loc_probs
 
     def select(self, node, dirichlet_noise_at_root=True):    
@@ -246,7 +254,8 @@ class MCTS:
             # Check if the child node is not already created
             if edges[env_id].child is None:
                 # Create a new child node for each selected edge
-                edges[env_id].child = MCTSNode(state=obs[env_id], env=self.env, policy_net=self.policy_net, parent_edge=edges[env_id])
+                self.node_id += 1
+                edges[env_id].child = MCTSNode(state=obs[env_id], env=self.env, policy_net=self.policy_net, parent_edge=edges[env_id], id=self.node_id)
                 
                 if dones[env_id]:
                     edges[env_id].child.is_terminated = True
@@ -265,7 +274,10 @@ class MCTS:
         for env_id in range(self.env.num_envs):
             state = states[env_id]
             nt_probs, loc_probs, pred_rew = self.policy_net.predict(state)
-            rews.append(float(pred_rew.detach().cpu().item()))
+            rew = float(pred_rew.detach().cpu().item())
+
+            nodes[env_id].reward = rew
+            rews.append(rew)
 
         return rews
 
@@ -295,3 +307,43 @@ class MCTS:
 
                 # Update the node to its parent
                 node = traversed_edge.parent
+
+    def export_tree(self, root, save_path="mcts_tree.json"):
+        """
+        Export the MCTS tree starting from root to a JSON file.
+        """
+        visited = set()
+        nodes = []
+        edges = []
+
+        def dfs(node):
+            if node.id in visited:
+                return
+            visited.add(node.id)
+
+            nodes.append({
+                "id": node.id,
+                "state": node.state,
+                "reward": node.reward,
+                "is_terminal": node.is_terminated
+            })
+
+            for edge in node.edges:
+                if edge.child:
+                    edges.append({
+                        "source": node.id,
+                        "target": edge.child.id,
+                        "action": edge.action,
+                        "visits": edge.visits,
+                        "q": edge.q,
+                        "prior": edge.prior
+                    })
+                    dfs(edge.child)
+
+        dfs(root)
+
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        with open(save_path, "w") as f:
+            json.dump({"nodes": nodes, "edges": edges}, f, indent=2)
+
+        print(f"Tree exported to {save_path}")

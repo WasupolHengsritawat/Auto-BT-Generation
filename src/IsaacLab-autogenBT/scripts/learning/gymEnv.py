@@ -8,12 +8,6 @@ import os
 import rclpy
 from scipy.spatial.transform import Rotation
 
-import omni.isaac.lab.sim as sim_utils
-from omni.isaac.lab.assets import ArticulationCfg, AssetBaseCfg
-from omni.isaac.lab.scene import InteractiveScene, InteractiveSceneCfg
-from omni.isaac.lab.sim import SimulationContext
-from omni.isaac.lab.utils import configclass
-
 # Import local files
 # Get the absolute path to the directory containing this script and the root of the project
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -27,13 +21,13 @@ sys.path.insert(0, script_dir)
 sys.path.insert(0, simulation_dir)
 sys.path.insert(0, bt_dir)
 
-from assets.jackal_ur5 import JACKAL_UR5_CFG
-from ros2_nodes.ros2_scene_publisher import pub_scene_data, SceneNode
+from bt_manager import run_BTs, stop_BTs
+from ros2_nodes.ros2_scene_publisher import pub_scene_data
+
+from ros2_nodes.ros2_scene_publisher import SceneNode
 from ros2_nodes.ros2_battery import BatteryManager
-from ros2_nodes.ros2_object import ObjectGroupManager
 from ros2_nodes.ros2_drive import RobotDriverManager
 from ros2_nodes.ros2_bt_tracker import BTStatusTrackerNode
-from bt_manager import run_BTs, stop_BTs
 
 def get_random_object_pos(num_env, device, number_of_objects = 5,mode = 'different'):
     """
@@ -67,24 +61,6 @@ def get_random_object_pos(num_env, device, number_of_objects = 5,mode = 'differe
 # Calculate initial rotation
 map_rot = Rotation.from_euler('xyz', [90, 0, 0], degrees=True).as_quat()
 robot_rot = Rotation.from_euler('xyz', [-630, -400, 60], degrees=True).as_quat()
-
-@configclass
-class ManualBTSceneCfg(InteractiveSceneCfg):
-    """Configuration for a manual created BT robot scene."""
-
-    # cave map
-    map = AssetBaseCfg(prim_path='{ENV_REGEX_NS}/Map', 
-        spawn=sim_utils.UsdFileCfg(usd_path=f"{project_root}/assets/cave_map.usd", scale=[0.0004, 0.0005, 0.0004]),
-        init_state=AssetBaseCfg.InitialStateCfg(pos=[-7, 27, 0], rot=[map_rot[3], map_rot[0], map_rot[1], map_rot[2]])
-    )
-
-    # lights
-    dome_light = AssetBaseCfg(
-        prim_path="/World/Light", spawn=sim_utils.DomeLightCfg(intensity=3000.0, color=(0.75, 0.75, 0.75))
-    )
-
-    # articulation
-    robot: ArticulationCfg = JACKAL_UR5_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
 
 ###
 #  Gym Environment
@@ -136,6 +112,7 @@ class MultiBTEnv(gym.Env):
                                 -0.25]  # Tree complexity penalty term
 
         if self.simulation_app is not None:
+
             self._create_sim()  # Create and initialize the simulation
 
             # ROS2 Communication - Reward Related
@@ -188,6 +165,33 @@ class MultiBTEnv(gym.Env):
         - BT status tracker.
         - Scene node for multi-agent control.
         """
+        import omni.isaac.lab.sim as sim_utils
+        from omni.isaac.lab.assets import ArticulationCfg, AssetBaseCfg
+        from omni.isaac.lab.scene import InteractiveScene, InteractiveSceneCfg
+        from omni.isaac.lab.sim import SimulationContext
+        from omni.isaac.lab.utils import configclass
+        from ros2_nodes.ros2_object import ObjectGroupManager
+
+        from assets.jackal_ur5 import JACKAL_UR5_CFG
+
+        @configclass
+        class ManualBTSceneCfg(InteractiveSceneCfg):
+            """Configuration for a manual created BT robot scene."""
+
+            # cave map
+            map = AssetBaseCfg(prim_path='{ENV_REGEX_NS}/Map', 
+                spawn=sim_utils.UsdFileCfg(usd_path=f"{project_root}/assets/cave_map.usd", scale=[0.0004, 0.0005, 0.0004]),
+                init_state=AssetBaseCfg.InitialStateCfg(pos=[-7, 27, 0], rot=[map_rot[3], map_rot[0], map_rot[1], map_rot[2]])
+            )
+
+            # lights
+            dome_light = AssetBaseCfg(
+                prim_path="/World/Light", spawn=sim_utils.DomeLightCfg(intensity=3000.0, color=(0.75, 0.75, 0.75))
+            )
+
+            # articulation
+            robot: ArticulationCfg = JACKAL_UR5_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+
         rclpy.init()
         self.node = Node('multi_bt_env')
 
@@ -441,10 +445,9 @@ class MultiBTEnv(gym.Env):
             # Done if agent select to not expand the tree
             if node_type == self.num_node_types - 1:
                 done = True
-            elif 0 <= node_type <= self.num_node_types - 1:
-                self.number_of_nodes_in_bt[env_id] += 1
 
             # Done if the number of nodes in BT exceed the limit
+            self.number_of_nodes_in_bt[env_id] = sum(1 for c in self.current_bt[env_id] if c not in ('(', ')'))
             if self.number_of_nodes_in_bt[env_id] > self.nodes_limit:
                 done = True
             
@@ -505,10 +508,9 @@ class MultiBTEnv(gym.Env):
             # Done if agent select to not expand the tree
             if node_type == self.num_node_types - 1:
                 done = True
-            elif 0 <= node_type <= self.num_node_types - 1:
-                self.number_of_nodes_in_bt[env_id] += 1
 
             # Done if the number of nodes in BT exceed the limit
+            self.number_of_nodes_in_bt[env_id] = sum(1 for c in self.current_bt[env_id] if c not in ('(', ')'))
             if self.number_of_nodes_in_bt[env_id] > self.nodes_limit:
                 done = True
             
@@ -623,3 +625,4 @@ class MultiBTEnv(gym.Env):
         :param bt_string: BT string to restore as state.
         """
         self.current_bt[env_id] = bt_string
+        self.number_of_nodes_in_bt[env_id] = sum(1 for c in self.current_bt[env_id] if c not in ('(', ')'))

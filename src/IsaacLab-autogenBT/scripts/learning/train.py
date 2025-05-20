@@ -22,7 +22,7 @@ parser = argparse.ArgumentParser(description="Train an RL agent with RSL-RL.")
 # parser.add_argument("--video_length", type=int, default=200, help="Length of the recorded video (in steps).")
 # parser.add_argument("--video_interval", type=int, default=2000, help="Interval between video recordings (in steps).")
 parser.add_argument("--num_search_agents", type=int, default=64, help="Number of search agents.")
-parser.add_argument("--num_search_times", type=int, default=200, help="Number of search agents.")
+parser.add_argument("--num_search_times", type=int, default=200, help="Number of search times.")
 parser.add_argument("--num_eval_agents", type=int, default=10, help="Number of evaluation agents.")
 parser.add_argument("--training_iters", type=int, default=100, help="Training iterations.")
 parser.add_argument("--env_spacing", type=int, default=40, help="Space between environments.")
@@ -368,6 +368,9 @@ if __name__ == "__main__":
     print(f"Final Results: {dataset.bt_strings[-1]}")
     print(f"Total elapsed time: {time.time() - start_time:.2f} seconds")
     rclpy.try_shutdown()
+
+    # tensorboard --logdir logs/
+
 
 
 # =====================================================================================================
