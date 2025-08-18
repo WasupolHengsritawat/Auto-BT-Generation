@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c.o"
+  "CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c.o.d"
   "CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/srv/_charging_request_s.c.o"
   "CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/srv/_charging_request_s.c.o.d"
   "CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/srv/_picking_request_s.c.o"

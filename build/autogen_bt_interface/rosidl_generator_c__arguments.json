@@ -4,7 +4,8 @@
   "template_dir": "/opt/ros/humble/share/rosidl_generator_c/cmake/../resource",
   "idl_tuples": [
     "/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_adapter/autogen_bt_interface:srv/ChargingRequest.idl",
-    "/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_adapter/autogen_bt_interface:srv/PickingRequest.idl"
+    "/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_adapter/autogen_bt_interface:srv/PickingRequest.idl",
+    "/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_adapter/autogen_bt_interface:msg/StringStamped.idl"
   ],
   "ros_interface_dependencies": [
     "std_msgs:/opt/ros/humble/share/std_msgs/msg/Bool.idl",
@@ -56,6 +57,7 @@
     "/opt/ros/humble/share/rosidl_generator_c/cmake/../resource/srv__type_support.h.em",
     "/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_adapter/autogen_bt_interface/srv/ChargingRequest.idl",
     "/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_adapter/autogen_bt_interface/srv/PickingRequest.idl",
+    "/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_adapter/autogen_bt_interface/msg/StringStamped.idl",
     "/opt/ros/humble/share/std_msgs/msg/Bool.idl",
     "/opt/ros/humble/share/std_msgs/msg/Byte.idl",
     "/opt/ros/humble/share/std_msgs/msg/ByteMultiArray.idl",

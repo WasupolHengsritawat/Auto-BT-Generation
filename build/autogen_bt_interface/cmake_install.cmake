@@ -364,6 +364,10 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/autogen_bt_interface/msg" TYPE FILE FILES "/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_adapter/autogen_bt_interface/msg/StringStamped.idl")
+endif()
+
+if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/autogen_bt_interface/srv" TYPE FILE FILES "/home/absolutezeno/Auto-BT-Generation/src/autogen_bt_interface/srv/ChargingRequest.srv")
 endif()
 
@@ -385,6 +389,10 @@ endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/autogen_bt_interface/srv" TYPE FILE FILES "/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_cmake/srv/PickingRequest_Response.msg")
+endif()
+
+if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/autogen_bt_interface/msg" TYPE FILE FILES "/home/absolutezeno/Auto-BT-Generation/src/autogen_bt_interface/msg/StringStamped.msg")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)

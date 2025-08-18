@@ -10,8 +10,8 @@ from dash.dependencies import ClientsideFunction
 script_dir = os.path.dirname(os.path.abspath(__file__))
 logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
 
-date_time = "2025-05-12_21-50-39"
-model_name = "rvnn_iter355"
+date_time = "2025-05-13_14-48-37"
+model_name = "rvnn_iter250"
 count = 1
 
 json_path = os.path.join(logs_dir, date_time, model_name, f"mcts_tree_{count}.json")
@@ -148,7 +148,7 @@ def update_annotations(clickData, fig_dict, pinned_annotations):
     # Define annotation text based on whether it's node or edge
     if isinstance(customdata, int):
         node = G.nodes[customdata]
-        annotation_text = f"Node {customdata}<br>State: {node['state']}<br>Terminal: {node['is_terminal']}"
+        annotation_text = f"Node {customdata}State: {node['state']}<br>Reward: {node['reward']}<br>Terminal: {node['is_terminal']}"
         key = f"Node-{customdata}"
     else:
         u, v = map(int, customdata.split('-'))

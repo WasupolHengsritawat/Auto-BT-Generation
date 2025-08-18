@@ -30,11 +30,13 @@ class MCTSNode:
         valid_locs_on_string = [j for j in range(1,len(bt_string)) if j == len(bt_string) or not bt_string[j].isdigit()] # Find valid location on BT string
         valid_locs = range(len(valid_locs_on_string))
 
-        # If the BT is empty, only the root node is valid
+        # Define all possible actions as (node_type, node_location) tuples
+        # The node_location = 0 means the location of the parent node while the other n locations are the locations of the nth child node
         if bt_string == '':
-            valid_locs = [1]
-
-        self.all_actions = [(nt, 0) for nt in range(3)] + [(nt, loc) for nt in range(self.env.num_node_types - 1) for loc in range(1, len(valid_locs) + 1)]
+            # If the BT is empty, only a location of the root node is valid
+            self.all_actions = [(nt, 1) for nt in range(self.env.num_node_types - 1)]
+        else:
+            self.all_actions = [(nt, 0) for nt in range(3)] + [(nt, loc) for nt in range(self.env.num_node_types - 1) for loc in range(1, len(valid_locs) + 1)]
 
         # If there are no valid locations, only the stop action is valid
         if (self.env.num_node_types - 1, 0) not in self.all_actions:
@@ -48,7 +50,9 @@ class MCTSNode:
         loc_probs = loc_probs.detach().cpu().numpy()
 
         # Initialize edges for each action
-        self.edges = [MCTSEdge(self, (nt, loc), float(nt_probs[nt] * loc_probs[loc]))
+        self.edges = [MCTSEdge(parent = self, 
+                               action = (nt, loc), 
+                               prior  = float(nt_probs[nt] * loc_probs[loc]))
                     for nt, loc in self.all_actions]
 
 class MCTSEdge:
@@ -70,9 +74,9 @@ class MCTSEdge:
         self.q = 0.0
 
 class MCTS:
-    def __init__(self, env, policy_net, num_simulations=50, exploration_weight=1.0, device='cpu'):
+    def __init__(self, env, policy_net, num_simulations=50, exploration_weight=1.0, model_based = False, device='cpu'):
         """
-        Monte Carlo Tree Search with PUCT for Behavior Tree generation.
+        Model-based Monte Carlo Tree Search with PUCT for Behavior Tree generation.
 
         :param env: MultiBTEnv environment instance.
         :param policy_net: Neural network to predict action probabilities.
@@ -86,8 +90,9 @@ class MCTS:
         self.exploration_weight = exploration_weight
         self.device = device
         self.node_id = 0
+        self.model_based = model_based
 
-    def run_search(self, root_state, temperature=1.0, verbose=False, export_path=None):
+    def run_search(self, root_state, temperature=1.0, dirichlet_noise_at_root=True, verbose=False, export_path=None):
         """
         Perform Monte Carlo Tree Search (MCTS) from a shared root Behavior Tree (BT) state.
 
@@ -124,20 +129,24 @@ class MCTS:
             progress.set_postfix(iteration=i)
 
             # Select a leaf node
+            print('Selecting...')
             if verbose: start_time = time.time()
-            selected_edges = self.select(root, dirichlet_noise_at_root=True)
+            selected_edges = self.select(root, dirichlet_noise_at_root=dirichlet_noise_at_root)
             if verbose: select_time = time.time()
 
             # Expand the selected leaf node
+            print('Expanding...')
             self.expand(selected_edges)
             leave_nodes = [edge.child for edge in selected_edges]
             if verbose: expand_time = time.time()
 
             # Evaluate the expanded nodes
+            print('Evaluating...')
             rewards = self.evaluate(leave_nodes)
             if verbose: evaluate_time = time.time()
 
             # Backpropagate the results
+            print('Backpropagating...')
             self.backpropagate(leave_nodes, rewards)
             if verbose: backpropagate_time = time.time()
 
@@ -239,7 +248,7 @@ class MCTS:
 
     def expand(self, edges):
         """
-        Expands leaf nodes by performing their selected actprint(edges[env_id].parent.state)ons and creating children.
+        Expands leaf nodes by performing their selected actions and creating children.
 
         :param edges: List of selected edges to expand.
         """
@@ -262,7 +271,92 @@ class MCTS:
 
     def evaluate(self, nodes):
         """
-        Evaluates completed BTs using the full IsaacSim simulation.
+        Evaluates the expanded nodes using the policy network.
+
+        :param nodes: Nodes to evaluate.
+        :return: List of rewards for each node.
+        """
+        if self.model_based:
+            return self._evaluate_modelbased(nodes)
+        
+        return self._evaluate_modelfree(nodes)
+
+    def _evaluate_modelfree(self, nodes):
+        """
+        Evaluates completed BTs using the simulation.
+
+        :param nodes: Nodes with fully expanded BTs.
+        :return: List of simulation-derived rewards.
+        """
+        states = [node.state for node in nodes]
+        dones = [False for _ in range(self.env.num_envs)]
+
+        # Make sure that the BT string is matched with the state in leaf node
+        for env_id in range(self.env.num_envs):
+            self.env.set_bt(env_id=env_id, bt_string=states[env_id])
+            
+        # Expand the BT until it reaches a terminal state (stop action or max depth)
+        while True:
+            actions = []
+            for env_id in range(self.env.num_envs):
+                state = states[env_id]
+                
+                # If the BT Contruction is done, select stop action
+                if nodes[env_id].is_terminated or dones[env_id]:
+                    actions.append((self.env.num_node_types - 1, 0))
+                    continue
+
+                # Get the action probablities from the policy network
+                nt_probs, loc_probs, _ = self.policy_net.predict(state) 
+
+                # Convert torch tensors to numpy arrays
+                nt_probs = nt_probs.detach().cpu().numpy()
+                loc_probs = loc_probs.detach().cpu().numpy()
+
+                
+                # Get all possible actions
+                bt_string = state
+                valid_locs_on_string = [j for j in range(1,len(bt_string)) if j == len(bt_string) or not bt_string[j].isdigit()] # Find valid location on BT string
+                valid_locs = range(len(valid_locs_on_string))
+
+                # Define all possible actions as (node_type, node_location) tuples
+                # The node_location = 0 means the location of the parent node while the other n locations are the locations of the nth child node
+                if bt_string == '':
+                    # If the BT is empty, only a location of the root node is valid
+                    all_actions = [(nt, 1) for nt in range(self.env.num_node_types - 1)]
+                else:
+                    all_actions = [(nt, 0) for nt in range(3)] + [(nt, loc) for nt in range(self.env.num_node_types - 1) for loc in range(1, len(valid_locs) + 1)]
+
+                # If there are no valid locations, only the stop action is valid
+                if (self.env.num_node_types - 1, 0) not in all_actions:
+                    all_actions.append((self.env.num_node_types - 1, 0))
+
+                # Select the best action according to its joint probability
+                probs = [float(nt_probs[nt] * loc_probs[loc]) for nt, loc in all_actions]
+                best_ind = np.where(probs == np.max(probs))[0]
+                selected_ind = np.random.choice(best_ind)
+
+                actions.append(all_actions[selected_ind])
+
+            # Perform the action in the environment (add node to BT)
+            obs, _, dones, infos =  self.env.step_without_sim(actions) 
+
+            # Update the state for each node
+            states = obs
+
+            # Check if the BTs construction is done
+            if all(dones):
+                break
+
+        print(f"[INFO] \tBTs constructed: {states}")
+        # Get the reward by runnung the BT in IsaacSim Simulation
+        _, rews, _, infos =  self.env.evaluate_bt_in_sim()
+
+        return rews
+
+    def _evaluate_modelbased(self, nodes):
+        """
+        Evaluates completed BTs using the predicted rewards from the network.
 
         :param nodes: Nodes with fully expanded BTs.
         :return: List of simulation-derived rewards.
@@ -347,3 +441,4 @@ class MCTS:
             json.dump({"nodes": nodes, "edges": edges}, f, indent=2)
 
         print(f"Tree exported to {save_path}")
+

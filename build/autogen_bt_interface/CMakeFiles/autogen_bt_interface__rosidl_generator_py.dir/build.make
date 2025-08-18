@@ -97,16 +97,32 @@ CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/aut
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/srv/_picking_request_s.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_generator_py/autogen_bt_interface/srv/_picking_request_s.c -o CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/srv/_picking_request_s.c.s
 
+CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c.o: CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/flags.make
+CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c.o: rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c
+CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c.o: CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c.o -MF CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c.o.d -o CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c.o -c /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c
+
+CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c > CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c.i
+
+CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c -o CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c.s
+
 # Object files for target autogen_bt_interface__rosidl_generator_py
 autogen_bt_interface__rosidl_generator_py_OBJECTS = \
 "CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/srv/_charging_request_s.c.o" \
-"CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/srv/_picking_request_s.c.o"
+"CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/srv/_picking_request_s.c.o" \
+"CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c.o"
 
 # External object files for target autogen_bt_interface__rosidl_generator_py
 autogen_bt_interface__rosidl_generator_py_EXTERNAL_OBJECTS =
 
 rosidl_generator_py/autogen_bt_interface/libautogen_bt_interface__rosidl_generator_py.so: CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/srv/_charging_request_s.c.o
 rosidl_generator_py/autogen_bt_interface/libautogen_bt_interface__rosidl_generator_py.so: CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/srv/_picking_request_s.c.o
+rosidl_generator_py/autogen_bt_interface/libautogen_bt_interface__rosidl_generator_py.so: CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c.o
 rosidl_generator_py/autogen_bt_interface/libautogen_bt_interface__rosidl_generator_py.so: CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/build.make
 rosidl_generator_py/autogen_bt_interface/libautogen_bt_interface__rosidl_generator_py.so: /usr/lib/x86_64-linux-gnu/libpython3.10.so
 rosidl_generator_py/autogen_bt_interface/libautogen_bt_interface__rosidl_generator_py.so: libautogen_bt_interface__rosidl_typesupport_c.so
@@ -121,7 +137,7 @@ rosidl_generator_py/autogen_bt_interface/libautogen_bt_interface__rosidl_generat
 rosidl_generator_py/autogen_bt_interface/libautogen_bt_interface__rosidl_generator_py.so: /opt/ros/humble/lib/librosidl_runtime_c.so
 rosidl_generator_py/autogen_bt_interface/libautogen_bt_interface__rosidl_generator_py.so: /opt/ros/humble/lib/librcutils.so
 rosidl_generator_py/autogen_bt_interface/libautogen_bt_interface__rosidl_generator_py.so: CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking C shared library rosidl_generator_py/autogen_bt_interface/libautogen_bt_interface__rosidl_generator_py.so"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking C shared library rosidl_generator_py/autogen_bt_interface/libautogen_bt_interface__rosidl_generator_py.so"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/autogen_bt_interface__rosidl_generator_py.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

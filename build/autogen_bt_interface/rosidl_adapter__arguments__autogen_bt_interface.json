@@ -2,6 +2,7 @@
   "package_name": "autogen_bt_interface",
   "non_idl_tuples": [
     "/home/absolutezeno/Auto-BT-Generation/src/autogen_bt_interface:srv/ChargingRequest.srv",
-    "/home/absolutezeno/Auto-BT-Generation/src/autogen_bt_interface:srv/PickingRequest.srv"
+    "/home/absolutezeno/Auto-BT-Generation/src/autogen_bt_interface:srv/PickingRequest.srv",
+    "/home/absolutezeno/Auto-BT-Generation/src/autogen_bt_interface:msg/StringStamped.msg"
   ]
 }

@@ -72,6 +72,7 @@ CMakeFiles/autogen_bt_interface: rosidl_cmake/srv/ChargingRequest_Response.msg
 CMakeFiles/autogen_bt_interface: /home/absolutezeno/Auto-BT-Generation/src/autogen_bt_interface/srv/PickingRequest.srv
 CMakeFiles/autogen_bt_interface: rosidl_cmake/srv/PickingRequest_Request.msg
 CMakeFiles/autogen_bt_interface: rosidl_cmake/srv/PickingRequest_Response.msg
+CMakeFiles/autogen_bt_interface: /home/absolutezeno/Auto-BT-Generation/src/autogen_bt_interface/msg/StringStamped.msg
 CMakeFiles/autogen_bt_interface: /opt/ros/humble/share/std_msgs/msg/Bool.idl
 CMakeFiles/autogen_bt_interface: /opt/ros/humble/share/std_msgs/msg/Byte.idl
 CMakeFiles/autogen_bt_interface: /opt/ros/humble/share/std_msgs/msg/ByteMultiArray.idl

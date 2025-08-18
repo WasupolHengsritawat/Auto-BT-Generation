@@ -29,6 +29,8 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/ChargingRequest.srv"
   "srv/PickingRequest.srv"
+
+  "msg/StringStamped.msg"
   DEPENDENCIES std_msgs # Add packages that above messages depend on, in this case geometry_msgs for Sphere.msg
 )
 

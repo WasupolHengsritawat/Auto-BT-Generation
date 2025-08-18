@@ -79,6 +79,7 @@ rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/charging_request__
 rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/charging_request__rosidl_typesupport_fastrtps_c.h: /opt/ros/humble/share/rosidl_typesupport_fastrtps_c/resource/srv__type_support_c.cpp.em
 rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/charging_request__rosidl_typesupport_fastrtps_c.h: rosidl_adapter/autogen_bt_interface/srv/ChargingRequest.idl
 rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/charging_request__rosidl_typesupport_fastrtps_c.h: rosidl_adapter/autogen_bt_interface/srv/PickingRequest.idl
+rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/charging_request__rosidl_typesupport_fastrtps_c.h: rosidl_adapter/autogen_bt_interface/msg/StringStamped.idl
 rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/charging_request__rosidl_typesupport_fastrtps_c.h: /opt/ros/humble/share/std_msgs/msg/Bool.idl
 rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/charging_request__rosidl_typesupport_fastrtps_c.h: /opt/ros/humble/share/std_msgs/msg/Byte.idl
 rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/charging_request__rosidl_typesupport_fastrtps_c.h: /opt/ros/humble/share/std_msgs/msg/ByteMultiArray.idl
@@ -123,6 +124,12 @@ rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/picking_request__r
 rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/picking_request__type_support_c.cpp: rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/charging_request__rosidl_typesupport_fastrtps_c.h
 	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/picking_request__type_support_c.cpp
 
+rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__rosidl_typesupport_fastrtps_c.h: rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/charging_request__rosidl_typesupport_fastrtps_c.h
+	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__rosidl_typesupport_fastrtps_c.h
+
+rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp: rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/charging_request__rosidl_typesupport_fastrtps_c.h
+	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp
+
 CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/charging_request__type_support_c.cpp.o: CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/flags.make
 CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/charging_request__type_support_c.cpp.o: rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/charging_request__type_support_c.cpp
 CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/charging_request__type_support_c.cpp.o: CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/compiler_depend.ts
@@ -151,16 +158,32 @@ CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesu
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/picking_request__type_support_c.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/picking_request__type_support_c.cpp -o CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/picking_request__type_support_c.cpp.s
 
+CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp.o: CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/flags.make
+CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp.o: rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp
+CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp.o: CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp.o -MF CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp.o.d -o CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp.o -c /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp
+
+CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp > CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp.i
+
+CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp -o CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp.s
+
 # Object files for target autogen_bt_interface__rosidl_typesupport_fastrtps_c
 autogen_bt_interface__rosidl_typesupport_fastrtps_c_OBJECTS = \
 "CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/charging_request__type_support_c.cpp.o" \
-"CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/picking_request__type_support_c.cpp.o"
+"CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/picking_request__type_support_c.cpp.o" \
+"CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp.o"
 
 # External object files for target autogen_bt_interface__rosidl_typesupport_fastrtps_c
 autogen_bt_interface__rosidl_typesupport_fastrtps_c_EXTERNAL_OBJECTS =
 
 libautogen_bt_interface__rosidl_typesupport_fastrtps_c.so: CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/charging_request__type_support_c.cpp.o
 libautogen_bt_interface__rosidl_typesupport_fastrtps_c.so: CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/picking_request__type_support_c.cpp.o
+libautogen_bt_interface__rosidl_typesupport_fastrtps_c.so: CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp.o
 libautogen_bt_interface__rosidl_typesupport_fastrtps_c.so: CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/build.make
 libautogen_bt_interface__rosidl_typesupport_fastrtps_c.so: libautogen_bt_interface__rosidl_generator_c.so
 libautogen_bt_interface__rosidl_typesupport_fastrtps_c.so: /opt/ros/humble/lib/libstd_msgs__rosidl_typesupport_fastrtps_c.so
@@ -174,7 +197,7 @@ libautogen_bt_interface__rosidl_typesupport_fastrtps_c.so: /opt/ros/humble/lib/l
 libautogen_bt_interface__rosidl_typesupport_fastrtps_c.so: /opt/ros/humble/lib/librosidl_runtime_c.so
 libautogen_bt_interface__rosidl_typesupport_fastrtps_c.so: /opt/ros/humble/lib/librcutils.so
 libautogen_bt_interface__rosidl_typesupport_fastrtps_c.so: CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX shared library libautogen_bt_interface__rosidl_typesupport_fastrtps_c.so"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX shared library libautogen_bt_interface__rosidl_typesupport_fastrtps_c.so"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -185,6 +208,8 @@ CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/clean:
 	$(CMAKE_COMMAND) -P CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/cmake_clean.cmake
 .PHONY : CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/clean
 
+CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/depend: rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__rosidl_typesupport_fastrtps_c.h
+CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/depend: rosidl_typesupport_fastrtps_c/autogen_bt_interface/msg/detail/string_stamped__type_support_c.cpp
 CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/depend: rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/charging_request__rosidl_typesupport_fastrtps_c.h
 CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/depend: rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/charging_request__type_support_c.cpp
 CMakeFiles/autogen_bt_interface__rosidl_typesupport_fastrtps_c.dir/depend: rosidl_typesupport_fastrtps_c/autogen_bt_interface/srv/detail/picking_request__rosidl_typesupport_fastrtps_c.h

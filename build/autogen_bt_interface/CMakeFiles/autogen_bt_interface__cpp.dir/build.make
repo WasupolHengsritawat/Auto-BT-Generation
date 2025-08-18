@@ -76,6 +76,11 @@ CMakeFiles/autogen_bt_interface__cpp: rosidl_generator_cpp/autogen_bt_interface/
 CMakeFiles/autogen_bt_interface__cpp: rosidl_generator_cpp/autogen_bt_interface/srv/detail/picking_request__struct.hpp
 CMakeFiles/autogen_bt_interface__cpp: rosidl_generator_cpp/autogen_bt_interface/srv/detail/picking_request__traits.hpp
 CMakeFiles/autogen_bt_interface__cpp: rosidl_generator_cpp/autogen_bt_interface/srv/detail/picking_request__type_support.hpp
+CMakeFiles/autogen_bt_interface__cpp: rosidl_generator_cpp/autogen_bt_interface/msg/string_stamped.hpp
+CMakeFiles/autogen_bt_interface__cpp: rosidl_generator_cpp/autogen_bt_interface/msg/detail/string_stamped__builder.hpp
+CMakeFiles/autogen_bt_interface__cpp: rosidl_generator_cpp/autogen_bt_interface/msg/detail/string_stamped__struct.hpp
+CMakeFiles/autogen_bt_interface__cpp: rosidl_generator_cpp/autogen_bt_interface/msg/detail/string_stamped__traits.hpp
+CMakeFiles/autogen_bt_interface__cpp: rosidl_generator_cpp/autogen_bt_interface/msg/detail/string_stamped__type_support.hpp
 CMakeFiles/autogen_bt_interface__cpp: rosidl_generator_cpp/autogen_bt_interface/msg/rosidl_generator_cpp__visibility_control.hpp
 
 rosidl_generator_cpp/autogen_bt_interface/srv/charging_request.hpp: /opt/ros/humble/lib/rosidl_generator_cpp/rosidl_generator_cpp
@@ -95,6 +100,7 @@ rosidl_generator_cpp/autogen_bt_interface/srv/charging_request.hpp: /opt/ros/hum
 rosidl_generator_cpp/autogen_bt_interface/srv/charging_request.hpp: /opt/ros/humble/share/rosidl_generator_cpp/resource/srv__traits.hpp.em
 rosidl_generator_cpp/autogen_bt_interface/srv/charging_request.hpp: rosidl_adapter/autogen_bt_interface/srv/ChargingRequest.idl
 rosidl_generator_cpp/autogen_bt_interface/srv/charging_request.hpp: rosidl_adapter/autogen_bt_interface/srv/PickingRequest.idl
+rosidl_generator_cpp/autogen_bt_interface/srv/charging_request.hpp: rosidl_adapter/autogen_bt_interface/msg/StringStamped.idl
 rosidl_generator_cpp/autogen_bt_interface/srv/charging_request.hpp: /opt/ros/humble/share/std_msgs/msg/Bool.idl
 rosidl_generator_cpp/autogen_bt_interface/srv/charging_request.hpp: /opt/ros/humble/share/std_msgs/msg/Byte.idl
 rosidl_generator_cpp/autogen_bt_interface/srv/charging_request.hpp: /opt/ros/humble/share/std_msgs/msg/ByteMultiArray.idl
@@ -157,7 +163,27 @@ rosidl_generator_cpp/autogen_bt_interface/srv/detail/picking_request__traits.hpp
 rosidl_generator_cpp/autogen_bt_interface/srv/detail/picking_request__type_support.hpp: rosidl_generator_cpp/autogen_bt_interface/srv/charging_request.hpp
 	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_cpp/autogen_bt_interface/srv/detail/picking_request__type_support.hpp
 
+rosidl_generator_cpp/autogen_bt_interface/msg/string_stamped.hpp: rosidl_generator_cpp/autogen_bt_interface/srv/charging_request.hpp
+	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_cpp/autogen_bt_interface/msg/string_stamped.hpp
+
+rosidl_generator_cpp/autogen_bt_interface/msg/detail/string_stamped__builder.hpp: rosidl_generator_cpp/autogen_bt_interface/srv/charging_request.hpp
+	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_cpp/autogen_bt_interface/msg/detail/string_stamped__builder.hpp
+
+rosidl_generator_cpp/autogen_bt_interface/msg/detail/string_stamped__struct.hpp: rosidl_generator_cpp/autogen_bt_interface/srv/charging_request.hpp
+	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_cpp/autogen_bt_interface/msg/detail/string_stamped__struct.hpp
+
+rosidl_generator_cpp/autogen_bt_interface/msg/detail/string_stamped__traits.hpp: rosidl_generator_cpp/autogen_bt_interface/srv/charging_request.hpp
+	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_cpp/autogen_bt_interface/msg/detail/string_stamped__traits.hpp
+
+rosidl_generator_cpp/autogen_bt_interface/msg/detail/string_stamped__type_support.hpp: rosidl_generator_cpp/autogen_bt_interface/srv/charging_request.hpp
+	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_cpp/autogen_bt_interface/msg/detail/string_stamped__type_support.hpp
+
 autogen_bt_interface__cpp: CMakeFiles/autogen_bt_interface__cpp
+autogen_bt_interface__cpp: rosidl_generator_cpp/autogen_bt_interface/msg/detail/string_stamped__builder.hpp
+autogen_bt_interface__cpp: rosidl_generator_cpp/autogen_bt_interface/msg/detail/string_stamped__struct.hpp
+autogen_bt_interface__cpp: rosidl_generator_cpp/autogen_bt_interface/msg/detail/string_stamped__traits.hpp
+autogen_bt_interface__cpp: rosidl_generator_cpp/autogen_bt_interface/msg/detail/string_stamped__type_support.hpp
+autogen_bt_interface__cpp: rosidl_generator_cpp/autogen_bt_interface/msg/string_stamped.hpp
 autogen_bt_interface__cpp: rosidl_generator_cpp/autogen_bt_interface/srv/charging_request.hpp
 autogen_bt_interface__cpp: rosidl_generator_cpp/autogen_bt_interface/srv/detail/charging_request__builder.hpp
 autogen_bt_interface__cpp: rosidl_generator_cpp/autogen_bt_interface/srv/detail/charging_request__struct.hpp

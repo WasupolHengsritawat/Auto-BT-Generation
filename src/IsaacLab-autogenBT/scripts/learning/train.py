@@ -18,26 +18,15 @@ from omni.isaac.lab.app import AppLauncher
 
 # add argparse arguments
 parser = argparse.ArgumentParser(description="Train an RL agent with RSL-RL.")
-# parser.add_argument("--video", action="store_true", default=False, help="Record videos during training.")
-# parser.add_argument("--video_length", type=int, default=200, help="Length of the recorded video (in steps).")
-# parser.add_argument("--video_interval", type=int, default=2000, help="Interval between video recordings (in steps).")
 parser.add_argument("--num_search_agents", type=int, default=64, help="Number of search agents.")
 parser.add_argument("--num_search_times", type=int, default=200, help="Number of search times.")
 parser.add_argument("--num_eval_agents", type=int, default=10, help="Number of evaluation agents.")
 parser.add_argument("--training_iters", type=int, default=100, help="Training iterations.")
 parser.add_argument("--env_spacing", type=int, default=40, help="Space between environments.")
-# parser.add_argument("--task", type=str, default=None, help="Name of the task.")
-# parser.add_argument("--seed", type=int, default=None, help="Seed used for the environment")
-# parser.add_argument("--max_iterations", type=int, default=None, help="RL Policy training iterations.")
-# append RSL-RL cli arguments
-# cli_args.add_rsl_rl_args(parser)
+
 # append AppLauncher cli args
 AppLauncher.add_app_launcher_args(parser)
 args_cli, hydra_args = parser.parse_known_args()
-
-# # always enable cameras to record video
-# if args_cli.video:
-#     args_cli.enable_cameras = True
 
 # clear out sys.argv for Hydra
 sys.argv = [sys.argv[0]] + hydra_args
@@ -157,7 +146,7 @@ def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, ev
                      nodes_limit, 
                      num_envs=num_search_agents,
                      sim_step_limit=sim_step_limit, device=device, verbose=False)
-    mcts = MCTS(env, policy_net, num_simulations=num_search, exploration_weight=1.0, device=device)
+    mcts = MCTS(env, policy_net, num_simulations=num_search, exploration_weight=1.0, model_based=True, device=device)
 
     bt_string = ''
 
@@ -221,7 +210,6 @@ def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, ev
     return BTDataset(bt_strings, action1_probs, action2_probs, rewards, device=device)
 
 if __name__ == "__main__":
-    # rclpy.init()
     device = args_cli.device
 
     # Specify Hyperparameters =======================================================================================
@@ -293,12 +281,13 @@ if __name__ == "__main__":
 
     # Instantiate the model
     model = RvNN(
-        node_type_vocab_size=20,  # 0 to 19
+        node_type_vocab_size=20,
         embed_size=64,
         hidden_size=128,
         action1_size=len(node_dict.items()),    # Number of node types to choose from
         action2_size=2*nodes_limit,             # Max insertion locations (50 * 2) - 1 + 1
-        device=device
+        device=device,
+        reward_head=True,                  # Set to True if you want to include a reward head
     )
 
     # Optimizer
@@ -369,85 +358,4 @@ if __name__ == "__main__":
     print(f"Total elapsed time: {time.time() - start_time:.2f} seconds")
     rclpy.try_shutdown()
 
-    # tensorboard --logdir logs/
-
-
-
-# =====================================================================================================
-
-# @hydra_task_config(args_cli.task, "rsl_rl_cfg_entry_point")
-# def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agent_cfg: RslRlOnPolicyRunnerCfg):
-#     """Train with RSL-RL agent."""
-#     # override configurations with non-hydra CLI arguments
-#     agent_cfg = cli_args.update_rsl_rl_cfg(agent_cfg, args_cli)
-#     env_cfg.scene.num_envs = args_cli.num_envs if args_cli.num_envs is not None else env_cfg.scene.num_envs
-#     agent_cfg.max_iterations = (
-#         args_cli.max_iterations if args_cli.max_iterations is not None else agent_cfg.max_iterations
-#     )
-
-#     # set the environment seed
-#     # note: certain randomizations occur in the environment initialization so we set the seed here
-#     env_cfg.seed = agent_cfg.seed
-#     env_cfg.sim.device = args_cli.device if args_cli.device is not None else env_cfg.sim.device
-
-#     # specify directory for logging experiments
-#     log_root_path = os.path.join("logs", "rsl_rl", agent_cfg.experiment_name)
-#     log_root_path = os.path.abspath(log_root_path)
-#     print(f"[INFO] Logging experiment in directory: {log_root_path}")
-#     # specify directory for logging runs: {time-stamp}_{run_name}
-#     log_dir = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-#     if agent_cfg.run_name:
-#         log_dir += f"_{agent_cfg.run_name}"
-#     log_dir = os.path.join(log_root_path, log_dir)
-
-#     # create isaac environment
-#     env = gym.make(args_cli.task, cfg=env_cfg, render_mode="rgb_array" if args_cli.video else None)
-#     # wrap for video recording
-#     if args_cli.video:
-#         video_kwargs = {
-#             "video_folder": os.path.join(log_dir, "videos", "train"),
-#             "step_trigger": lambda step: step % args_cli.video_interval == 0,
-#             "video_length": args_cli.video_length,
-#             "disable_logger": True,
-#         }
-#         print("[INFO] Recording videos during training.")
-#         print_dict(video_kwargs, nesting=4)
-#         env = gym.wrappers.RecordVideo(env, **video_kwargs)
-
-#     # convert to single-agent instance if required by the RL algorithm
-#     if isinstance(env.unwrapped, DirectMARLEnv):
-#         env = multi_agent_to_single_agent(env)
-
-#     # wrap around environment for rsl-rl
-#     env = RslRlVecEnvWrapper(env)
-
-#     # create runner from rsl-rl
-#     runner = OnPolicyRunner(env, agent_cfg.to_dict(), log_dir=log_dir, device=agent_cfg.device)
-#     # write git state to logs
-#     runner.add_git_repo_to_log(__file__)
-#     # save resume path before creating a new log_dir
-#     if agent_cfg.resume:
-#         # get path to previous checkpoint
-#         resume_path = get_checkpoint_path(log_root_path, agent_cfg.load_run, agent_cfg.load_checkpoint)
-#         print(f"[INFO]: Loading model checkpoint from: {resume_path}")
-#         # load previously trained model
-#         runner.load(resume_path)
-
-#     # dump the configuration into log-directory
-#     dump_yaml(os.path.join(log_dir, "params", "env.yaml"), env_cfg)
-#     dump_yaml(os.path.join(log_dir, "params", "agent.yaml"), agent_cfg)
-#     dump_pickle(os.path.join(log_dir, "params", "env.pkl"), env_cfg)
-#     dump_pickle(os.path.join(log_dir, "params", "agent.pkl"), agent_cfg)
-
-#     # run training
-#     runner.learn(num_learning_iterations=agent_cfg.max_iterations, init_at_random_ep_len=True)
-
-#     # close the simulator
-#     env.close()
-
-
-# if __name__ == "__main__":
-#     # run the main function
-#     main()
-#     # close sim app
-#     simulation_app.close()
+    # Use this command to view log -> tensorboard --logdir logs/

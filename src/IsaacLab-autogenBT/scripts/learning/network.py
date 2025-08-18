@@ -32,6 +32,27 @@ from cachetools import LRUCache
 #               19 : None, #stop node
 #             }
 
+# node_dict = {   0 : '0', #patrol_node
+#                 1 : '1', #find_target_node
+#                 2 : '2', #go_to_nearest_target
+#                 # Behaviors
+#                 3 : 'a', #patrol_node
+#                 4 : 'b', #find_target_node
+#                 5 : 'c', #go_to_nearest_target
+#                 6 : 'e', #go_to_spawn_node
+#                 7 : 'f', #picking_object_node
+#                 8 : 'g', #drop_object_node
+#                 # Conditions
+#                 9 : 'B', #is_robot_at_the_spawn_node
+#                 10 : 'D', #are_object_existed_on_internal_map
+#                 11 : 'E', #are_object_nearby_node
+#                 12 : 'F', #is_object_in_hand_node
+#                 13 : 'G', #is_nearby_object_not_at_goal
+#                 14 : 'H', #are_five_objects_at_spawn
+#                 # Specials
+#                 15 : None, #stop node
+#                 }
+
 node_dict = {   0 : '0', #patrol_node
                 1 : '1', #find_target_node
                 2 : '2', #go_to_nearest_target
@@ -47,10 +68,9 @@ node_dict = {   0 : '0', #patrol_node
                 10 : 'D', #are_object_existed_on_internal_map
                 11 : 'E', #are_object_nearby_node
                 12 : 'F', #is_object_in_hand_node
-                13 : 'G', #is_nearby_object_not_at_goal
-                14 : 'H', #are_five_objects_at_spawn
+                13 : 'H', #are_five_objects_at_spawn
                 # Specials
-                15 : None, #stop node
+                14 : None, #stop node
                 }
 
 # === Inverted character -> type index ===
@@ -147,7 +167,7 @@ class RvNN_mem(nn.Module):
         2. Node location to apply expansion (classification)
         3. Scalar reward (regression)
     """
-    def __init__(self, node_type_vocab_size, embed_size, hidden_size, action1_size, action2_size, device, cache_size=10000, parse_cache_size=10000):
+    def __init__(self, node_type_vocab_size, embed_size, hidden_size, action1_size, action2_size, device, reward_head = False, cache_size=10000, parse_cache_size=10000):
         super(RvNN_mem, self).__init__()
         
         self.device = device
@@ -158,7 +178,10 @@ class RvNN_mem(nn.Module):
 
         self.output_action1 = nn.Linear(hidden_size, action1_size, device=self.device)
         self.output_action2 = nn.Linear(hidden_size, action2_size, device=self.device)
-        self.reward_head = nn.Linear(hidden_size, 1, device=self.device)
+
+        self.reward_head = None
+        if reward_head:
+            self.reward_head = nn.Linear(hidden_size, 1, device=self.device)
 
         self.child_gru = nn.GRU(hidden_size, hidden_size, batch_first=True, device=self.device)
 
@@ -291,7 +314,8 @@ class RvNN_mem(nn.Module):
 
         action1_logits = self.output_action1(h)
         action2_logits = self.output_action2(h)
-        reward_pred = self.reward_head(h).squeeze(0)
+        if self.reward_head is not None: reward_pred = self.reward_head(h).squeeze(0) 
+        else: reward_pred = None
 
         action1_probs = torch.softmax(action1_logits, dim=0)
         action2_probs = torch.softmax(action2_logits, dim=0)
@@ -328,7 +352,8 @@ class RvNN_mem(nn.Module):
 
                     loss1 = self.loss_fn(action1_logits.unsqueeze(0), target1)
                     loss2 = self.loss_fn(action2_logits.unsqueeze(0), target2)
-                    loss3 = self.loss_fn_reward(reward_pred, reward_target)
+                    if self.reward_head is not None: loss3 = self.loss_fn_reward(reward_pred, reward_target)
+                    else: loss3 = 0
 
                     l2_reg = sum((param**2).sum() for param in self.parameters())
                     loss = loss1 + loss2 + loss3 + l2_weight * l2_reg
@@ -340,21 +365,24 @@ class RvNN_mem(nn.Module):
                     train_loss += loss.item()
                     train_correct1 += (action1_logits.argmax().item() == target1.item())
                     train_correct2 += (action2_logits.argmax().item() == target2.item())
-                    reward_mse_total += (reward_pred.item() - reward_target.item()) ** 2
+                    if self.reward_head is not None: reward_mse_total += (reward_pred.item() - reward_target.item()) ** 2
 
             n_train = len(train_loader.dataset)
             avg_loss = train_loss / n_train
             acc1 = train_correct1 / n_train
             acc2 = train_correct2 / n_train
-            reward_mse = reward_mse_total / n_train
 
-            print(f"Epoch {epoch+1}/{num_epochs} | Train Loss: {avg_loss:.4f} | Acc1: {acc1:.2%} | Acc2: {acc2:.2%} | Reward MSE: {reward_mse:.4f}")
+            if self.reward_head is not None:
+                reward_mse = reward_mse_total / n_train
+                print(f"Epoch {epoch+1}/{num_epochs} | Train Loss: {avg_loss:.4f} | Acc1: {acc1:.2%} | Acc2: {acc2:.2%} | Reward MSE: {reward_mse:.4f}")
+            else:
+                print(f"Epoch {epoch+1}/{num_epochs} | Train Loss: {avg_loss:.4f} | Acc1: {acc1:.2%} | Acc2: {acc2:.2%}")
 
             if writer:
                 writer.add_scalar("Train/Loss", avg_loss, global_step + epoch)
                 writer.add_scalar("Train/Acc1_NodeType", acc1, global_step + epoch)
                 writer.add_scalar("Train/Acc2_Location", acc2, global_step + epoch)
-                writer.add_scalar("Train/Reward_MSE", reward_mse, global_step + epoch)
+                if self.reward_head is not None: writer.add_scalar("Train/Reward_MSE", reward_mse, global_step + epoch)
 
             # Validation
             if val_loader:
@@ -374,18 +402,22 @@ class RvNN_mem(nn.Module):
 
                             val_correct1 += (action1_logits.argmax().item() == target1.item())
                             val_correct2 += (action2_logits.argmax().item() == target2.item())
-                            val_reward_mse += (reward_pred.item() - reward_target.item()) ** 2
+                            if self.reward_head is not None: val_reward_mse += (reward_pred.item() - reward_target.item()) ** 2
 
                 n_val = len(val_loader.dataset)
                 val_acc1 = val_correct1 / n_val
                 val_acc2 = val_correct2 / n_val
-                val_reward_mse /= n_val
 
-                print(f"              | Val Acc1: {val_acc1:.2%} | Val Acc2: {val_acc2:.2%} | Val Reward MSE: {val_reward_mse:.4f}")
+                if self.reward_head is not None:
+                    val_reward_mse /= n_val
+                    print(f"              | Val Acc1: {val_acc1:.2%} | Val Acc2: {val_acc2:.2%} | Val Reward MSE: {val_reward_mse:.4f}")
+                else:
+                    print(f"              | Val Acc1: {val_acc1:.2%} | Val Acc2: {val_acc2:.2%}")
+
                 if writer:
                     writer.add_scalar("Val/Acc1_NodeType", val_acc1, global_step + epoch)
                     writer.add_scalar("Val/Acc2_Location", val_acc2, global_step + epoch)
-                    writer.add_scalar("Val/Reward_MSE", val_reward_mse, global_step + epoch)
+                    if self.reward_head is not None: writer.add_scalar("Val/Reward_MSE", val_reward_mse, global_step + epoch)
 
         print(f"Cache hits: {self.cache_hits} | Cache misses: {self.cache_misses} | Hit ratio: {100 * self.cache_hits / (self.cache_hits + self.cache_misses + 1e-8):.2f}%")
         return avg_loss  # Return the final average loss for outer-loop logging
@@ -397,7 +429,7 @@ class RvNN(nn.Module):
         2. Node location to apply expansion (classification)
         3. Scalar reward (regression)
     """
-    def __init__(self, node_type_vocab_size, embed_size, hidden_size, action1_size, action2_size, device):
+    def __init__(self, node_type_vocab_size, embed_size, hidden_size, action1_size, action2_size, device, reward_head=False):
         super(RvNN, self).__init__()
         
         self.device = device
@@ -408,7 +440,10 @@ class RvNN(nn.Module):
 
         self.output_action1 = nn.Linear(hidden_size, action1_size, device=self.device)
         self.output_action2 = nn.Linear(hidden_size, action2_size, device=self.device)
-        self.reward_head = nn.Linear(hidden_size, 1, device=self.device)
+
+        self.reward_head = None
+        if reward_head:
+            self.reward_head = nn.Linear(hidden_size, 1, device=self.device)
 
         self.child_gru = nn.GRU(hidden_size, hidden_size, batch_first=True, device=self.device)
 
@@ -473,7 +508,8 @@ class RvNN(nn.Module):
 
         action1_logits = self.output_action1(h)
         action2_logits = self.output_action2(h)
-        reward_pred = self.reward_head(h).squeeze(0)  # scalar output
+        if self.reward_head is not None: reward_pred = self.reward_head(h).squeeze(0) 
+        else: reward_pred = None
 
         action1_probs = torch.softmax(action1_logits, dim=0)
         action2_probs = torch.softmax(action2_logits, dim=0)
@@ -510,7 +546,8 @@ class RvNN(nn.Module):
 
                     loss1 = self.loss_fn(action1_logits.unsqueeze(0), target1)
                     loss2 = self.loss_fn(action2_logits.unsqueeze(0), target2)
-                    loss3 = self.loss_fn_reward(reward_pred, reward_target)
+                    if self.reward_head is not None: loss3 = self.loss_fn_reward(reward_pred, reward_target)
+                    else: loss3 = 0
 
                     l2_reg = sum((param**2).sum() for param in self.parameters())
                     loss = loss1 + loss2 + loss3 + l2_weight * l2_reg
@@ -521,21 +558,24 @@ class RvNN(nn.Module):
                     train_loss += loss.item()
                     train_correct1 += (action1_logits.argmax().item() == target1.item())
                     train_correct2 += (action2_logits.argmax().item() == target2.item())
-                    reward_mse_total += (reward_pred.item() - reward_target.item()) ** 2
+                    if self.reward_head is not None: reward_mse_total += (reward_pred.item() - reward_target.item()) ** 2
 
             n_train = len(train_loader.dataset)
             avg_loss = train_loss / n_train
             acc1 = train_correct1 / n_train
             acc2 = train_correct2 / n_train
-            reward_mse = reward_mse_total / n_train
 
-            print(f"Epoch {epoch+1}/{num_epochs} | Train Loss: {avg_loss:.4f} | Acc1: {acc1:.2%} | Acc2: {acc2:.2%} | Reward MSE: {reward_mse:.4f}")
+            if self.reward_head is not None:
+                reward_mse = reward_mse_total / n_train
+                print(f"Epoch {epoch+1}/{num_epochs} | Train Loss: {avg_loss:.4f} | Acc1: {acc1:.2%} | Acc2: {acc2:.2%} | Reward MSE: {reward_mse:.4f}")
+            else:
+                print(f"Epoch {epoch+1}/{num_epochs} | Train Loss: {avg_loss:.4f} | Acc1: {acc1:.2%} | Acc2: {acc2:.2%}")
 
             if writer:
                 writer.add_scalar("Train/Loss", avg_loss, global_step + epoch)
                 writer.add_scalar("Train/Acc1_NodeType", acc1, global_step + epoch)
                 writer.add_scalar("Train/Acc2_Location", acc2, global_step + epoch)
-                writer.add_scalar("Train/Reward_MSE", reward_mse, global_step + epoch)
+                if self.reward_head is not None: writer.add_scalar("Train/Reward_MSE", reward_mse, global_step + epoch)
 
             # Validation
             if val_loader:
@@ -555,17 +595,21 @@ class RvNN(nn.Module):
 
                             val_correct1 += (action1_logits.argmax().item() == target1.item())
                             val_correct2 += (action2_logits.argmax().item() == target2.item())
-                            val_reward_mse += (reward_pred.item() - reward_target.item()) ** 2
+                            if self.reward_head is not None: val_reward_mse += (reward_pred.item() - reward_target.item()) ** 2
 
                 n_val = len(val_loader.dataset)
                 val_acc1 = val_correct1 / n_val
                 val_acc2 = val_correct2 / n_val
-                val_reward_mse /= n_val
 
-                print(f"              | Val Acc1: {val_acc1:.2%} | Val Acc2: {val_acc2:.2%} | Val Reward MSE: {val_reward_mse:.4f}")
+                if self.reward_head is not None:
+                    val_reward_mse /= n_val
+                    print(f"              | Val Acc1: {val_acc1:.2%} | Val Acc2: {val_acc2:.2%} | Val Reward MSE: {val_reward_mse:.4f}")
+                else:
+                    print(f"              | Val Acc1: {val_acc1:.2%} | Val Acc2: {val_acc2:.2%}")
+
                 if writer:
                     writer.add_scalar("Val/Acc1_NodeType", val_acc1, global_step + epoch)
                     writer.add_scalar("Val/Acc2_Location", val_acc2, global_step + epoch)
-                    writer.add_scalar("Val/Reward_MSE", val_reward_mse, global_step + epoch)
+                    if self.reward_head is not None: writer.add_scalar("Val/Reward_MSE", val_reward_mse, global_step + epoch)
 
         return avg_loss  # Return the final average loss for outer-loop logging

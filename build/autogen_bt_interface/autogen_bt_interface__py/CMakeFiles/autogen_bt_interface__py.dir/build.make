@@ -71,9 +71,12 @@ autogen_bt_interface__py/CMakeFiles/autogen_bt_interface__py: rosidl_generator_p
 autogen_bt_interface__py/CMakeFiles/autogen_bt_interface__py: rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_c.c
 autogen_bt_interface__py/CMakeFiles/autogen_bt_interface__py: rosidl_generator_py/autogen_bt_interface/srv/_charging_request.py
 autogen_bt_interface__py/CMakeFiles/autogen_bt_interface__py: rosidl_generator_py/autogen_bt_interface/srv/_picking_request.py
+autogen_bt_interface__py/CMakeFiles/autogen_bt_interface__py: rosidl_generator_py/autogen_bt_interface/msg/_string_stamped.py
 autogen_bt_interface__py/CMakeFiles/autogen_bt_interface__py: rosidl_generator_py/autogen_bt_interface/srv/__init__.py
+autogen_bt_interface__py/CMakeFiles/autogen_bt_interface__py: rosidl_generator_py/autogen_bt_interface/msg/__init__.py
 autogen_bt_interface__py/CMakeFiles/autogen_bt_interface__py: rosidl_generator_py/autogen_bt_interface/srv/_charging_request_s.c
 autogen_bt_interface__py/CMakeFiles/autogen_bt_interface__py: rosidl_generator_py/autogen_bt_interface/srv/_picking_request_s.c
+autogen_bt_interface__py/CMakeFiles/autogen_bt_interface__py: rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c
 
 rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_fastrtps_c.c: /opt/ros/humble/lib/rosidl_generator_py/rosidl_generator_py
 rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_fastrtps_c.c: /opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_generator_py/__init__.py
@@ -90,6 +93,7 @@ rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_types
 rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_fastrtps_c.c: /opt/ros/humble/share/rosidl_generator_py/resource/_srv.py.em
 rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_fastrtps_c.c: rosidl_adapter/autogen_bt_interface/srv/ChargingRequest.idl
 rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_fastrtps_c.c: rosidl_adapter/autogen_bt_interface/srv/PickingRequest.idl
+rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_fastrtps_c.c: rosidl_adapter/autogen_bt_interface/msg/StringStamped.idl
 rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_fastrtps_c.c: /opt/ros/humble/share/std_msgs/msg/Bool.idl
 rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_fastrtps_c.c: /opt/ros/humble/share/std_msgs/msg/Byte.idl
 rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_fastrtps_c.c: /opt/ros/humble/share/std_msgs/msg/ByteMultiArray.idl
@@ -137,8 +141,14 @@ rosidl_generator_py/autogen_bt_interface/srv/_charging_request.py: rosidl_genera
 rosidl_generator_py/autogen_bt_interface/srv/_picking_request.py: rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_fastrtps_c.c
 	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_py/autogen_bt_interface/srv/_picking_request.py
 
+rosidl_generator_py/autogen_bt_interface/msg/_string_stamped.py: rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_fastrtps_c.c
+	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_py/autogen_bt_interface/msg/_string_stamped.py
+
 rosidl_generator_py/autogen_bt_interface/srv/__init__.py: rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_fastrtps_c.c
 	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_py/autogen_bt_interface/srv/__init__.py
+
+rosidl_generator_py/autogen_bt_interface/msg/__init__.py: rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_fastrtps_c.c
+	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_py/autogen_bt_interface/msg/__init__.py
 
 rosidl_generator_py/autogen_bt_interface/srv/_charging_request_s.c: rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_fastrtps_c.c
 	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_py/autogen_bt_interface/srv/_charging_request_s.c
@@ -146,10 +156,16 @@ rosidl_generator_py/autogen_bt_interface/srv/_charging_request_s.c: rosidl_gener
 rosidl_generator_py/autogen_bt_interface/srv/_picking_request_s.c: rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_fastrtps_c.c
 	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_py/autogen_bt_interface/srv/_picking_request_s.c
 
+rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c: rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_fastrtps_c.c
+	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c
+
 autogen_bt_interface__py: autogen_bt_interface__py/CMakeFiles/autogen_bt_interface__py
 autogen_bt_interface__py: rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_c.c
 autogen_bt_interface__py: rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_fastrtps_c.c
 autogen_bt_interface__py: rosidl_generator_py/autogen_bt_interface/_autogen_bt_interface_s.ep.rosidl_typesupport_introspection_c.c
+autogen_bt_interface__py: rosidl_generator_py/autogen_bt_interface/msg/__init__.py
+autogen_bt_interface__py: rosidl_generator_py/autogen_bt_interface/msg/_string_stamped.py
+autogen_bt_interface__py: rosidl_generator_py/autogen_bt_interface/msg/_string_stamped_s.c
 autogen_bt_interface__py: rosidl_generator_py/autogen_bt_interface/srv/__init__.py
 autogen_bt_interface__py: rosidl_generator_py/autogen_bt_interface/srv/_charging_request.py
 autogen_bt_interface__py: rosidl_generator_py/autogen_bt_interface/srv/_charging_request_s.c

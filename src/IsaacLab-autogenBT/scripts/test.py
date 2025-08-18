@@ -20,7 +20,7 @@ def run_BTs(bt_string_array, number_of_target_to_success = 5, verbose=False):
     global processes
     processes = []  # Reset the global process list
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    run_bt_file = os.path.join(script_dir, "bt", "run_bt.py")
+    run_bt_file = os.path.join(script_dir, "bt", "simple_run_bt.py")
 
     for env_id, bt_string in enumerate(bt_string_array):
         # Run the run_bt.py script as a new process
@@ -28,7 +28,7 @@ def run_BTs(bt_string_array, number_of_target_to_success = 5, verbose=False):
             'python3', run_bt_file,
             f'--env_id={env_id}',
             f"--bt_string={bt_string}",
-            f"--number_of_target_to_success={number_of_target_to_success}"
+            # f"--number_of_target_to_success={number_of_target_to_success}"
         ])
         processes.append(process)
     
@@ -50,10 +50,11 @@ def stop_BTs(verbose=False):
 if __name__ == "__main__":
     # ========== Test the run_BTs function =========
     num_envs = 10  # Set the number of parallel executions you want
-    bt_string_array = ['e'] * num_envs
+    bt_string_array = ['(2abce)'] * num_envs
     # bt_string_array[1] = '(1H(0(1C(0(1Ad)h))(0(1F(0(1(0EG)(0(1D(2ab))c))f))(1Be)g)))'
 
     # bt_string_array = ['(1H(0(1F(0(1(0EG)(0(1D(2ab))c))f))(1Be)g))'] * num_envs
+    # bt_string_array = ['(1H(0(1F(0(1E(0(1D(2ab))c))f))(1Be)g))'] * num_envs  # Example behavior tree strings
     
     # # Launch the behavior trees
     run_BTs(bt_string_array , number_of_target_to_success=1)

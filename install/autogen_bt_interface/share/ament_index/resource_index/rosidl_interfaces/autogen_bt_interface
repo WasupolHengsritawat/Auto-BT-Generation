@@ -1,3 +1,5 @@
+msg/StringStamped.idl
+msg/StringStamped.msg
 srv/ChargingRequest.idl
 srv/ChargingRequest.srv
 srv/ChargingRequest_Request.msg

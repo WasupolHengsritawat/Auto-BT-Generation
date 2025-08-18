@@ -1,5 +1,10 @@
 file(REMOVE_RECURSE
   "CMakeFiles/autogen_bt_interface__cpp"
+  "rosidl_generator_cpp/autogen_bt_interface/msg/detail/string_stamped__builder.hpp"
+  "rosidl_generator_cpp/autogen_bt_interface/msg/detail/string_stamped__struct.hpp"
+  "rosidl_generator_cpp/autogen_bt_interface/msg/detail/string_stamped__traits.hpp"
+  "rosidl_generator_cpp/autogen_bt_interface/msg/detail/string_stamped__type_support.hpp"
+  "rosidl_generator_cpp/autogen_bt_interface/msg/string_stamped.hpp"
   "rosidl_generator_cpp/autogen_bt_interface/srv/charging_request.hpp"
   "rosidl_generator_cpp/autogen_bt_interface/srv/detail/charging_request__builder.hpp"
   "rosidl_generator_cpp/autogen_bt_interface/srv/detail/charging_request__struct.hpp"

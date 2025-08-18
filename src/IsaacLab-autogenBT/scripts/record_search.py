@@ -14,11 +14,11 @@ project_root = os.path.abspath(os.path.join(script_dir, ".."))
 
 logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
 
-date_time = "2025-05-12_21-50-39"
-model_name = "rvnn_iter354"
+date_time = "2025-05-13_14-48-37"
+model_name = "rvnn_iter004"
 full_model_name = f"{model_name}.pt"
 
-model_path = os.path.join(logs_dir, date_time, model_name)
+model_path = os.path.join(logs_dir, date_time, full_model_name)
 
 sys.path.insert(0, project_root)
 sys.path.insert(0, script_dir)
@@ -29,10 +29,37 @@ from learning.gymEnv import MultiBTEnv
 
 device = "cuda"
 
-num_search_agents = 100
-num_search = 200
+num_search_agents = 5
+num_search = 10
 
 num_node_to_explore = 10
+
+# # Node dictionary
+#             # Flow Control
+# node_dict = {   0 : '(0)', #patrol_node
+#                 1 : '(1)', #find_target_node
+#                 2 : '(2)', #go_to_nearest_target
+#             # Behaviors
+#                 3 : 'a', #patrol_node
+#                 4 : 'b', #find_target_node
+#                 5 : 'c', #go_to_nearest_target
+#                 6 : 'd', #go_to_charger_node
+#                 7 : 'e', #go_to_spawn_node
+#                 8 : 'f', #picking_object_node
+#                 9 : 'g', #drop_object_node
+#                 10: 'h', #charge_node
+#             # Conditions
+#                 11 : 'A', #is_robot_at_the_charger_node
+#                 12 : 'B', #is_robot_at_the_spawn_node
+#                 13 : 'C', #is_battery_on_proper_level
+#                 14 : 'D', #are_object_existed_on_internal_map
+#                 15 : 'E', #are_object_nearby_node
+#                 16 : 'F', #is_object_in_hand_node
+#                 17 : 'G', #is_nearby_object_not_at_goal
+#                 18 : 'H', #are_five_objects_at_spawn
+#             # Specials
+#                 19 : None, #stop node
+#             }
 
 # Flow Control
 node_dict = {   0 : '(0)', #patrol_node
@@ -62,13 +89,6 @@ nodes_limit = 25
 # Number of training epochs
 num_epochs = 20
 
-# Simulation configurations
-# number_of_target_to_success=3 
-# number_of_spawned_objects=8
-# sim_step_limit=160000
-
-number_of_target_to_success=1 
-number_of_spawned_objects=10
 sim_step_limit=20000
 
 def modify_bt(node_dict, current_bt, node_type, node_location):
@@ -105,13 +125,15 @@ def modify_bt(node_dict, current_bt, node_type, node_location):
 
 # Instantiate the model
 model = RvNN(
-    node_type_vocab_size=20,  # 0 to 19
-    embed_size=64,
-    hidden_size=128,
-    action1_size=len(node_dict.items()),    # Number of node types to choose from
-    action2_size=2*nodes_limit,             # Max insertion locations (50 * 2) - 1 + 1
-    device=device
-)
+        node_type_vocab_size=20,
+        embed_size=64,
+        hidden_size=128,
+        action1_size=len(node_dict.items()),    # Number of node types to choose from
+        action2_size=2*nodes_limit,             # Max insertion locations (50 * 2) - 1 + 1
+        device=device
+    )
+model.load_state_dict(torch.load(model_path))
+model.eval()
 
 # Optimizer
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
@@ -144,9 +166,7 @@ while True:
     # Get the action probabilities from MCTS search
     save_path = os.path.join(logs_dir, date_time, model_name, f"mcts_tree_{count}.json")
     nt_probs, loc_probs = mcts.run_search(root_state=bt_string,temperature=temperature, verbose=False, export_path=save_path) # Set verbose = True if want to see each search step run time
-
-    # print(loc_probs)
-
+    
     # Store the sample data
     bt_strings.append(bt_string)
     action1_probs.append(nt_probs)
@@ -165,5 +185,9 @@ while True:
     bt_string = modify_bt(node_dict, bt_string, selected_nt, selected_loc)
     number_of_nodes += 1
 
+    print(f"[INFO] Dataset {number_of_nodes}/{nodes_limit} << {bt_strings[-1]}, ({selected_nt}, {selected_loc})")
+
     if selected_nt == (len(node_dict.items()) - 1) or number_of_nodes >= nodes_limit:
         break
+
+print(f"Final BT >> {bt_string}")

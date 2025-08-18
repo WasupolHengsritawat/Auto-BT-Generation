@@ -84,6 +84,7 @@ rosidl_generator_c/autogen_bt_interface/srv/charging_request.h: /opt/ros/humble/
 rosidl_generator_c/autogen_bt_interface/srv/charging_request.h: /opt/ros/humble/share/rosidl_generator_c/resource/srv__type_support.h.em
 rosidl_generator_c/autogen_bt_interface/srv/charging_request.h: rosidl_adapter/autogen_bt_interface/srv/ChargingRequest.idl
 rosidl_generator_c/autogen_bt_interface/srv/charging_request.h: rosidl_adapter/autogen_bt_interface/srv/PickingRequest.idl
+rosidl_generator_c/autogen_bt_interface/srv/charging_request.h: rosidl_adapter/autogen_bt_interface/msg/StringStamped.idl
 rosidl_generator_c/autogen_bt_interface/srv/charging_request.h: /opt/ros/humble/share/std_msgs/msg/Bool.idl
 rosidl_generator_c/autogen_bt_interface/srv/charging_request.h: /opt/ros/humble/share/std_msgs/msg/Byte.idl
 rosidl_generator_c/autogen_bt_interface/srv/charging_request.h: /opt/ros/humble/share/std_msgs/msg/ByteMultiArray.idl
@@ -140,11 +141,26 @@ rosidl_generator_c/autogen_bt_interface/srv/detail/picking_request__struct.h: ro
 rosidl_generator_c/autogen_bt_interface/srv/detail/picking_request__type_support.h: rosidl_generator_c/autogen_bt_interface/srv/charging_request.h
 	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_c/autogen_bt_interface/srv/detail/picking_request__type_support.h
 
+rosidl_generator_c/autogen_bt_interface/msg/string_stamped.h: rosidl_generator_c/autogen_bt_interface/srv/charging_request.h
+	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_c/autogen_bt_interface/msg/string_stamped.h
+
+rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.h: rosidl_generator_c/autogen_bt_interface/srv/charging_request.h
+	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.h
+
+rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__struct.h: rosidl_generator_c/autogen_bt_interface/srv/charging_request.h
+	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__struct.h
+
+rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__type_support.h: rosidl_generator_c/autogen_bt_interface/srv/charging_request.h
+	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__type_support.h
+
 rosidl_generator_c/autogen_bt_interface/srv/detail/charging_request__functions.c: rosidl_generator_c/autogen_bt_interface/srv/charging_request.h
 	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_c/autogen_bt_interface/srv/detail/charging_request__functions.c
 
 rosidl_generator_c/autogen_bt_interface/srv/detail/picking_request__functions.c: rosidl_generator_c/autogen_bt_interface/srv/charging_request.h
 	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_c/autogen_bt_interface/srv/detail/picking_request__functions.c
+
+rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c: rosidl_generator_c/autogen_bt_interface/srv/charging_request.h
+	@$(CMAKE_COMMAND) -E touch_nocreate rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c
 
 CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/srv/detail/charging_request__functions.c.o: CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/flags.make
 CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/srv/detail/charging_request__functions.c.o: rosidl_generator_c/autogen_bt_interface/srv/detail/charging_request__functions.c
@@ -174,23 +190,39 @@ CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autog
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/srv/detail/picking_request__functions.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_generator_c/autogen_bt_interface/srv/detail/picking_request__functions.c -o CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/srv/detail/picking_request__functions.c.s
 
+CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c.o: CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/flags.make
+CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c.o: rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c
+CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c.o: CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c.o -MF CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c.o.d -o CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c.o -c /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c
+
+CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c > CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c.i
+
+CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c -o CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c.s
+
 # Object files for target autogen_bt_interface__rosidl_generator_c
 autogen_bt_interface__rosidl_generator_c_OBJECTS = \
 "CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/srv/detail/charging_request__functions.c.o" \
-"CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/srv/detail/picking_request__functions.c.o"
+"CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/srv/detail/picking_request__functions.c.o" \
+"CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c.o"
 
 # External object files for target autogen_bt_interface__rosidl_generator_c
 autogen_bt_interface__rosidl_generator_c_EXTERNAL_OBJECTS =
 
 libautogen_bt_interface__rosidl_generator_c.so: CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/srv/detail/charging_request__functions.c.o
 libautogen_bt_interface__rosidl_generator_c.so: CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/srv/detail/picking_request__functions.c.o
+libautogen_bt_interface__rosidl_generator_c.so: CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c.o
 libautogen_bt_interface__rosidl_generator_c.so: CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/build.make
 libautogen_bt_interface__rosidl_generator_c.so: /opt/ros/humble/lib/libstd_msgs__rosidl_generator_c.so
 libautogen_bt_interface__rosidl_generator_c.so: /opt/ros/humble/lib/libbuiltin_interfaces__rosidl_generator_c.so
 libautogen_bt_interface__rosidl_generator_c.so: /opt/ros/humble/lib/librosidl_runtime_c.so
 libautogen_bt_interface__rosidl_generator_c.so: /opt/ros/humble/lib/librcutils.so
 libautogen_bt_interface__rosidl_generator_c.so: CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking C shared library libautogen_bt_interface__rosidl_generator_c.so"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking C shared library libautogen_bt_interface__rosidl_generator_c.so"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -201,6 +233,11 @@ CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/clean:
 	$(CMAKE_COMMAND) -P CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/cmake_clean.cmake
 .PHONY : CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/clean
 
+CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/depend: rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.c
+CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/depend: rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__functions.h
+CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/depend: rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__struct.h
+CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/depend: rosidl_generator_c/autogen_bt_interface/msg/detail/string_stamped__type_support.h
+CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/depend: rosidl_generator_c/autogen_bt_interface/msg/string_stamped.h
 CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/depend: rosidl_generator_c/autogen_bt_interface/srv/charging_request.h
 CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/depend: rosidl_generator_c/autogen_bt_interface/srv/detail/charging_request__functions.c
 CMakeFiles/autogen_bt_interface__rosidl_generator_c.dir/depend: rosidl_generator_c/autogen_bt_interface/srv/detail/charging_request__functions.h

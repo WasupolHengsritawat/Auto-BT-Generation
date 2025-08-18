@@ -7,6 +7,9 @@ import sys
 import os
 import rclpy
 from scipy.spatial.transform import Rotation
+from std_msgs.msg import UInt8, String
+
+from autogen_bt_interface.msg import StringStamped
 
 # Import local files
 # Get the absolute path to the directory containing this script and the root of the project
@@ -22,12 +25,15 @@ sys.path.insert(0, simulation_dir)
 sys.path.insert(0, bt_dir)
 
 from bt_manager import run_BTs, stop_BTs
+from simple_bt_manager import run_simple_BTs, stop_simple_BTs
 from ros2_nodes.ros2_scene_publisher import pub_scene_data
 
 from ros2_nodes.ros2_scene_publisher import SceneNode
 from ros2_nodes.ros2_battery import BatteryManager
 from ros2_nodes.ros2_drive import RobotDriverManager
 from ros2_nodes.ros2_bt_tracker import BTStatusTrackerNode
+
+from env_state_machine import SearchAndDeliverMachine
 
 def get_random_object_pos(num_env, device, number_of_objects = 5,mode = 'different'):
     """
@@ -430,75 +436,18 @@ class MultiBTEnv(gym.Env):
         :param actions: List of (node_type, node_location) for each environment.
         :return: Tuple of (observations, rewards, dones, infos) for all environments.
         """
-        obs, rews, dones, infos = [], [], [], []
+        # Modify each BT
+        obs, _, dones, infos1 = self.step_without_sim(actions)  # Run without simulation
+        
+        # Run BTs in simulation
+        _, rews, _, infos2 = self.evaluate_bt_in_sim()
 
-        self._reset_sim() # reset the simulation before running the BT
-
-        # Modify each BT and run it
-        bt_with_evaluation_node = []
-        for env_id, action in enumerate(actions):
-            node_type, node_location = action
-            self.modify_bt(env_id, node_type, node_location)    # add node according to selected action
-            bt_with_evaluation_node.append('(1H' + self.current_bt[env_id] + ')')   # add evaluation node
-
-            done = False
-            # Done if agent select to not expand the tree
-            if node_type == self.num_node_types - 1:
-                done = True
-
-            # Done if the number of nodes in BT exceed the limit
-            self.number_of_nodes_in_bt[env_id] = sum(1 for c in self.current_bt[env_id] if c not in ('(', ')'))
-            if self.number_of_nodes_in_bt[env_id] > self.nodes_limit:
-                done = True
-            
-            dones.append(done)
-
-        obs = self.current_bt
-        run_BTs(bt_with_evaluation_node, number_of_target_to_success = self.number_of_target_to_success) # run BTs
-
-        pbar = tqdm(total=self.sim_step_limit)
-
-        # Run the simulation
-        while self.simulation_app.is_running():
-            # Publish Transformation Data
-            pub_scene_data(self.scene.num_envs, self.base_node, self.scene)
-
-            # Control motors via cmd_vel
-            self.driver_manager.apply(self.robot, self.joint_names)
-            self.robot.write_data_to_sim()
-
-            # Spin BT Tracker Node
-            try:
-                rclpy.spin_once(self.bt_tracker, timeout_sec=0.0)
-            except rclpy.executors.ExternalShutdownException:
-                print("[INFO] Spin exited because ROS2 shutdown detected.")
-
-            # Perform step
-            self.sim.step()
-
-            # Increment counter
-            self.sim_step += 1
-
-            # Update the progress bar
-            pbar.update(1)
-            
-            # Update buffers
-            self.scene.update(self.sim_dt)
-
-            # Check if the simulation must be terminated
-            if self._is_sim_terminated():
-                break
-
-        pbar.close()
-
-        stop_BTs()  # stop all BT processes
-        rews = self._get_reward()
-
-        return obs, rews, dones, infos
+        return obs, rews, dones, infos1 + infos2
     
     def step_without_sim(self, actions):
+
         obs, rews, dones, infos = [], [], [], []
-        
+
         for env_id, action in enumerate(actions):
             # Modify each BT
             node_type, node_location = action
@@ -626,3 +575,138 @@ class MultiBTEnv(gym.Env):
         """
         self.current_bt[env_id] = bt_string
         self.number_of_nodes_in_bt[env_id] = sum(1 for c in self.current_bt[env_id] if c not in ('(', ')'))
+
+
+class Simple_MultiBTEnv(MultiBTEnv):
+    def __init__(self, node_dict, 
+                 nodes_limit, num_envs, 
+                 verbose = False):
+        super().__init__(node_dict=node_dict,
+                         nodes_limit=nodes_limit,
+                         num_envs=num_envs,
+                         verbose=verbose)
+
+        self.reward_weight = [  25,     # Is object found
+                                50,     # Was robot been to object
+                                75,     # Is object picked
+                               100,     # Was robot been to final
+                               200,     # Is object delivered
+                                -0.25]  # Tree complexity penalty term
+
+        # ROS2 Setup
+        if not rclpy.ok():
+            rclpy.init()
+        self.node = Node('multi_bt_env')
+
+        self.env_publisher = []
+        for i in range(self.num_envs):
+            self.env_publisher.append(self.node.create_publisher(String, f'/env_{i}/robot/state', 10))
+            self.node.create_subscription(StringStamped, f'/env_{i}/robot/action', lambda msg, idx=i: self._receive_action(idx, msg), 10)
+
+        # Simulation Variables
+        self.robot_action = [None for _ in range(self.num_envs)]
+        self.robot_action_timestamp = [0 for _ in range(self.num_envs)]
+
+        # State Progress for Reward Calculation
+        self.state_progress = {
+            'A' : TaskState(position='Start' , object_found=False, object_picked=False, object_delivered=False), # Initial state
+            'B' : TaskState(position='InMap' , object_found=False, object_picked=False, object_delivered=False), # Patroling
+            'C' : TaskState(position='InMap' , object_found=True , object_picked=False, object_delivered=False), # Searching -> Object found
+            'D' : TaskState(position='Object', object_found=True , object_picked=False, object_delivered=False), # Arrived at object location
+            'E' : TaskState(position='Object', object_found=True , object_picked=True , object_delivered=False), # Object Picked
+            'F' : TaskState(position='Final' , object_found=True , object_picked=True , object_delivered=False), # Initial State with object in hand
+            'G' : TaskState(position='Final' , object_found=True , object_picked=False, object_delivered=False), # Initial State with known object location
+            'H' : TaskState(position='Final' , object_found=True , object_picked=True , object_delivered=True)   # Final State
+        }
+
+    def _receive_action(self, env_id, msg):
+        """
+        Update a specific environment's internal state synced with ROS2 topics.
+
+        :param idx: Index of the environment to update.
+        :param attr: Name of the attribute to set.
+        :param value: New value received from ROS2.
+        """
+        temp_robot_action = msg.data
+        temp_robot_action_timestamp = msg.header.stamp.sec + msg.header.stamp.nanosec * 1e-9
+
+        if temp_robot_action_timestamp - self.robot_action_timestamp[env_id] < 7e-3 and temp_robot_action not in self.robot_action[env_id]:
+            temp_robot_action = self.robot_action[env_id] + temp_robot_action
+
+        self.robot_action[env_id] = temp_robot_action
+        self.robot_action_timestamp[env_id] = temp_robot_action_timestamp
+
+    def _reset_sim(self):
+        # Reset Robot Action
+        self.robot_action = [None for _ in range(self.num_envs)]
+        self.robot_action_timestamp = [0 for _ in range(self.num_envs)]
+    
+    def evaluate_bt_in_sim(self):
+        obs, rews, dones, infos = [], [], [], []
+
+        self._reset_sim() # reset the simulation before running the BT
+
+        # Modify each BT and run it
+        bt_with_evaluation_node = []
+        for env_id in range(self.num_envs):
+            bt_with_evaluation_node.append('(1H' + self.current_bt[env_id] + ')')   # add evaluation node
+
+        run_simple_BTs(bt_with_evaluation_node) # run BTs
+
+        # Environment Finite State Machine Setup
+        env_fsm = [SearchAndDeliverMachine() for _ in range(self.num_envs)]
+        env_state = [fsm.current_state.id for fsm in env_fsm]
+        env_done = [False for _ in range(self.num_envs)]
+
+        while all(env_done) != True:
+            # Spin Env Node
+            try:
+                rclpy.spin_once(self.node, timeout_sec=0.0)
+            except rclpy.executors.ExternalShutdownException:
+                print("[INFO] Spin exited because ROS2 shutdown detected.")
+
+            for i in range(self.num_envs):
+                self.env_publisher[i].publish(String(data=env_state[i]))
+
+            # If any robot action is None, skip the step
+            if None in self.robot_action:
+                continue
+
+            for i in range(self.num_envs):
+                try:
+                    env_fsm[i].send(self.robot_action[i])
+                    env_state[i] = env_fsm[i].current_state.id
+
+                    if env_state[i] == 'H':
+                        env_done[i] = True
+                except:
+                    env_done[i] = True
+
+        stop_simple_BTs()  # stop all BT processes
+        rews = self._get_reward(env_state)
+
+        return obs, rews, dones, infos
+    
+    def _get_reward(self, env_state):
+
+        rewards = [ self.reward_weight[0] * self.state_progress[final_state]._is_object_found() +
+                    self.reward_weight[1] * self.state_progress[final_state]._was_robot_been_to_object() +
+                    self.reward_weight[2] * self.state_progress[final_state]._is_object_picked() +
+                    self.reward_weight[3] * self.state_progress[final_state]._was_robot_been_to_final() +
+                    self.reward_weight[4] * self.state_progress[final_state]._is_object_delivered() +
+                    self.reward_weight[5] * self.state_progress[final_state]._is_object_delivered() * self._BT_complexity(env_id) for env_id, final_state in enumerate(env_state) ]
+
+        return rewards     
+
+class TaskState:
+    def __init__(self, position: str, object_found: bool, object_picked: bool, object_delivered: bool):
+        self.position = position
+        self.object_found = object_found
+        self.object_picked = object_picked
+        self.object_delivered = object_delivered
+
+    def _is_object_found(self): return self.object_found
+    def _was_robot_been_to_object(self): return self.position == 'Object' or self.position == 'Final'
+    def _is_object_picked(self): return self.object_picked
+    def _was_robot_been_to_final(self): return self.position == 'Final'
+    def _is_object_delivered(self): return self.object_delivered

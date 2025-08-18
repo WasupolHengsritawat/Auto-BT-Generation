@@ -1,0 +1,23 @@
+[3.265s] Invoking command in '/home/absolutezeno/Auto-BT-Generation/src/py_trees_ros_viewer': PS1=(isaaclab) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ PYTHONPATH=/home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages:${PYTHONPATH} VIRTUAL_ENV_PROMPT=(isaaclab) /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/py_trees_ros_viewer build --build-base /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build install --record /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/install.log --single-version-externally-managed install_data
+[3.296s] /home/absolutezeno/Auto-BT-Generation/src/py_trees_ros_viewer/setup.py:5: DeprecationWarning: The distutils package is deprecated and slated for removal in Python 3.12. Use setuptools or check PEP 632 for potential alternatives
+[3.296s]   from distutils import log
+[3.724s] running egg_info
+[3.726s] writing ../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info/PKG-INFO
+[3.732s] writing dependency_links to ../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info/dependency_links.txt
+[3.732s] writing entry points to ../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info/entry_points.txt
+[3.732s] writing top-level names to ../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info/top_level.txt
+[3.735s] reading manifest file '../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info/SOURCES.txt'
+[3.735s] adding license file 'LICENSE'
+[3.735s] writing manifest file '../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info/SOURCES.txt'
+[3.735s] running build
+[3.735s] running build_py
+[3.737s] running install
+[3.737s] running install_lib
+[3.755s] running install_data
+[3.755s] running install_egg_info
+[3.755s] removing '/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer-0.2.3-py3.10.egg-info' (and everything under it)
+[3.756s] Copying ../../build/py_trees_ros_viewer/py_trees_ros_viewer.egg-info to /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages/py_trees_ros_viewer-0.2.3-py3.10.egg-info
+[3.756s] running install_scripts
+[3.756s] Installing py-trees-tree-viewer script to /home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/bin
+[3.756s] writing list of installed files to '/home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/install.log'
+[4.113s] Invoked command in '/home/absolutezeno/Auto-BT-Generation/src/py_trees_ros_viewer' returned '0': PS1=(isaaclab) \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ PYTHONPATH=/home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/absolutezeno/Auto-BT-Generation/install/py_trees_ros_viewer/lib/python3.10/site-packages:${PYTHONPATH} VIRTUAL_ENV_PROMPT=(isaaclab) /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/py_trees_ros_viewer build --build-base /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/build install --record /home/absolutezeno/Auto-BT-Generation/build/py_trees_ros_viewer/install.log --single-version-externally-managed install_data
