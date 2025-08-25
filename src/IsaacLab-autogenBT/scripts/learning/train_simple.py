@@ -162,11 +162,11 @@ def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, po
     for env_id in range(env.num_envs):
         mcts.env.set_bt(env_id=env_id, bt_string=bt_string)
 
-    # # Get the reward by runnung the BT in IsaacSim Simulation
-    # if verbose: print(f"[INFO] \tEvaluating {bt_string}")
-    # _, rews, _, infos =  env.evaluate_bt_in_sim()
-    # rew = np.mean(rews)
-    # if verbose: print(f"[INFO] \tFinished Evaluation >> reward: {rew}")
+    # Get the reward by runnung the BT in IsaacSim Simulation
+    if verbose: print(f"[INFO] \tEvaluating {bt_string}")
+    _, rews, _, infos =  env.evaluate_bt_in_sim()
+    rew = np.mean(rews)
+    if verbose: print(f"[INFO] \tFinished Evaluation >> reward: {rew}")
 
     # Convert rewards to numpy array
     rewards = np.array([0.0] * len(bt_strings))
