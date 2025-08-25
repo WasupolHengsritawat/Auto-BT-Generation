@@ -9,8 +9,11 @@ import rclpy
 from rclpy.node import Node
 from scipy.spatial.transform import Rotation
 from std_msgs.msg import UInt8, String
+import py_trees
 
 from autogen_bt_interface.msg import StringStamped
+
+import py_trees
 
 # Import local files
 # Get the absolute path to the directory containing this script and the root of the project
@@ -25,12 +28,22 @@ sys.path.insert(0, script_dir)
 # sys.path.insert(0, simulation_dir)
 sys.path.insert(0, bt_dir)
 
-from simple_bt_manager import run_simple_BTs, stop_simple_BTs
+from simple_behavior import (
+    PatrolNode, FindTargetNode, AreObjectsExistOnInternalMap, 
+    GoToNearestTarget, AreObjectNearby, PickObject, IsRobotAtTheSpawn, 
+    IsObjectInHand, DropObject, GoToSpawnNode, AreXObjectsAtSpawn
+)
 
 from env_state_machine import SearchAndDeliverMachine
 
 ######## Hyperparameters ########
-num_envs = 20
+num_envs = 100
+loop_allowed = 2
+
+# bt_string_array = ['(1H(0(1F(0(1E(0(1D(2ab))c))f))(1Be)g))'] * num_envs
+# bt_string_array = '(1H(0(1F(0(1E(0(1D(2ab))c))f))(1Be)g))'
+bt_string_array = ['(1H(0(1D(2ab))c))'] * num_envs
+# bt_string_array = ['(1H)'] * num_envs
 #################################
 
 class TaskState:
@@ -41,97 +54,157 @@ class TaskState:
         self.object_delivered = object_delivered
 
     def _is_object_found(self): return self.object_found
-    def _was_robot_been_to_object(self): return self.position == 'Object' or self.position == 'Final'
+    def _is_robot_at_object(self): return self.position == 'Object' or self.position == 'Final'
     def _is_object_picked(self): return self.object_picked
-    def _was_robot_been_to_final(self): return self.position == 'Final'
+    def _is_robot_at_final(self): return self.position == 'Final'
     def _is_object_delivered(self): return self.object_delivered
 
-def _receive_action(env_id, msg):
+def subtract_prefix(s: str, prefix: str) -> str:
+    if s.startswith(prefix):
+        return s[len(prefix):]
+    return s  # if prefix doesn't match, return original string
+
+def create_tree(env_id, tree_string, verbose = False):
     """
-    Update a specific environment's internal state synced with ROS2 topics.
-
-    :param idx: Index of the environment to update.
-    :param attr: Name of the attribute to set.
-    :param value: New value received from ROS2.
+    Create the behavior tree after obtaining the correct environment origin.
+    
+    Args:
+        env_id (int): Environment identifier.
+        node (EnvironmentSubscriber): ROS2 node that subscribes to the environment origin.
+    
+    Returns:
+        py_trees.composites.Selector: Root node of the behavior tree.
     """
-    unparallelable_action = {'a': ['c', 'e'], 
-                             'b': [],
-                             'c': ['a', 'e'],
-                             'e': ['a', 'c'],
-                             'f': ['g'],
-                             'g': ['f'],}
-    temp_robot_action = msg.data
-    temp_robot_action_timestamp = msg.header.stamp.sec + msg.header.stamp.nanosec * 1e-9
 
-    if temp_robot_action_timestamp - robot_action_timestamp[env_id] < 7e-3 and temp_robot_action not in robot_action[env_id] and not(set(robot_action) & set(unparallelable_action[temp_robot_action])):
-        temp_robot_action = robot_action[env_id] + temp_robot_action
+                    # Behaviors
+    behavior_dict = {'a': lambda ind: PatrolNode(name = f"PatrolNode_{ind}", env_id = env_id, verbose=verbose),
+                     'b': lambda ind: FindTargetNode(name=f'FindTarget_{ind}', env_id=env_id, verbose=verbose),
+                     'c': lambda ind: GoToNearestTarget(name=f"GoToNearestTarget_{ind}", env_id=env_id, verbose=verbose),
+                     'e': lambda ind: GoToSpawnNode(name=f'GoToSpawnNode_{ind}', env_id=env_id, verbose=verbose),
+                     'f': lambda ind: PickObject(name = f'PickObject_{ind}', env_id=env_id, verbose=verbose),
+                     'g': lambda ind: DropObject(name=f'DropObject_{ind}', env_id=env_id, verbose=verbose),
+                    # Conditions
+                     'B': lambda ind: IsRobotAtTheSpawn(name=f'IsRobotAtTheSpawn_{ind}', env_id=env_id, verbose=verbose),
+                     'D': lambda ind: AreObjectsExistOnInternalMap(name=f'AreObjectExistsOnInternalMap_{ind}', env_id=env_id, verbose=verbose),
+                     'E': lambda ind: AreObjectNearby(f'AreObjectNearby_{ind}', env_id=env_id, verbose=verbose),
+                     'F': lambda ind: IsObjectInHand(f'IsObjectInHand_{ind}', env_id=env_id, verbose=verbose),
+                     'H': lambda ind: AreXObjectsAtSpawn(f'AreFiveObjectsAtSpawn_{ind}', env_id=env_id, verbose=verbose),
+                     }
 
-    robot_action[env_id] = temp_robot_action
-    robot_action_timestamp[env_id] = temp_robot_action_timestamp
+    def string2tree(tree_string, cond_num):
+        # If a single behavior node is passed, return the corresponding behavior node
+        if len(tree_string) == 1:
+            return behavior_dict[tree_string[0]](0)
+        
+        # Select Condition Node as Parent Node
+        condition_node = tree_string[1]
+        if condition_node == '0':
+            parent = py_trees.composites.Sequence(f"Sequence_{cond_num}", memory=False)
+        elif condition_node == '1':
+            parent = py_trees.composites.Selector(f"Selector_{cond_num}", memory=False)
+        elif condition_node == '2':
+            parent = py_trees.composites.Parallel(f"Parallel_{cond_num}", policy=py_trees.common.ParallelPolicy.SuccessOnAll(synchronise=False))
+    
+        cond_num += 1
+        record = False
+
+        child_num = 0
+        for n in tree_string[2:]:
+            if record:
+                subtree_string += n
+                if n == '(':
+                    n_open += 1
+                elif n == ')':
+                    n_open -= 1
+
+                if n_open == 0:
+                    record = False
+                    parent.add_child(string2tree(subtree_string, cond_num))
+            else:
+                if n == '(':
+                    subtree_string = '('
+                    n_open = 1
+                    record = True
+                elif n == ')':
+                    pass
+                else:
+                    if n in behavior_dict.keys():
+                        parent.add_child(behavior_dict[n](child_num))
+                        child_num += 1
+                    else:
+                        print('[Error] Undefined char in tree_string')
+
+        return parent
+    
+    if tree_string=='':
+        return None
+    
+    return string2tree(tree_string, 0)
 
 if __name__ == '__main__':
-    if not rclpy.ok():
-        rclpy.init()
+    # BT blackboard Initialization
+    bb_client = py_trees.blackboard.Client(name="External")
 
-    node = Node('multi_bt_env')
-    env_publisher = []
+    # Behavior Tree Setup
+    trees = []
+    for env_id in range(num_envs):
+        # BT initialization
+        root = create_tree(env_id, bt_string_array[env_id], verbose=False)
+        tree = py_trees.trees.BehaviourTree(root)
+        tree.setup(timeout=15)
+        trees.append(tree)
 
-    for i in range(num_envs):
-        env_publisher.append(node.create_publisher(String, f'/env_{i}/robot/state', 10))
-        node.create_subscription(StringStamped, f'/env_{i}/robot/action', lambda msg, idx=i: _receive_action(idx, msg), 10)
+        # BT blackboard variable registration
+        bb_client.register_key(key=f"action_{env_id}", access=py_trees.common.Access.READ)
+        bb_client.register_key(key=f"action_{env_id}", access=py_trees.common.Access.WRITE)
 
-    # State Progress for Reward Calculation
-    state_progress = {
-        'A' : TaskState(position='Start' , object_found=False, object_picked=False, object_delivered=False), # Initial state
-        'B' : TaskState(position='InMap' , object_found=False, object_picked=False, object_delivered=False), # Patroling
-        'C' : TaskState(position='InMap' , object_found=True , object_picked=False, object_delivered=False), # Searching -> Object found
-        'D' : TaskState(position='Object', object_found=True , object_picked=False, object_delivered=False), # Arrived at object location
-        'E' : TaskState(position='Object', object_found=True , object_picked=True , object_delivered=False), # Object Picked
-        'F' : TaskState(position='Final' , object_found=True , object_picked=True , object_delivered=False), # Initial State with object in hand
-        'G' : TaskState(position='Final' , object_found=True , object_picked=False, object_delivered=False), # Initial State with known object location
-        'H' : TaskState(position='Final' , object_found=True , object_picked=True , object_delivered=True)   # Final State
-    }
+        bb_client.register_key(key=f"env_state_{env_id}", access=py_trees.common.Access.WRITE)
 
-    # bt_string_array = ['(1H(0(1F(0(1E(0(1D(2ab))c))f))(1Be)g))'] * num_envs
-    bt_string_array = ['(2abce)'] * num_envs
-
-    run_simple_BTs(bt_string_array) # run BTs
+        bb_client.set(f"action_{env_id}", '')
 
     # Environment Finite State Machine Setup
     env_fsm = [SearchAndDeliverMachine() for _ in range(num_envs)]
     env_state = [fsm.current_state.id for fsm in env_fsm]
+    env_state_history = [fsm.current_state.id for fsm in env_fsm]
     env_done = [False for _ in range(num_envs)]
-
-    # Simulation Variables
-    robot_action = [None for _ in range(num_envs)]
-    robot_action_timestamp = [0 for _ in range(num_envs)]
+    bb_shared_data_last = ["" for _ in range(num_envs)]
 
     print(f"[INFO] Initial State: {env_state}")
 
-    while all(env_done) != True:
-        # Spin Env Node
-        try:
-            rclpy.spin_once(node, timeout_sec=0.0)
-        except rclpy.executors.ExternalShutdownException:
-            print("[INFO] Spin exited because ROS2 shutdown detected.")
+    while not all(env_done):  
+        print("\n[External] State:", env_state)
 
-        for i in range(num_envs):
-            env_publisher[i].publish(String(data=env_state[i]))
+        # Update state in BT blackboard
+        for env_id in range(num_envs):
+            # Update the environment state in the blackboard
+            bb_client.set(f"env_state_{env_id}", env_state[env_id])
 
-        # If any robot action is None, skip the step
-        if None in robot_action:
-            continue
+            # Execute a BT tick
+            trees[env_id].tick()
 
-        for i in range(num_envs):
+            # Update the action in the blackboard
+            bb_client.set(f"action_{env_id}", subtract_prefix(bb_client.get(f"action_{env_id}"), bb_shared_data_last[env_id]))
+            bb_shared_data_last[env_id] = bb_client.get(f"action_{env_id}")
+
+            print(f"[External] BT Action {env_id}: {bb_client.get(f'action_{env_id}')}")
+
             try:
-                env_fsm[i].send(robot_action[i])
-                env_state[i] = env_fsm[i].current_state.id
+                # Send the action to the environment FSM
+                env_fsm[env_id].send(bb_client.get(f"action_{env_id}"))
+                env_state[env_id] = env_fsm[env_id].current_state.id
 
-                if env_state[i] == 'H':
-                    env_done[i] = True
-            except:
-                env_done[i] = True
-        
-        print(f"[INFO] {env_state}")
+                # Stop the individual simulation if the FSM reached the accepted state
+                if env_state[env_id] == 'H':
+                    env_done[env_id] = True
+            except Exception as e:
+                # Stop the individual simulation if the FSM rejects the command
+                if bb_client.get(f'action_{env_id}') != "":
+                    env_done[env_id] = True
 
-    print("[INFO] Finished simulation execution.")
+            # Stop the individual simulation if the FSM reached the maximum number of loops
+            env_state_history[env_id] += env_state[env_id]
+            if env_state_history[env_id].count(env_state[env_id]) >= (loop_allowed + 1):
+                env_done[env_id] = True
+
+    print("\n*************** Pass ***************")
+    print("\n[External] Final State:", env_state)

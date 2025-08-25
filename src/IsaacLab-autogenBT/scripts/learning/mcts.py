@@ -116,7 +116,7 @@ class MCTS:
             - loc_prob (np.ndarray): Normalized visit-based probability distribution over node locations.
         """
         root = MCTSNode(state=root_state, env=self.env, policy_net=self.policy_net)
-        print(f"Root possible actions: {root.all_actions}")
+        # >> print(f"Root possible actions: {root.all_actions}")
 
         if verbose:
             select_time_elapsed_avg = 0
@@ -129,24 +129,24 @@ class MCTS:
             progress.set_postfix(iteration=i)
 
             # Select a leaf node
-            print('Selecting...')
+            # print('Selecting...')
             if verbose: start_time = time.time()
             selected_edges = self.select(root, dirichlet_noise_at_root=dirichlet_noise_at_root)
             if verbose: select_time = time.time()
 
             # Expand the selected leaf node
-            print('Expanding...')
+            # print('Expanding...')
             self.expand(selected_edges)
             leave_nodes = [edge.child for edge in selected_edges]
             if verbose: expand_time = time.time()
 
             # Evaluate the expanded nodes
-            print('Evaluating...')
+            # print('Evaluating...')
             rewards = self.evaluate(leave_nodes)
             if verbose: evaluate_time = time.time()
 
             # Backpropagate the results
-            print('Backpropagating...')
+            # print('Backpropagating...')
             self.backpropagate(leave_nodes, rewards)
             if verbose: backpropagate_time = time.time()
 
@@ -183,8 +183,8 @@ class MCTS:
         loc_prob_denominator = sum(loc_prob_numerator)
         loc_probs = [num / loc_prob_denominator for num in loc_prob_numerator]
 
-        print(f"nt_probs: {nt_probs}")
-        print(f"loc_probs: {loc_probs}")
+        # >> print(f"nt_probs: {nt_probs}")
+        # >> print(f"loc_probs: {loc_probs}")
 
         if export_path:
             self.export_tree(root, export_path)
@@ -294,6 +294,8 @@ class MCTS:
         # Make sure that the BT string is matched with the state in leaf node
         for env_id in range(self.env.num_envs):
             self.env.set_bt(env_id=env_id, bt_string=states[env_id])
+
+        # print(f"[INFO] \tBTs after expand: {states}")
             
         # Expand the BT until it reaches a terminal state (stop action or max depth)
         while True:
@@ -348,7 +350,8 @@ class MCTS:
             if all(dones):
                 break
 
-        print(f"[INFO] \tBTs constructed: {states}")
+        # print(f"[INFO] \tBTs constructed: {states}")
+
         # Get the reward by runnung the BT in IsaacSim Simulation
         _, rews, _, infos =  self.env.evaluate_bt_in_sim()
 

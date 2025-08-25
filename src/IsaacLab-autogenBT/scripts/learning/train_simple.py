@@ -16,10 +16,9 @@ import sys
 
 # add argparse arguments
 parser = argparse.ArgumentParser(description="Train an RL agent with RSL-RL.")
-parser.add_argument("--num_search_agents", type=int, default=1, help="Number of search agents.") #64
-parser.add_argument("--num_search_times", type=int, default=200, help="Number of search times.")
+parser.add_argument("--num_search_agents", type=int, default=16, help="Number of search agents.") #64
+parser.add_argument("--num_search_times", type=int, default=800, help="Number of search times.")
 parser.add_argument("--training_iters", type=int, default=100, help="Training iterations.")
-parser.add_argument("--env_spacing", type=int, default=40, help="Space between environments.")
 
 args_cli, hydra_args = parser.parse_known_args()
 
@@ -133,7 +132,7 @@ def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, po
             temperature = 1/(number_of_nodes - (num_node_to_explore - 1))
 
         # Get the action probabilities from MCTS search
-        nt_probs, loc_probs = mcts.run_search(root_state=bt_string,temperature=temperature, verbose=False) # Set verbose = True if want to see each search step run time
+        nt_probs, loc_probs = mcts.run_search(root_state=bt_string,temperature=temperature, verbose=True) # Set verbose = True if want to see each search step run time
 
         # print(loc_probs)
 
@@ -161,16 +160,16 @@ def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, po
             break
 
     for env_id in range(env.num_envs):
-        mcts.set_bt(env_id=env_id, bt_string=bt_string)
+        mcts.env.set_bt(env_id=env_id, bt_string=bt_string)
 
-    # Get the reward by runnung the BT in IsaacSim Simulation
-    if verbose: print(f"[INFO] \tEvaluating {bt_string}")
-    _, rews, _, infos =  env.evaluate_bt_in_sim()
-    rew = np.mean(rews)
-    if verbose: print(f"[INFO] \tFinished Evaluation >> reward: {rew}")
+    # # Get the reward by runnung the BT in IsaacSim Simulation
+    # if verbose: print(f"[INFO] \tEvaluating {bt_string}")
+    # _, rews, _, infos =  env.evaluate_bt_in_sim()
+    # rew = np.mean(rews)
+    # if verbose: print(f"[INFO] \tFinished Evaluation >> reward: {rew}")
 
     # Convert rewards to numpy array
-    rewards = np.array([rew] * len(bt_strings))
+    rewards = np.array([0.0] * len(bt_strings))
     
     # Convert list of np.array to a single np.array
     action1_probs = np.array(action1_probs)
@@ -210,9 +209,9 @@ if __name__ == "__main__":
     #                 19 : None, #stop node
     #             }
     
-    node_dict = {   0 : '0', #patrol_node
-                    1 : '1', #find_target_node
-                    2 : '2', #go_to_nearest_target
+    node_dict = {   0 : '(0)', #patrol_node
+                    1 : '(1)', #find_target_node
+                    2 : '(2)', #go_to_nearest_target
                     # Behaviors
                     3 : 'a', #patrol_node
                     4 : 'b', #find_target_node

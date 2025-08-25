@@ -11,6 +11,8 @@ from std_msgs.msg import UInt8, String
 
 from autogen_bt_interface.msg import StringStamped
 
+import py_trees
+
 # Import local files
 # Get the absolute path to the directory containing this script and the root of the project
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -34,6 +36,12 @@ from ros2_nodes.ros2_drive import RobotDriverManager
 from ros2_nodes.ros2_bt_tracker import BTStatusTrackerNode
 
 from env_state_machine import SearchAndDeliverMachine
+
+from simple_behavior import (
+    PatrolNode, FindTargetNode, AreObjectsExistOnInternalMap, 
+    GoToNearestTarget, AreObjectNearby, PickObject, IsRobotAtTheSpawn, 
+    IsObjectInHand, DropObject, GoToSpawnNode, AreXObjectsAtSpawn
+)
 
 def get_random_object_pos(num_env, device, number_of_objects = 5,mode = 'different'):
     """
@@ -580,11 +588,14 @@ class MultiBTEnv(gym.Env):
 class Simple_MultiBTEnv(MultiBTEnv):
     def __init__(self, node_dict, 
                  nodes_limit, num_envs, 
+                 loop_allowed = 2,
                  verbose = False):
         super().__init__(node_dict=node_dict,
                          nodes_limit=nodes_limit,
                          num_envs=num_envs,
                          verbose=verbose)
+
+        self.loop_allowed = loop_allowed
 
         self.reward_weight = [  25,     # Is object found
                                 50,     # Was robot been to object
@@ -609,14 +620,14 @@ class Simple_MultiBTEnv(MultiBTEnv):
 
         # State Progress for Reward Calculation
         self.state_progress = {
-            'A' : TaskState(position='Start' , object_found=False, object_picked=False, object_delivered=False), # Initial state
-            'B' : TaskState(position='InMap' , object_found=False, object_picked=False, object_delivered=False), # Patroling
-            'C' : TaskState(position='InMap' , object_found=True , object_picked=False, object_delivered=False), # Searching -> Object found
-            'D' : TaskState(position='Object', object_found=True , object_picked=False, object_delivered=False), # Arrived at object location
-            'E' : TaskState(position='Object', object_found=True , object_picked=True , object_delivered=False), # Object Picked
-            'F' : TaskState(position='Final' , object_found=True , object_picked=True , object_delivered=False), # Initial State with object in hand
-            'G' : TaskState(position='Final' , object_found=True , object_picked=False, object_delivered=False), # Initial State with known object location
-            'H' : TaskState(position='Final' , object_found=True , object_picked=True , object_delivered=True)   # Final State
+            'A' : TaskStateProgress(position='Start' , object_found=False, object_picked=False, object_delivered=False), # Initial state
+            'B' : TaskStateProgress(position='InMap' , object_found=False, object_picked=False, object_delivered=False), # Patroling
+            'C' : TaskStateProgress(position='InMap' , object_found=True , object_picked=False, object_delivered=False), # Searching -> Object found
+            'D' : TaskStateProgress(position='Object', object_found=True , object_picked=False, object_delivered=False), # Arrived at object location
+            'E' : TaskStateProgress(position='Object', object_found=True , object_picked=True , object_delivered=False), # Object Picked
+            'F' : TaskStateProgress(position='Final' , object_found=True , object_picked=True , object_delivered=False), # Initial State with object in hand
+            'G' : TaskStateProgress(position='Final' , object_found=True , object_picked=False, object_delivered=False), # Initial State with known object location
+            'H' : TaskStateProgress(position='Final' , object_found=True , object_picked=True , object_delivered=True)   # Final State
         }
 
     def _receive_action(self, env_id, msg):
@@ -651,62 +662,176 @@ class Simple_MultiBTEnv(MultiBTEnv):
         for env_id in range(self.num_envs):
             bt_with_evaluation_node.append('(1H' + self.current_bt[env_id] + ')')   # add evaluation node
 
-        run_simple_BTs(bt_with_evaluation_node) # run BTs
+        # BT blackboard Initialization
+        bb_client = py_trees.blackboard.Client(name="External")
+
+        # Behavior Tree Setup
+        trees = []
+        for env_id in range(self.num_envs):
+            # BT initialization
+            root = create_tree(env_id, bt_with_evaluation_node[env_id], verbose=False)
+            tree = py_trees.trees.BehaviourTree(root)
+            tree.setup(timeout=15)
+            trees.append(tree)
+
+            # BT blackboard variable registration
+            bb_client.register_key(key=f"action_{env_id}", access=py_trees.common.Access.READ)
+            bb_client.register_key(key=f"action_{env_id}", access=py_trees.common.Access.WRITE)
+
+            bb_client.register_key(key=f"env_state_{env_id}", access=py_trees.common.Access.WRITE)
+
+            bb_client.set(f"action_{env_id}", '')
 
         # Environment Finite State Machine Setup
         env_fsm = [SearchAndDeliverMachine() for _ in range(self.num_envs)]
         env_state = [fsm.current_state.id for fsm in env_fsm]
+        env_state_history = [fsm.current_state.id for fsm in env_fsm]
         env_done = [False for _ in range(self.num_envs)]
+        bb_shared_data_last = ["" for _ in range(self.num_envs)]
 
-        while all(env_done) != True:
-            # Spin Env Node
-            try:
-                rclpy.spin_once(self.node, timeout_sec=0.0)
-            except rclpy.executors.ExternalShutdownException:
-                print("[INFO] Spin exited because ROS2 shutdown detected.")
+        # print(f"[INFO] Initial State: {env_state}")
 
-            for i in range(self.num_envs):
-                self.env_publisher[i].publish(String(data=env_state[i]))
+        while not all(env_done):  
+            # print("\n[External] State:", env_state)
 
-            # If any robot action is None, skip the step
-            if None in self.robot_action:
-                continue
+            # Update state in BT blackboard
+            for env_id in range(self.num_envs):
+                # Update the environment state in the blackboard
+                bb_client.set(f"env_state_{env_id}", env_state[env_id])
 
-            for i in range(self.num_envs):
+                # Execute a BT tick
+                trees[env_id].tick()
+
+                # Update the action in the blackboard
+                bb_client.set(f"action_{env_id}", subtract_prefix(bb_client.get(f"action_{env_id}"), bb_shared_data_last[env_id]))
+                bb_shared_data_last[env_id] = bb_client.get(f"action_{env_id}")
+
+                # print(f"[External] BT Action {env_id}: {bb_client.get(f'action_{env_id}')}")
+
                 try:
-                    env_fsm[i].send(self.robot_action[i])
-                    env_state[i] = env_fsm[i].current_state.id
+                    # Send the action to the environment FSM
+                    env_fsm[env_id].send(bb_client.get(f"action_{env_id}"))
+                    env_state[env_id] = env_fsm[env_id].current_state.id
 
-                    if env_state[i] == 'H':
-                        env_done[i] = True
-                except:
-                    env_done[i] = True
+                    # Stop the individual simulation if the FSM reached the accepted state
+                    if env_state[env_id] == 'H':
+                        env_done[env_id] = True
+                except Exception as e:
+                    # Stop the individual simulation if the FSM rejects the command
+                    if bb_client.get(f'action_{env_id}') != "":
+                        env_done[env_id] = True
 
-        stop_simple_BTs()  # stop all BT processes
+                # Stop the individual simulation if the FSM reached the maximum number of loops
+                env_state_history[env_id] += env_state[env_id]
+                if env_state_history[env_id].count(env_state[env_id]) >= (self.loop_allowed + 1):
+                    env_done[env_id] = True
+        
         rews = self._get_reward(env_state)
 
         return obs, rews, dones, infos
     
     def _get_reward(self, env_state):
 
-        rewards = [ self.reward_weight[0] * self.state_progress[final_state]._is_object_found() +
+        rewards = [ self.reward_weight[0] * self.state_progress[final_state]._was_object_found() +
                     self.reward_weight[1] * self.state_progress[final_state]._was_robot_been_to_object() +
-                    self.reward_weight[2] * self.state_progress[final_state]._is_object_picked() +
+                    self.reward_weight[2] * self.state_progress[final_state]._was_object_picked() +
                     self.reward_weight[3] * self.state_progress[final_state]._was_robot_been_to_final() +
-                    self.reward_weight[4] * self.state_progress[final_state]._is_object_delivered() +
-                    self.reward_weight[5] * self.state_progress[final_state]._is_object_delivered() * self._BT_complexity(env_id) for env_id, final_state in enumerate(env_state) ]
+                    self.reward_weight[4] * self.state_progress[final_state]._was_object_delivered() +
+                    self.reward_weight[5] * self.state_progress[final_state]._was_object_delivered() * self._BT_complexity(env_id) for env_id, final_state in enumerate(env_state) ]
 
         return rewards     
 
-class TaskState:
+class TaskStateProgress:
     def __init__(self, position: str, object_found: bool, object_picked: bool, object_delivered: bool):
         self.position = position
         self.object_found = object_found
         self.object_picked = object_picked
         self.object_delivered = object_delivered
 
-    def _is_object_found(self): return self.object_found
+    def _was_object_found(self): return self.object_found
     def _was_robot_been_to_object(self): return self.position == 'Object' or self.position == 'Final'
-    def _is_object_picked(self): return self.object_picked
+    def _was_object_picked(self): return self.object_picked
     def _was_robot_been_to_final(self): return self.position == 'Final'
-    def _is_object_delivered(self): return self.object_delivered
+    def _was_object_delivered(self): return self.object_delivered
+
+def subtract_prefix(s: str, prefix: str) -> str:
+    if s.startswith(prefix):
+        return s[len(prefix):]
+    return s  # if prefix doesn't match, return original string
+
+def create_tree(env_id, tree_string, verbose = False):
+    """
+    Create the behavior tree after obtaining the correct environment origin.
+    
+    Args:
+        env_id (int): Environment identifier.
+        node (EnvironmentSubscriber): ROS2 node that subscribes to the environment origin.
+    
+    Returns:
+        py_trees.composites.Selector: Root node of the behavior tree.
+    """
+
+                    # Behaviors
+    behavior_dict = {'a': lambda ind: PatrolNode(name = f"PatrolNode_{ind}", env_id = env_id, verbose=verbose),
+                     'b': lambda ind: FindTargetNode(name=f'FindTarget_{ind}', env_id=env_id, verbose=verbose),
+                     'c': lambda ind: GoToNearestTarget(name=f"GoToNearestTarget_{ind}", env_id=env_id, verbose=verbose),
+                     'e': lambda ind: GoToSpawnNode(name=f'GoToSpawnNode_{ind}', env_id=env_id, verbose=verbose),
+                     'f': lambda ind: PickObject(name = f'PickObject_{ind}', env_id=env_id, verbose=verbose),
+                     'g': lambda ind: DropObject(name=f'DropObject_{ind}', env_id=env_id, verbose=verbose),
+                    # Conditions
+                     'B': lambda ind: IsRobotAtTheSpawn(name=f'IsRobotAtTheSpawn_{ind}', env_id=env_id, verbose=verbose),
+                     'D': lambda ind: AreObjectsExistOnInternalMap(name=f'AreObjectExistsOnInternalMap_{ind}', env_id=env_id, verbose=verbose),
+                     'E': lambda ind: AreObjectNearby(f'AreObjectNearby_{ind}', env_id=env_id, verbose=verbose),
+                     'F': lambda ind: IsObjectInHand(f'IsObjectInHand_{ind}', env_id=env_id, verbose=verbose),
+                     'H': lambda ind: AreXObjectsAtSpawn(f'AreFiveObjectsAtSpawn_{ind}', env_id=env_id, verbose=verbose),
+                     }
+
+    def string2tree(tree_string, cond_num):
+        # If a single behavior node is passed, return the corresponding behavior node
+        if len(tree_string) == 1:
+            return behavior_dict[tree_string[0]](0)
+        
+        # Select Condition Node as Parent Node
+        condition_node = tree_string[1]
+        if condition_node == '0':
+            parent = py_trees.composites.Sequence(f"Sequence_{cond_num}", memory=False)
+        elif condition_node == '1':
+            parent = py_trees.composites.Selector(f"Selector_{cond_num}", memory=False)
+        elif condition_node == '2':
+            parent = py_trees.composites.Parallel(f"Parallel_{cond_num}", policy=py_trees.common.ParallelPolicy.SuccessOnAll(synchronise=False))
+    
+        cond_num += 1
+        record = False
+
+        child_num = 0
+        for n in tree_string[2:]:
+            if record:
+                subtree_string += n
+                if n == '(':
+                    n_open += 1
+                elif n == ')':
+                    n_open -= 1
+
+                if n_open == 0:
+                    record = False
+                    parent.add_child(string2tree(subtree_string, cond_num))
+            else:
+                if n == '(':
+                    subtree_string = '('
+                    n_open = 1
+                    record = True
+                elif n == ')':
+                    pass
+                else:
+                    if n in behavior_dict.keys():
+                        parent.add_child(behavior_dict[n](child_num))
+                        child_num += 1
+                    else:
+                        print('[Error] Undefined char in tree_string')
+
+        return parent
+    
+    if tree_string=='':
+        return None
+    
+    return string2tree(tree_string, 0)
