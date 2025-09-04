@@ -671,7 +671,7 @@ class Simple_MultiBTEnv(MultiBTEnv):
             # BT initialization
             root = create_tree(env_id, bt_with_evaluation_node[env_id], verbose=False)
             tree = py_trees.trees.BehaviourTree(root)
-            tree.setup(timeout=15)
+            tree.setup()
             trees.append(tree)
 
             # BT blackboard variable registration

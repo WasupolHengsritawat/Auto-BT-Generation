@@ -303,6 +303,5 @@ if __name__ == "__main__":
 
     print(f"Final Results: {dataset.bt_strings[-1]}")
     print(f"Total elapsed time: {time.time() - start_time:.2f} seconds")
-    rclpy.try_shutdown()
 
     # Use this command to view log -> tensorboard --logdir logs/
