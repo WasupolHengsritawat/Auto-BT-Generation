@@ -169,7 +169,7 @@ def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, po
     if verbose: print(f"[INFO] \tFinished Evaluation >> reward: {rew}")
 
     # Convert rewards to numpy array
-    rewards = np.array([0.0] * len(bt_strings))
+    rewards = np.array([rew] * len(bt_strings))
     
     # Convert list of np.array to a single np.array
     action1_probs = np.array(action1_probs)
