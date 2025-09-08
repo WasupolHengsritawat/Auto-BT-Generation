@@ -19,6 +19,7 @@ parser = argparse.ArgumentParser(description="Train an RL agent with RSL-RL.")
 parser.add_argument("--num_search_agents", type=int, default=16, help="Number of search agents.") #64
 parser.add_argument("--num_search_times", type=int, default=800, help="Number of search times.")
 parser.add_argument("--training_iters", type=int, default=100, help="Training iterations.")
+parser.add_argument("--seed", type=int, default=42, help="Random seed.")
 
 args_cli, hydra_args = parser.parse_known_args()
 
@@ -74,7 +75,11 @@ class BTDataset(Dataset):
             torch.tensor(self.action2_probs[idx], dtype=torch.float32, device=self.device),
             torch.tensor(self.rewards[idx], dtype=torch.float32, device=self.device)
         )
-    
+
+SEED = args_cli.seed
+torch.manual_seed(SEED)
+np.random.seed(SEED)
+  
 def modify_bt(node_dict, current_bt, node_type, node_location):
     """Modify the BT string"""
     node = node_dict[node_type]
