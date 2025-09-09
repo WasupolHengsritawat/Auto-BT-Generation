@@ -254,8 +254,8 @@ if __name__ == "__main__":
     # Instantiate the model
     model = RvNN(
         node_type_vocab_size=20,
-        embed_size=64,
-        hidden_size=128,
+        embed_size=32,  # was 64
+        hidden_size=64, # was 128
         action1_size=len(node_dict.items()),    # Number of node types to choose from
         action2_size=2*nodes_limit,             # Max insertion locations (50 * 2) - 1 + 1
         device=device,
