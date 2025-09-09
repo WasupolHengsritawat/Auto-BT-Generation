@@ -16,10 +16,11 @@ import sys
 
 # add argparse arguments
 parser = argparse.ArgumentParser(description="Train an RL agent with RSL-RL.")
-parser.add_argument("--num_search_agents", type=int, default=16, help="Number of search agents.") #64
-parser.add_argument("--num_search_times", type=int, default=800, help="Number of search times.")
-parser.add_argument("--training_iters", type=int, default=100, help="Training iterations.")
-parser.add_argument("--seed", type=int, default=42, help="Random seed.")
+parser.add_argument("--num_search_agents",  type=int, default=16,   help="Number of search agents.") #64
+parser.add_argument("--num_search_times",   type=int, default=800,  help="Number of search times.")
+parser.add_argument("--training_iters",     type=int, default=100,  help="Training iterations.")
+parser.add_argument("--round_per_dataset",  type=int, default=10,   help="Number of latest rounds per dataset.")
+parser.add_argument("--seed",               type=int, default=None, help="Random seed.")
 
 args_cli, hydra_args = parser.parse_known_args()
 
@@ -27,6 +28,7 @@ args_cli, hydra_args = parser.parse_known_args()
 
 import os
 import torch
+import queue
 from datetime import datetime
 
 torch.backends.cuda.matmul.allow_tf32 = True
@@ -35,7 +37,7 @@ torch.backends.cudnn.deterministic = False
 torch.backends.cudnn.benchmark = False
 
 # =====================================================================================================
-from torch.utils.data import Dataset, DataLoader, random_split
+from torch.utils.data import Dataset, DataLoader, ConcatDataset
 from torch.utils.tensorboard import SummaryWriter
 import numpy as np
 import rclpy
@@ -50,6 +52,12 @@ bt_dir = os.path.abspath(os.path.join(project_root, "scripts", "bt"))
 from gymEnv import Simple_MultiBTEnv
 from mcts import MCTS
 from network import RvNN_mem, RvNN
+
+class PeekableQueue(queue.Queue):
+    def peek_all(self):
+        """Return a list of all items in the queue without removing them."""
+        with self.mutex:  # ensure thread-safety
+            return list(self.queue)
 
 class BTDataset(Dataset):
     def __init__(self, bt_strings, action1_probs, action2_probs, rewards, device):
@@ -76,10 +84,11 @@ class BTDataset(Dataset):
             torch.tensor(self.rewards[idx], dtype=torch.float32, device=self.device)
         )
 
-SEED = args_cli.seed
-torch.manual_seed(SEED)
-np.random.seed(SEED)
-  
+if args_cli.seed is not None:
+    SEED = args_cli.seed
+    torch.manual_seed(SEED)
+    np.random.seed(SEED)
+
 def modify_bt(node_dict, current_bt, node_type, node_location):
     """Modify the BT string"""
     node = node_dict[node_type]
@@ -262,11 +271,13 @@ if __name__ == "__main__":
 
     global_step = 0
     start_time = time.time()
+    dataset_queue = PeekableQueue()
+
     for iter_i in range(args_cli.training_iters):
         print(f"[INFO] Iteration {iter_i + 1}/{args_cli.training_iters}")
 
         # Generate dataset
-        dataset = dataset_generation(
+        dataset_queue.put(dataset_generation(
             node_dict,
             nodes_limit,
             num_search_agents=args_cli.num_search_agents,
@@ -274,7 +285,12 @@ if __name__ == "__main__":
             policy_net=model,
             device=device,
             verbose=True
-        )
+        ))
+
+        if dataset_queue.qsize() > args_cli.round_per_dataset:
+            dataset_queue.get()
+
+        dataset = ConcatDataset(dataset_queue.peek_all())
 
         train_loader = DataLoader(dataset, batch_size=4, shuffle=True)
 
@@ -289,7 +305,7 @@ if __name__ == "__main__":
         )
 
         # Log final evaluation reward
-        writer.add_scalar("Eval/FinalReward", dataset.rewards[0].item(), iter_i)
+        writer.add_scalar("Eval/FinalReward", dataset.rewards[-1].item(), iter_i)
 
         # Save model after each iteration (optional: adjust to save best only)
         model_path = os.path.join(log_dir, f"rvnn_iter{iter_i:03d}.pt")
