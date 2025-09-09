@@ -36,18 +36,17 @@ class MCTSNode:
             # If the BT is empty, only a location of the root node is valid
             self.all_actions = [(nt, 1) for nt in range(self.env.num_node_types - 1)]
         else:
-            self.all_actions = [(nt, 0) for nt in range(3)] + [(nt, loc) for nt in range(self.env.num_node_types - 1) for loc in range(1, len(valid_locs) + 1)]
+            self.all_actions = [(nt, 0) for nt in range(3)] + [(nt, loc) for loc in range(1, len(valid_locs) + 1) for nt in range(15 - 1)]
 
         # If there are no valid locations, only the stop action is valid
         if (self.env.num_node_types - 1, 0) not in self.all_actions:
             self.all_actions.append((self.env.num_node_types - 1, 0))
 
-        # Get prior porbabilities from the policy network
-        nt_probs, loc_probs, pred_rew = self.policy_net.predict(state)
+        # Get prior probabilities from the policy network
+        action_probs, pred_rew = self.policy_net.predict(state)
 
         # Ensure probs are detached from GPU
-        nt_probs = nt_probs.detach().cpu().numpy()
-        loc_probs = loc_probs.detach().cpu().numpy()
+        action_probs = action_probs.detach().cpu().numpy()
 
         # Initialize edges for each action
         self.edges = [MCTSEdge(parent = self, 
