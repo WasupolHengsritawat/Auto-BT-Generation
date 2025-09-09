@@ -19,8 +19,8 @@ parser = argparse.ArgumentParser(description="Train an RL agent with RSL-RL.")
 parser.add_argument("--num_search_agents",  type=int, default=16,   help="Number of search agents.") #64
 parser.add_argument("--num_search_times",   type=int, default=800,  help="Number of search times.")
 parser.add_argument("--training_iters",     type=int, default=100,  help="Training iterations.")
-parser.add_argument("--round_per_dataset",   type=int, default=10,  help="Number of latest rounds per dataset.")
-parser.add_argument("--seed",               type=int, default=42,   help="Random seed.")
+parser.add_argument("--round_per_dataset",  type=int, default=10,  help="Number of latest rounds per dataset.")
+parser.add_argument("--seed",               type=int, default=None,   help="Random seed.")
 
 args_cli, hydra_args = parser.parse_known_args()
 
@@ -84,9 +84,10 @@ class BTDataset(Dataset):
             torch.tensor(self.rewards[idx], dtype=torch.float32, device=self.device)
         )
 
-SEED = args_cli.seed
-torch.manual_seed(SEED)
-np.random.seed(SEED)
+if args_cli.seed is not None:
+    SEED = args_cli.seed
+    torch.manual_seed(SEED)
+    np.random.seed(SEED)
 
 def modify_bt(node_dict, current_bt, node_type, node_location):
     """Modify the BT string"""
@@ -187,8 +188,6 @@ def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, po
     # Convert list of np.array to a single np.array
     action1_probs = np.array(action1_probs)
     action2_probs = np.array(action2_probs)
-
-    current_dataset = BTDataset(bt_strings, action1_probs, action2_probs, rewards, device=device)
 
     return BTDataset(bt_strings, action1_probs, action2_probs, rewards, device=device)
 
