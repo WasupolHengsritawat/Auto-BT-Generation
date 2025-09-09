@@ -277,7 +277,7 @@ if __name__ == "__main__":
         print(f"[INFO] Iteration {iter_i + 1}/{args_cli.training_iters}")
 
         # Generate dataset
-        dataset_queue.put(dataset_generation(
+        current_dataset = dataset_generation(
             node_dict,
             nodes_limit,
             num_search_agents=args_cli.num_search_agents,
@@ -285,7 +285,9 @@ if __name__ == "__main__":
             policy_net=model,
             device=device,
             verbose=True
-        ))
+        )
+
+        dataset_queue.put(current_dataset)
 
         if dataset_queue.qsize() > args_cli.round_per_dataset:
             dataset_queue.get()
@@ -305,7 +307,7 @@ if __name__ == "__main__":
         )
 
         # Log final evaluation reward
-        writer.add_scalar("Eval/FinalReward", dataset.rewards[-1].item(), iter_i)
+        writer.add_scalar("Eval/FinalReward", current_dataset.rewards[-1].item(), iter_i)
 
         # Save model after each iteration (optional: adjust to save best only)
         model_path = os.path.join(log_dir, f"rvnn_iter{iter_i:03d}.pt")
@@ -322,7 +324,7 @@ if __name__ == "__main__":
     # Close TensorBoard writer
     writer.close()
 
-    print(f"Final Results: {dataset.bt_strings[-1]}")
+    print(f"Final Results: {current_dataset.bt_strings[-1]}")
     print(f"Total elapsed time: {time.time() - start_time:.2f} seconds")
 
     # Use this command to view log -> tensorboard --logdir logs/
