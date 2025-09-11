@@ -605,20 +605,6 @@ class Simple_MultiBTEnv(MultiBTEnv):
                                200,     # Is object delivered
                                 -0.25]  # Tree complexity penalty term
 
-        # ROS2 Setup
-        if not rclpy.ok():
-            rclpy.init()
-        self.node = Node('multi_bt_env')
-
-        self.env_publisher = []
-        for i in range(self.num_envs):
-            self.env_publisher.append(self.node.create_publisher(String, f'/env_{i}/robot/state', 10))
-            self.node.create_subscription(StringStamped, f'/env_{i}/robot/action', lambda msg, idx=i: self._receive_action(idx, msg), 10)
-
-        # Simulation Variables
-        self.robot_action = [None for _ in range(self.num_envs)]
-        self.robot_action_timestamp = [0 for _ in range(self.num_envs)]
-
         # State Progress for Reward Calculation
         self.state_progress = {
             'A' : TaskStateProgress(position='Start' , object_found=False, object_picked=False, object_delivered=False), # Initial state
@@ -630,33 +616,9 @@ class Simple_MultiBTEnv(MultiBTEnv):
             'G' : TaskStateProgress(position='Final' , object_found=True , object_picked=False, object_delivered=False), # Initial State with known object location
             'H' : TaskStateProgress(position='Final' , object_found=True , object_picked=True , object_delivered=True)   # Final State
         }
-
-    def _receive_action(self, env_id, msg):
-        """
-        Update a specific environment's internal state synced with ROS2 topics.
-
-        :param idx: Index of the environment to update.
-        :param attr: Name of the attribute to set.
-        :param value: New value received from ROS2.
-        """
-        temp_robot_action = msg.data
-        temp_robot_action_timestamp = msg.header.stamp.sec + msg.header.stamp.nanosec * 1e-9
-
-        if temp_robot_action_timestamp - self.robot_action_timestamp[env_id] < 7e-3 and temp_robot_action not in self.robot_action[env_id]:
-            temp_robot_action = self.robot_action[env_id] + temp_robot_action
-
-        self.robot_action[env_id] = temp_robot_action
-        self.robot_action_timestamp[env_id] = temp_robot_action_timestamp
-
-    def _reset_sim(self):
-        # Reset Robot Action
-        self.robot_action = [None for _ in range(self.num_envs)]
-        self.robot_action_timestamp = [0 for _ in range(self.num_envs)]
     
     def evaluate_bt_in_sim(self):
         obs, rews, dones, infos = [], [], [], []
-
-        self._reset_sim() # reset the simulation before running the BT
 
         # Modify each BT and run it
         bt_with_evaluation_node = []
