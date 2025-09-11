@@ -60,15 +60,14 @@ class PeekableQueue(queue.Queue):
             return list(self.queue)
 
 class BTDataset(Dataset):
-    def __init__(self, bt_strings, action1_probs, action2_probs, rewards, device):
+    def __init__(self, bt_strings, action_probs, rewards, device):
         """
         :param bt_strings: List of behavior tree strings
-        :param action1_probs: List of node type distributions (numpy or list)
-        :param action2_probs: List of location distributions (numpy or list)
+        :param action_probs: List of action probabilities (numpy or list)
+        :param rewards: List of rewards (numpy or list)
         """
         self.bt_strings = bt_strings
-        self.action1_probs = action1_probs
-        self.action2_probs = action2_probs
+        self.action_probs = action_probs
         self.rewards = rewards
         self.device = device
 
@@ -79,8 +78,7 @@ class BTDataset(Dataset):
         # You can convert numpy arrays to torch.Tensor here if needed
         return (
             self.bt_strings[idx],
-            torch.tensor(self.action1_probs[idx], dtype=torch.float32, device=self.device),
-            torch.tensor(self.action2_probs[idx], dtype=torch.float32, device=self.device),
+            torch.tensor(self.action_probs[idx], dtype=torch.float32, device=self.device),
             torch.tensor(self.rewards[idx], dtype=torch.float32, device=self.device)
         )
 
@@ -105,8 +103,8 @@ def modify_bt(node_dict, current_bt, node_type, node_location):
     if node != None:
 
         # If node location is 0 and node type is a flow control node, we add it as a parent node
-        if node_location == 0 and node_type in [0, 1, 2]:
-            return f'({node_type}' + bt_string + ')'
+        if node_location == 0 and node_type in [1, 2, 3]:
+            return f'({node_type - 1}' + bt_string + ')'
         
         else:
             # Iterate over all potential insertion positions (0 to len(s))
@@ -133,8 +131,7 @@ def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, po
     bt_string = ''
 
     bt_strings = []
-    action1_probs = []
-    action2_probs = []
+    action_probs = []
 
     number_of_nodes = 0
 
@@ -146,31 +143,32 @@ def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, po
             temperature = 1/(number_of_nodes - (num_node_to_explore - 1))
 
         # Get the action probabilities from MCTS search
-        nt_probs, loc_probs = mcts.run_search(root_state=bt_string,temperature=temperature, verbose=True) # Set verbose = True if want to see each search step run time
-
-        # print(loc_probs)
-
+        action_prob = mcts.run_search(root_state=bt_string,temperature=temperature, verbose=True) # Set verbose = True if want to see each search step run time
+        
         # Store the sample data
         bt_strings.append(bt_string)
-        action1_probs.append(nt_probs)
-        action2_probs.append(loc_probs)
-        
-        max_nt_probs = np.max(nt_probs)
-        max_loc_probs = np.max(loc_probs)
+        action_probs.append(action_prob)
 
-        best_nt_indices = np.where(nt_probs == max_nt_probs)[0]
-        best_loc_indices = np.where(loc_probs == max_loc_probs)[0]
+        max_action_prob = np.max(action_prob)
+
+        best_action_indices = np.where(action_prob == max_action_prob)[0]
 
         # Randomly select one of the best indices
-        selected_nt = np.random.choice(best_nt_indices)
-        selected_loc = np.random.choice(best_loc_indices)
+        selected_action = np.random.choice(best_action_indices)
+
+        if selected_action > 3:
+            selected_nt = (selected_action - 3) % (len(node_dict.items()) - 1)
+            selected_loc = (selected_action - 3) // (len(node_dict.items()) - 1) + 1
+        else:
+            selected_nt = selected_action
+            selected_loc = 0
 
         bt_string = modify_bt(node_dict, bt_string, selected_nt, selected_loc)
         number_of_nodes += 1
 
         if verbose: print(f"[INFO] Dataset {number_of_nodes}/{nodes_limit} << {bt_strings[-1]}, ({selected_nt}, {selected_loc})")
 
-        if selected_nt == (len(node_dict.items()) - 1) or number_of_nodes >= nodes_limit:
+        if selected_nt == 0 or number_of_nodes >= nodes_limit:
             break
 
     for env_id in range(env.num_envs):
@@ -186,10 +184,9 @@ def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, po
     rewards = np.array([rew] * len(bt_strings))
     
     # Convert list of np.array to a single np.array
-    action1_probs = np.array(action1_probs)
-    action2_probs = np.array(action2_probs)
+    action_probs = np.array(action_probs)
 
-    return BTDataset(bt_strings, action1_probs, action2_probs, rewards, device=device)
+    return BTDataset(bt_strings, action_probs, rewards, device=device)
 
 if __name__ == "__main__":
     # setting device on GPU if available, else CPU
@@ -223,24 +220,44 @@ if __name__ == "__main__":
     #                 19 : None, #stop node
     #             }
     
-    node_dict = {   0 : '(0)', #patrol_node
-                    1 : '(1)', #find_target_node
-                    2 : '(2)', #go_to_nearest_target
-                    # Behaviors
-                    3 : 'a', #patrol_node
-                    4 : 'b', #find_target_node
-                    5 : 'c', #go_to_nearest_target
-                    6 : 'e', #go_to_spawn_node
-                    7 : 'f', #picking_object_node
-                    8 : 'g', #drop_object_node
-                    # Conditions
-                    9 : 'B', #is_robot_at_the_spawn_node
-                    10 : 'D', #are_object_existed_on_internal_map
-                    11 : 'E', #are_object_nearby_node
-                    12 : 'F', #is_object_in_hand_node
-                    13 : 'H', #are_five_objects_at_spawn
+    # node_dict = {   0 : '(0)', #patrol_node
+    #                 1 : '(1)', #find_target_node
+    #                 2 : '(2)', #go_to_nearest_target
+    #                 # Behaviors
+    #                 3 : 'a', #patrol_node
+    #                 4 : 'b', #find_target_node
+    #                 5 : 'c', #go_to_nearest_target
+    #                 6 : 'e', #go_to_spawn_node
+    #                 7 : 'f', #picking_object_node
+    #                 8 : 'g', #drop_object_node
+    #                 # Conditions
+    #                 9 : 'B', #is_robot_at_the_spawn_node
+    #                 10 : 'D', #are_object_existed_on_internal_map
+    #                 11 : 'E', #are_object_nearby_node
+    #                 12 : 'F', #is_object_in_hand_node
+    #                 13 : 'H', #are_five_objects_at_spawn
+    #                 # Specials
+    #                 14 : None, #stop node
+    #                 }
+    
                     # Specials
-                    14 : None, #stop node
+    node_dict = {   0 : None,
+                    1 : '(0)', #patrol_node
+                    2 : '(1)', #find_target_node
+                    3 : '(2)', #go_to_nearest_target
+                    # Behaviors
+                    4 : 'a', #patrol_node
+                    5 : 'b', #find_target_node
+                    6 : 'c', #go_to_nearest_target
+                    7 : 'e', #go_to_spawn_node
+                    8 : 'f', #picking_object_node
+                    9 : 'g', #drop_object_node
+                    # Conditions
+                    10 : 'B', #is_robot_at_the_spawn_node
+                    11 : 'D', #are_object_existed_on_internal_map
+                    12 : 'E', #are_object_nearby_node
+                    13 : 'F', #is_object_in_hand_node
+                    14 : 'H', #are_five_objects_at_spawn
                     }
     
     # Maximum of nodes in the BT
@@ -256,8 +273,7 @@ if __name__ == "__main__":
         node_type_vocab_size=20,
         embed_size=32,  # was 64
         hidden_size=64, # was 128
-        action1_size=len(node_dict.items()),    # Number of node types to choose from
-        action2_size=2*nodes_limit,             # Max insertion locations (50 * 2) - 1 + 1
+        action_size=4 + (len(node_dict.items()) - 1) * (2 * nodes_limit - 1),    # Number of node types to choose from * Max insertion locations (50 * 2) - 1 
         device=device,
         reward_head=False,                      # Set to True if you want to include a reward head
     )

@@ -14,8 +14,8 @@ project_root = os.path.abspath(os.path.join(script_dir, ".."))
 
 logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
 
-date_time = "2025-05-13_14-48-37"
-model_name = "rvnn_iter004"
+date_time = "2025-09-10_02-58-50"
+model_name = "rvnn_iter124"
 full_model_name = f"{model_name}.pt"
 
 model_path = os.path.join(logs_dir, date_time, full_model_name)
@@ -29,8 +29,8 @@ from learning.gymEnv import MultiBTEnv
 
 device = "cuda"
 
-num_search_agents = 5
-num_search = 10
+num_search_agents = 16
+num_search = 800
 
 num_node_to_explore = 10
 
@@ -61,27 +61,25 @@ num_node_to_explore = 10
 #                 19 : None, #stop node
 #             }
 
-# Flow Control
-node_dict = {   0 : '(0)', #patrol_node
-                1 : '(1)', #find_target_node
-                2 : '(2)', #go_to_nearest_target
-            # Behaviors
-                3 : 'a', #patrol_node
-                4 : 'b', #find_target_node
-                5 : 'c', #go_to_nearest_target
-                6 : 'e', #go_to_spawn_node
-                7 : 'f', #picking_object_node
-                8 : 'g', #drop_object_node
-            # Conditions
-                9 : 'B', #is_robot_at_the_spawn_node
-                10 : 'D', #are_object_existed_on_internal_map
-                11 : 'E', #are_object_nearby_node
-                12 : 'F', #is_object_in_hand_node
-                13 : 'G', #is_nearby_object_not_at_goal
+                # Specials
+node_dict = {   0 : None,
+                1 : '(0)', #patrol_node
+                2 : '(1)', #find_target_node
+                3 : '(2)', #go_to_nearest_target
+                # Behaviors
+                4 : 'a', #patrol_node
+                5 : 'b', #find_target_node
+                6 : 'c', #go_to_nearest_target
+                7 : 'e', #go_to_spawn_node
+                8 : 'f', #picking_object_node
+                9 : 'g', #drop_object_node
+                # Conditions
+                10 : 'B', #is_robot_at_the_spawn_node
+                11 : 'D', #are_object_existed_on_internal_map
+                12 : 'E', #are_object_nearby_node
+                13 : 'F', #is_object_in_hand_node
                 14 : 'H', #are_five_objects_at_spawn
-            # Specials
-                15 : None, #stop node
-            }
+                }
 
 # Maximum of nodes in the BT
 nodes_limit = 25
@@ -107,8 +105,8 @@ def modify_bt(node_dict, current_bt, node_type, node_location):
     if node != None:
 
         # If node location is 0 and node type is a flow control node, we add it as a parent node
-        if node_location == 0 and node_type in [0, 1, 2]:
-            return f'({node_type}' + bt_string + ')'
+        if node_location == 0 and node_type in [1, 2, 3]:
+            return f'({node_type - 1}' + bt_string + ')'
         
         else:
             # Iterate over all potential insertion positions (0 to len(s))
@@ -125,13 +123,13 @@ def modify_bt(node_dict, current_bt, node_type, node_location):
 
 # Instantiate the model
 model = RvNN(
-        node_type_vocab_size=20,
-        embed_size=64,
-        hidden_size=128,
-        action1_size=len(node_dict.items()),    # Number of node types to choose from
-        action2_size=2*nodes_limit,             # Max insertion locations (50 * 2) - 1 + 1
-        device=device
-    )
+    node_type_vocab_size=20,
+    embed_size=32,  # was 64
+    hidden_size=64, # was 128
+    action_size=4 + (len(node_dict.items()) - 1) * (2 * nodes_limit - 1),    # Number of node types to choose from * Max insertion locations (50 * 2) - 1 
+    device=device,
+    reward_head=False,                      # Set to True if you want to include a reward head
+)
 model.load_state_dict(torch.load(model_path))
 model.eval()
 
@@ -149,8 +147,8 @@ mcts = MCTS(env, policy_net, num_simulations=num_search, exploration_weight=1.0,
 bt_string = ''
 
 bt_strings = []
-action1_probs = []
-action2_probs = []
+action_probs = []
+
 
 number_of_nodes = 0
 count = 0
@@ -165,29 +163,32 @@ while True:
 
     # Get the action probabilities from MCTS search
     save_path = os.path.join(logs_dir, date_time, model_name, f"mcts_tree_{count}.json")
-    nt_probs, loc_probs = mcts.run_search(root_state=bt_string,temperature=temperature, verbose=False, export_path=save_path) # Set verbose = True if want to see each search step run time
+    action_prob = mcts.run_search(root_state=bt_string,temperature=temperature, verbose=True) # Set verbose = True if want to see each search step run time
     
     # Store the sample data
     bt_strings.append(bt_string)
-    action1_probs.append(nt_probs)
-    action2_probs.append(loc_probs)
-    
-    max_nt_probs = np.max(nt_probs)
-    max_loc_probs = np.max(loc_probs)
+    action_probs.append(action_prob)
 
-    best_nt_indices = np.where(nt_probs == max_nt_probs)[0]
-    best_loc_indices = np.where(loc_probs == max_loc_probs)[0]
+    max_action_prob = np.max(action_prob)
+
+    best_action_indices = np.where(action_prob == max_action_prob)[0]
 
     # Randomly select one of the best indices
-    selected_nt = np.random.choice(best_nt_indices)
-    selected_loc = np.random.choice(best_loc_indices)
+    selected_action = np.random.choice(best_action_indices)
+
+    if selected_action > 3:
+        selected_nt = (selected_action - 3) % (len(node_dict.items()) - 1)
+        selected_loc = (selected_action - 3) // (len(node_dict.items()) - 1) + 1
+    else:
+        selected_nt = selected_action
+        selected_loc = 0
 
     bt_string = modify_bt(node_dict, bt_string, selected_nt, selected_loc)
     number_of_nodes += 1
 
     print(f"[INFO] Dataset {number_of_nodes}/{nodes_limit} << {bt_strings[-1]}, ({selected_nt}, {selected_loc})")
 
-    if selected_nt == (len(node_dict.items()) - 1) or number_of_nodes >= nodes_limit:
+    if selected_nt == 0 or number_of_nodes >= nodes_limit:
         break
 
 print(f"Final BT >> {bt_string}")

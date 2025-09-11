@@ -34,13 +34,13 @@ class MCTSNode:
         # The node_location = 0 means the location of the parent node while the other n locations are the locations of the nth child node
         if bt_string == '':
             # If the BT is empty, only a location of the root node is valid
-            self.all_actions = [(nt, 1) for nt in range(self.env.num_node_types - 1)]
+            self.all_actions = [(nt, 1) for nt in range(1, self.env.num_node_types)]
         else:
-            self.all_actions = [(nt, 0) for nt in range(3)] + [(nt, loc) for loc in range(1, len(valid_locs) + 1) for nt in range(15 - 1)]
+            self.all_actions = [(nt, 0) for nt in range(4)] + [(nt, loc) for loc in range(1, len(valid_locs) + 1) for nt in range(1, self.env.num_node_types)]
 
         # If there are no valid locations, only the stop action is valid
-        if (self.env.num_node_types - 1, 0) not in self.all_actions:
-            self.all_actions.append((self.env.num_node_types - 1, 0))
+        if (0, 0) not in self.all_actions:
+            self.all_actions.append((0, 0))
 
         # Get prior probabilities from the policy network
         action_probs, pred_rew = self.policy_net.predict(state)
@@ -49,10 +49,18 @@ class MCTSNode:
         action_probs = action_probs.detach().cpu().numpy()
 
         # Initialize edges for each action
-        self.edges = [MCTSEdge(parent = self, 
-                               action = (nt, loc), 
-                               prior  = float(nt_probs[nt] * loc_probs[loc]))
-                    for nt, loc in self.all_actions]
+        self.edges = []
+        for nt, loc in self.all_actions:
+            if loc == 0:
+                prior=float(action_probs[nt])
+            else:
+                prior=float(action_probs[3 + nt + (self.env.num_node_types - 1) * (loc - 1)])
+
+            self.edges.append(MCTSEdge(
+                    parent=self, 
+                    action=(nt, loc), 
+                    prior=prior))
+
 
 class MCTSEdge:
     def __init__(self, parent, action, prior):
@@ -166,29 +174,28 @@ class MCTS:
             print(f"Average time elapsed for backpropagation: {backpropagate_time_elapsed_avg:.4f}s")
 
         # Collect visit counts and probabilities
-        nt_probs = np.zeros(self.env.num_node_types)
-        loc_probs = np.zeros(self.env.max_location_size)
+        action_probs = np.zeros(4 + (self.env.num_node_types - 1) * (self.env.max_location_size - 1))
 
         for edge in root.edges:
             nt, loc = edge.action
-            nt_probs[nt] += edge.visits
-            loc_probs[loc] += edge.visits
 
-        nt_prob_numerator = [nt_prob ** (1/(temperature)) for nt_prob in nt_probs] 
-        nt_prob_denominator = sum(nt_prob_numerator)
-        nt_probs = [num / nt_prob_denominator for num in nt_prob_numerator]
+            if loc == 0:
+                index = nt
+            else:
+                index = 3 + nt + (self.env.num_node_types - 1) * (loc - 1)
 
-        loc_prob_numerator = [loc_prob ** (1/(temperature)) for loc_prob in loc_probs] 
-        loc_prob_denominator = sum(loc_prob_numerator)
-        loc_probs = [num / loc_prob_denominator for num in loc_prob_numerator]
+            action_probs[index] += edge.visits
 
-        # >> print(f"nt_probs: {nt_probs}")
-        # >> print(f"loc_probs: {loc_probs}")
+        action_prob_numerator = [action_prob ** (1/(temperature)) for action_prob in action_probs] 
+        action_prob_denominator = sum(action_prob_numerator)
+        action_probs = [num / action_prob_denominator for num in action_prob_numerator]
+
+        # >> print(f"action_probs: {action_probs}")
 
         if export_path:
             self.export_tree(root, export_path)
 
-        return nt_probs, loc_probs
+        return action_probs
 
     def select(self, node, dirichlet_noise_at_root=True):    
         """
@@ -304,17 +311,15 @@ class MCTS:
                 
                 # If the BT Contruction is done, select stop action
                 if nodes[env_id].is_terminated or dones[env_id]:
-                    actions.append((self.env.num_node_types - 1, 0))
+                    actions.append((0, 0))
                     continue
 
                 # Get the action probablities from the policy network
-                nt_probs, loc_probs, _ = self.policy_net.predict(state) 
+                action_probs, _ = self.policy_net.predict(state) 
 
                 # Convert torch tensors to numpy arrays
-                nt_probs = nt_probs.detach().cpu().numpy()
-                loc_probs = loc_probs.detach().cpu().numpy()
-
-                
+                action_probs = action_probs.detach().cpu().numpy()
+  
                 # Get all possible actions
                 bt_string = state
                 valid_locs_on_string = [j for j in range(1,len(bt_string)) if j == len(bt_string) or not bt_string[j].isdigit()] # Find valid location on BT string
@@ -322,18 +327,21 @@ class MCTS:
 
                 # Define all possible actions as (node_type, node_location) tuples
                 # The node_location = 0 means the location of the parent node while the other n locations are the locations of the nth child node
+                all_actions = [(0, 0)]
                 if bt_string == '':
                     # If the BT is empty, only a location of the root node is valid
-                    all_actions = [(nt, 1) for nt in range(self.env.num_node_types - 1)]
+                    all_actions += [(nt, 1) for nt in range(1, self.env.num_node_types)]
                 else:
-                    all_actions = [(nt, 0) for nt in range(3)] + [(nt, loc) for nt in range(self.env.num_node_types - 1) for loc in range(1, len(valid_locs) + 1)]
-
-                # If there are no valid locations, only the stop action is valid
-                if (self.env.num_node_types - 1, 0) not in all_actions:
-                    all_actions.append((self.env.num_node_types - 1, 0))
+                    all_actions += [(nt, 0) for nt in range(1, 4)] + [(nt, loc) for loc in range(1, len(valid_locs) + 1) for nt in range(1, self.env.num_node_types)]
 
                 # Select the best action according to its joint probability
-                probs = [float(nt_probs[nt] * loc_probs[loc]) for nt, loc in all_actions]
+                probs = []
+                for nt, loc in all_actions:
+                    if loc == 0:
+                        probs.append(float(action_probs[nt]))
+                    else:
+                        probs.append(float(action_probs[3 + nt + (self.env.num_node_types - 1) * (loc - 1)]))
+
                 best_ind = np.where(probs == np.max(probs))[0]
                 selected_ind = np.random.choice(best_ind)
 

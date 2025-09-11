@@ -145,7 +145,7 @@ class MultiBTEnv(gym.Env):
 
         # Action Space: (Node Type, Node Location)
         self.num_node_types = len(self.node_dict.items())  # 20 possible node types
-        self.max_location_size = (2 * self.nodes_limit - 1) + 1 # Maximum possible locations for child nodes + parent node
+        self.max_location_size = 2 * self.nodes_limit # Maximum possible locations for child nodes + parent node
         self.action_space = gym.spaces.Tuple([gym.spaces.MultiDiscrete([self.num_node_types, self.max_location_size]) for _ in range(num_envs)])
 
         # Observation Space: String representing BT
@@ -463,7 +463,8 @@ class MultiBTEnv(gym.Env):
 
             done = False
             # Done if agent select to not expand the tree
-            if node_type == self.num_node_types - 1:
+            # if node_type == self.num_node_types - 1:
+            if node_type == 0:
                 done = True
 
             # Done if the number of nodes in BT exceed the limit
@@ -564,8 +565,8 @@ class MultiBTEnv(gym.Env):
 
         if node is not None:
             # If node location is 0 and node type is a flow control node, we add it as a parent node
-            if node_location == 0 and node_type in [0, 1, 2]:
-                self.current_bt[env_id] = f'({node_type}' + bt_string + ')'
+            if node_location == 0 and node_type in [1, 2, 3]:
+                self.current_bt[env_id] = f'({node_type - 1}' + bt_string + ')'
             else:   
                 # Generate list of valid insert positions
                 valid_indices = [j for j in range(1,len(bt_string)) if j == len(bt_string) or not bt_string[j].isdigit()]
