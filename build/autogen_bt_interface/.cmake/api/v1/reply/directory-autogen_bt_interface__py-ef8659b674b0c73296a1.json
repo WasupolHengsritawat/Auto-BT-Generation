@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "autogen_bt_interface__py",
+		"source" : "/home/drl-68/Auto-BT-Generation/build/autogen_bt_interface/autogen_bt_interface__py"
+	}
+}

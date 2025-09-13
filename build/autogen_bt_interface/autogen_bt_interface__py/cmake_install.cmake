@@ -1,8 +1,8 @@
-# Install script for directory: /home/absolutezeno/Auto-BT-Generation/build/autogen_bt_interface/autogen_bt_interface__py
+# Install script for directory: /home/drl-68/Auto-BT-Generation/build/autogen_bt_interface/autogen_bt_interface__py
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/absolutezeno/Auto-BT-Generation/install/autogen_bt_interface")
+  set(CMAKE_INSTALL_PREFIX "/home/drl-68/Auto-BT-Generation/install/autogen_bt_interface")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 

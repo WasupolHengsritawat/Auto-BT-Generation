@@ -1,8 +1,8 @@
-# Install script for directory: /home/absolutezeno/Auto-BT-Generation/build/isaac_ros2_messages/isaac_ros2_messages__py
+# Install script for directory: /home/drl-68/Auto-BT-Generation/build/isaac_ros2_messages/isaac_ros2_messages__py
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/absolutezeno/Auto-BT-Generation/install/isaac_ros2_messages")
+  set(CMAKE_INSTALL_PREFIX "/home/drl-68/Auto-BT-Generation/install/isaac_ros2_messages")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 

@@ -1,8 +1,8 @@
-# Install script for directory: /home/absolutezeno/Auto-BT-Generation/build/custom_message/custom_message__py
+# Install script for directory: /home/drl-68/Auto-BT-Generation/build/custom_message/custom_message__py
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/absolutezeno/Auto-BT-Generation/install/custom_message")
+  set(CMAKE_INSTALL_PREFIX "/home/drl-68/Auto-BT-Generation/install/custom_message")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 

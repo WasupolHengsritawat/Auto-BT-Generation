@@ -1,0 +1,231 @@
+[0.221s] Invoking command in '/home/drl-68/Auto-BT-Generation/build/custom_message': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake /home/drl-68/Auto-BT-Generation/src/custom_message -DCMAKE_INSTALL_PREFIX=/home/drl-68/Auto-BT-Generation/install/custom_message
+[0.263s] -- The C compiler identification is GNU 11.4.0
+[0.299s] -- The CXX compiler identification is GNU 11.4.0
+[0.305s] -- Detecting C compiler ABI info
+[0.350s] -- Detecting C compiler ABI info - done
+[0.355s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.355s] -- Detecting C compile features
+[0.355s] -- Detecting C compile features - done
+[0.357s] -- Detecting CXX compiler ABI info
+[0.408s] -- Detecting CXX compiler ABI info - done
+[0.413s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.413s] -- Detecting CXX compile features
+[0.414s] -- Detecting CXX compile features - done
+[0.415s] -- Found ament_cmake: 1.3.12 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.517s] -- Found Python3: /usr/bin/python3 (found version "3.10.12") found components: Interpreter 
+[0.583s] -- Found std_msgs: 4.9.0 (/opt/ros/humble/share/std_msgs/cmake)
+[0.611s] -- Found rosidl_generator_c: 3.1.7 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[0.615s] -- Found rosidl_adapter: 3.1.7 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[0.621s] -- Found rosidl_generator_cpp: 3.1.7 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[0.631s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.643s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.662s] -- Found rosidl_default_generators: 1.2.0 (/opt/ros/humble/share/rosidl_default_generators/cmake)
+[0.841s] -- Found ament_cmake_ros: 0.10.0 (/opt/ros/humble/share/ament_cmake_ros/cmake)
+[1.069s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[1.163s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[1.180s] -- Found PythonInterp: /usr/bin/python3 (found suitable version "3.10.12", minimum required is "3.6") 
+[1.182s] -- Found python_cmake_module: 0.10.0 (/opt/ros/humble/share/python_cmake_module/cmake)
+[1.200s] -- Found PythonLibs: /usr/lib/x86_64-linux-gnu/libpython3.10.so (found suitable version "3.10.12", minimum required is "3.5") 
+[1.200s] -- Using PYTHON_EXECUTABLE: /usr/bin/python3
+[1.200s] -- Using PYTHON_INCLUDE_DIRS: /usr/include/python3.10
+[1.200s] -- Using PYTHON_LIBRARIES: /usr/lib/x86_64-linux-gnu/libpython3.10.so
+[1.214s] -- Found PythonExtra: .so  
+[1.243s] -- Found ament_lint_auto: 0.12.14 (/opt/ros/humble/share/ament_lint_auto/cmake)
+[1.254s] -- Added test 'copyright' to check source files copyright and LICENSE
+[1.255s] -- Added test 'lint_cmake' to check CMake code style
+[1.255s] -- Added test 'xmllint' to check XML markup files
+[1.257s] -- Configuring done
+[1.273s] -- Generating done
+[1.280s] -- Build files have been written to: /home/drl-68/Auto-BT-Generation/build/custom_message
+[1.284s] Invoked command in '/home/drl-68/Auto-BT-Generation/build/custom_message' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake /home/drl-68/Auto-BT-Generation/src/custom_message -DCMAKE_INSTALL_PREFIX=/home/drl-68/Auto-BT-Generation/install/custom_message
+[1.285s] Invoking command in '/home/drl-68/Auto-BT-Generation/build/custom_message': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/drl-68/Auto-BT-Generation/build/custom_message -- -j16 -l16
+[1.309s] [  3%] [34m[1mGenerating C code for ROS interfaces[0m
+[1.315s] [  6%] [34m[1mGenerating C++ code for ROS interfaces[0m
+[1.324s] [  6%] Built target ament_cmake_python_copy_custom_message
+[1.464s] [  6%] Built target custom_message__cpp
+[1.464s] [  9%] [32mBuilding C object CMakeFiles/custom_message__rosidl_generator_c.dir/rosidl_generator_c/custom_message/msg/detail/sample_msg__functions.c.o[0m
+[1.471s] [ 12%] [34m[1mGenerating C++ type support for eProsima Fast-RTPS[0m
+[1.471s] [ 16%] [34m[1mGenerating C++ introspection for ROS interfaces[0m
+[1.472s] [ 19%] [34m[1mGenerating C++ type support dispatch for ROS interfaces[0m
+[1.507s] [ 22%] [32m[1mLinking C shared library libcustom_message__rosidl_generator_c.so[0m
+[1.542s] [ 22%] Built target custom_message__rosidl_generator_c
+[1.551s] [ 29%] [34m[1mGenerating C introspection for ROS interfaces[0m
+[1.551s] [ 29%] [34m[1mGenerating C type support dispatch for ROS interfaces[0m
+[1.551s] [ 32%] [34m[1mGenerating C type support for eProsima Fast-RTPS[0m
+[1.649s] [ 35%] [32mBuilding CXX object CMakeFiles/custom_message__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/custom_message/msg/sample_msg__type_support.cpp.o[0m
+[1.652s] running egg_info
+[1.652s] creating custom_message.egg-info
+[1.652s] writing custom_message.egg-info/PKG-INFO
+[1.652s] writing dependency_links to custom_message.egg-info/dependency_links.txt
+[1.652s] writing top-level names to custom_message.egg-info/top_level.txt
+[1.652s] writing manifest file 'custom_message.egg-info/SOURCES.txt'
+[1.654s] reading manifest file 'custom_message.egg-info/SOURCES.txt'
+[1.655s] writing manifest file 'custom_message.egg-info/SOURCES.txt'
+[1.706s] [ 35%] Built target ament_cmake_python_build_custom_message_egg
+[1.713s] [ 38%] [32mBuilding CXX object CMakeFiles/custom_message__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/custom_message/msg/detail/sample_msg__type_support.cpp.o[0m
+[1.736s] [ 41%] [32mBuilding CXX object CMakeFiles/custom_message__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/custom_message/msg/detail/dds_fastrtps/sample_msg__type_support.cpp.o[0m
+[1.753s] [ 45%] [32mBuilding CXX object CMakeFiles/custom_message__rosidl_typesupport_c.dir/rosidl_typesupport_c/custom_message/msg/sample_msg__type_support.cpp.o[0m
+[1.783s] [ 48%] [32m[1mLinking CXX shared library libcustom_message__rosidl_typesupport_c.so[0m
+[1.803s] [ 51%] [32mBuilding C object CMakeFiles/custom_message__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/custom_message/msg/detail/sample_msg__type_support.c.o[0m
+[1.806s] [ 54%] [32mBuilding CXX object CMakeFiles/custom_message__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/custom_message/msg/detail/sample_msg__type_support_c.cpp.o[0m
+[1.827s] [ 54%] Built target custom_message__rosidl_typesupport_c
+[1.838s] [ 58%] [32m[1mLinking C shared library libcustom_message__rosidl_typesupport_introspection_c.so[0m
+[1.860s] [ 58%] Built target custom_message__rosidl_typesupport_introspection_c
+[1.922s] [ 61%] [32m[1mLinking CXX shared library libcustom_message__rosidl_typesupport_cpp.so[0m
+[1.956s] [ 61%] Built target custom_message__rosidl_typesupport_cpp
+[2.063s] [ 64%] [32m[1mLinking CXX shared library libcustom_message__rosidl_typesupport_introspection_cpp.so[0m
+[2.063s] [ 67%] [32m[1mLinking CXX shared library libcustom_message__rosidl_typesupport_fastrtps_cpp.so[0m
+[2.108s] [ 70%] [32m[1mLinking CXX shared library libcustom_message__rosidl_typesupport_fastrtps_c.so[0m
+[2.195s] [ 70%] Built target custom_message__rosidl_typesupport_introspection_cpp
+[2.205s] [ 70%] Built target custom_message__rosidl_typesupport_fastrtps_c
+[2.287s] [ 70%] Built target custom_message__rosidl_typesupport_fastrtps_cpp
+[2.319s] [ 70%] Built target custom_message
+[2.351s] [ 74%] [34m[1mGenerating Python code for ROS interfaces[0m
+[2.538s] [ 74%] Built target custom_message__py
+[2.556s] [ 77%] [32mBuilding C object CMakeFiles/custom_message__rosidl_generator_py.dir/rosidl_generator_py/custom_message/msg/_sample_msg_s.c.o[0m
+[2.660s] [ 80%] [32m[1mLinking C shared library rosidl_generator_py/custom_message/libcustom_message__rosidl_generator_py.so[0m
+[2.697s] [ 80%] Built target custom_message__rosidl_generator_py
+[2.715s] [ 87%] [32mBuilding C object CMakeFiles/custom_message__rosidl_typesupport_c__pyext.dir/rosidl_generator_py/custom_message/_custom_message_s.ep.rosidl_typesupport_c.c.o[0m
+[2.715s] [ 87%] [32mBuilding C object CMakeFiles/custom_message__rosidl_typesupport_introspection_c__pyext.dir/rosidl_generator_py/custom_message/_custom_message_s.ep.rosidl_typesupport_introspection_c.c.o[0m
+[2.715s] [ 90%] [32mBuilding C object CMakeFiles/custom_message__rosidl_typesupport_fastrtps_c__pyext.dir/rosidl_generator_py/custom_message/_custom_message_s.ep.rosidl_typesupport_fastrtps_c.c.o[0m
+[2.809s] [ 93%] [32m[1mLinking C shared library rosidl_generator_py/custom_message/custom_message_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so[0m
+[2.812s] [ 96%] [32m[1mLinking C shared library rosidl_generator_py/custom_message/custom_message_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so[0m
+[2.817s] [100%] [32m[1mLinking C shared library rosidl_generator_py/custom_message/custom_message_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so[0m
+[2.868s] [100%] Built target custom_message__rosidl_typesupport_introspection_c__pyext
+[2.885s] [100%] Built target custom_message__rosidl_typesupport_fastrtps_c__pyext
+[2.900s] [100%] Built target custom_message__rosidl_typesupport_c__pyext
+[2.924s] Invoked command in '/home/drl-68/Auto-BT-Generation/build/custom_message' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/drl-68/Auto-BT-Generation/build/custom_message -- -j16 -l16
+[2.945s] Invoking command in '/home/drl-68/Auto-BT-Generation/build/custom_message': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/drl-68/Auto-BT-Generation/build/custom_message
+[2.953s] -- Install configuration: ""
+[2.953s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/ament_index/resource_index/rosidl_interfaces/custom_message
+[2.953s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message
+[2.953s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg
+[2.954s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/rosidl_generator_c__visibility_control.h
+[2.954s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/sample_msg.h
+[2.954s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail
+[2.954s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail/sample_msg__struct.h
+[2.954s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail/sample_msg__functions.c
+[2.954s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail/sample_msg__type_support.h
+[2.954s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail/sample_msg__functions.h
+[2.954s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/environment/library_path.sh
+[2.954s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/environment/library_path.dsv
+[2.954s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/lib/libcustom_message__rosidl_generator_c.so
+[2.955s] -- Set runtime path of "/home/drl-68/Auto-BT-Generation/install/custom_message/lib/libcustom_message__rosidl_generator_c.so" to ""
+[2.955s] -- Up-to-date: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message
+[2.955s] -- Up-to-date: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg
+[2.955s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/rosidl_typesupport_fastrtps_c__visibility_control.h
+[2.956s] -- Up-to-date: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail
+[2.956s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail/sample_msg__rosidl_typesupport_fastrtps_c.h
+[2.957s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/lib/libcustom_message__rosidl_typesupport_fastrtps_c.so
+[2.957s] -- Set runtime path of "/home/drl-68/Auto-BT-Generation/install/custom_message/lib/libcustom_message__rosidl_typesupport_fastrtps_c.so" to ""
+[2.957s] -- Up-to-date: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message
+[2.957s] -- Up-to-date: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg
+[2.957s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/sample_msg.hpp
+[2.957s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/rosidl_generator_cpp__visibility_control.hpp
+[2.957s] -- Up-to-date: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail
+[2.957s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail/sample_msg__struct.hpp
+[2.957s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail/sample_msg__traits.hpp
+[2.957s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail/sample_msg__type_support.hpp
+[2.957s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail/sample_msg__builder.hpp
+[2.957s] -- Up-to-date: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message
+[2.957s] -- Up-to-date: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg
+[2.957s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h
+[2.957s] -- Up-to-date: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail
+[2.957s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail/dds_fastrtps
+[2.962s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail/sample_msg__rosidl_typesupport_fastrtps_cpp.hpp
+[2.962s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/lib/libcustom_message__rosidl_typesupport_fastrtps_cpp.so
+[2.963s] -- Set runtime path of "/home/drl-68/Auto-BT-Generation/install/custom_message/lib/libcustom_message__rosidl_typesupport_fastrtps_cpp.so" to ""
+[2.963s] -- Up-to-date: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message
+[2.963s] -- Up-to-date: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg
+[2.963s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/rosidl_typesupport_introspection_c__visibility_control.h
+[2.963s] -- Up-to-date: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail
+[2.963s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail/sample_msg__rosidl_typesupport_introspection_c.h
+[2.963s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail/sample_msg__type_support.c
+[2.963s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/lib/libcustom_message__rosidl_typesupport_introspection_c.so
+[2.963s] -- Set runtime path of "/home/drl-68/Auto-BT-Generation/install/custom_message/lib/libcustom_message__rosidl_typesupport_introspection_c.so" to ""
+[2.964s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/lib/libcustom_message__rosidl_typesupport_c.so
+[2.964s] -- Set runtime path of "/home/drl-68/Auto-BT-Generation/install/custom_message/lib/libcustom_message__rosidl_typesupport_c.so" to ""
+[2.964s] -- Up-to-date: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message
+[2.964s] -- Up-to-date: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg
+[2.964s] -- Up-to-date: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail
+[2.964s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail/sample_msg__type_support.cpp
+[2.964s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/include/custom_message/custom_message/msg/detail/sample_msg__rosidl_typesupport_introspection_cpp.hpp
+[2.964s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/lib/libcustom_message__rosidl_typesupport_introspection_cpp.so
+[2.964s] -- Set runtime path of "/home/drl-68/Auto-BT-Generation/install/custom_message/lib/libcustom_message__rosidl_typesupport_introspection_cpp.so" to ""
+[2.964s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/lib/libcustom_message__rosidl_typesupport_cpp.so
+[2.966s] -- Set runtime path of "/home/drl-68/Auto-BT-Generation/install/custom_message/lib/libcustom_message__rosidl_typesupport_cpp.so" to ""
+[2.966s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/environment/pythonpath.sh
+[2.966s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/environment/pythonpath.dsv
+[2.966s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message-0.0.0-py3.10.egg-info
+[2.966s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message-0.0.0-py3.10.egg-info/dependency_links.txt
+[2.966s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message-0.0.0-py3.10.egg-info/PKG-INFO
+[2.966s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message-0.0.0-py3.10.egg-info/SOURCES.txt
+[2.966s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message-0.0.0-py3.10.egg-info/top_level.txt
+[2.967s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message
+[2.967s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/custom_message_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so
+[2.967s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/custom_message_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so
+[2.967s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/msg
+[2.967s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/msg/_sample_msg_s.c
+[2.967s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/msg/__init__.py
+[2.967s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/msg/_sample_msg.py
+[2.967s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/__init__.py
+[2.970s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/_custom_message_s.ep.rosidl_typesupport_c.c
+[2.970s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/custom_message_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so
+[2.970s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/_custom_message_s.ep.rosidl_typesupport_introspection_c.c
+[2.970s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/libcustom_message__rosidl_generator_py.so
+[2.970s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/_custom_message_s.ep.rosidl_typesupport_fastrtps_c.c
+[3.005s] Listing '/home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message'...
+[3.005s] Compiling '/home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/__init__.py'...
+[3.005s] Listing '/home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/msg'...
+[3.006s] Compiling '/home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/msg/__init__.py'...
+[3.006s] Compiling '/home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/msg/_sample_msg.py'...
+[3.011s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/custom_message_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so
+[3.012s] -- Set runtime path of "/home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/custom_message_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so" to ""
+[3.013s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/custom_message_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so
+[3.013s] -- Set runtime path of "/home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/custom_message_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so" to ""
+[3.014s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/custom_message_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so
+[3.014s] -- Set runtime path of "/home/drl-68/Auto-BT-Generation/install/custom_message/local/lib/python3.10/dist-packages/custom_message/custom_message_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so" to ""
+[3.015s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/lib/libcustom_message__rosidl_generator_py.so
+[3.015s] -- Set runtime path of "/home/drl-68/Auto-BT-Generation/install/custom_message/lib/libcustom_message__rosidl_generator_py.so" to ""
+[3.016s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/msg/SampleMsg.idl
+[3.016s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/msg/SampleMsg.msg
+[3.017s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/ament_index/resource_index/package_run_dependencies/custom_message
+[3.017s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/ament_index/resource_index/parent_prefix_path/custom_message
+[3.018s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/environment/ament_prefix_path.sh
+[3.018s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/environment/ament_prefix_path.dsv
+[3.018s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/environment/path.sh
+[3.021s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/environment/path.dsv
+[3.021s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/local_setup.bash
+[3.021s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/local_setup.sh
+[3.021s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/local_setup.zsh
+[3.021s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/local_setup.dsv
+[3.023s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/package.dsv
+[3.023s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/ament_index/resource_index/packages/custom_message
+[3.023s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/export_custom_message__rosidl_generator_cExport.cmake
+[3.023s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/export_custom_message__rosidl_generator_cExport-noconfig.cmake
+[3.024s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/export_custom_message__rosidl_typesupport_fastrtps_cExport.cmake
+[3.024s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/export_custom_message__rosidl_typesupport_fastrtps_cExport-noconfig.cmake
+[3.024s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/export_custom_message__rosidl_generator_cppExport.cmake
+[3.024s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/export_custom_message__rosidl_typesupport_fastrtps_cppExport.cmake
+[3.025s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/export_custom_message__rosidl_typesupport_fastrtps_cppExport-noconfig.cmake
+[3.025s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/custom_message__rosidl_typesupport_introspection_cExport.cmake
+[3.026s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/custom_message__rosidl_typesupport_introspection_cExport-noconfig.cmake
+[3.026s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/custom_message__rosidl_typesupport_cExport.cmake
+[3.026s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/custom_message__rosidl_typesupport_cExport-noconfig.cmake
+[3.026s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/custom_message__rosidl_typesupport_introspection_cppExport.cmake
+[3.027s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/custom_message__rosidl_typesupport_introspection_cppExport-noconfig.cmake
+[3.027s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/custom_message__rosidl_typesupport_cppExport.cmake
+[3.028s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/custom_message__rosidl_typesupport_cppExport-noconfig.cmake
+[3.028s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/export_custom_message__rosidl_generator_pyExport.cmake
+[3.029s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/export_custom_message__rosidl_generator_pyExport-noconfig.cmake
+[3.029s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/rosidl_cmake-extras.cmake
+[3.029s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/ament_cmake_export_dependencies-extras.cmake
+[3.030s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/ament_cmake_export_include_directories-extras.cmake
+[3.030s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/ament_cmake_export_libraries-extras.cmake
+[3.030s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/ament_cmake_export_targets-extras.cmake
+[3.031s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake
+[3.031s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake
+[3.031s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/custom_messageConfig.cmake
+[3.032s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/cmake/custom_messageConfig-version.cmake
+[3.032s] -- Installing: /home/drl-68/Auto-BT-Generation/install/custom_message/share/custom_message/package.xml
+[3.042s] Invoked command in '/home/drl-68/Auto-BT-Generation/build/custom_message' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/drl-68/Auto-BT-Generation/build/custom_message

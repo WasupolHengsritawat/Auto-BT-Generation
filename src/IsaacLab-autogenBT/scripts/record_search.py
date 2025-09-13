@@ -29,8 +29,8 @@ from learning.gymEnv import MultiBTEnv
 
 device = "cuda"
 
-num_search_agents = 5
-num_search = 10
+num_search_agents = 16
+num_search = 800
 
 num_node_to_explore = 10
 
@@ -126,11 +126,12 @@ def modify_bt(node_dict, current_bt, node_type, node_location):
 # Instantiate the model
 model = RvNN(
         node_type_vocab_size=20,
-        embed_size=64,
-        hidden_size=128,
+        embed_size=32,  # was 64
+        hidden_size=64, # was 128
         action1_size=len(node_dict.items()),    # Number of node types to choose from
         action2_size=2*nodes_limit,             # Max insertion locations (50 * 2) - 1 + 1
-        device=device
+        device=device,
+        reward_head=False
     )
 model.load_state_dict(torch.load(model_path))
 model.eval()

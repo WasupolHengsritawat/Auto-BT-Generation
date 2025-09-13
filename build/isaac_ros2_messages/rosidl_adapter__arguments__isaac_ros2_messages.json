@@ -1,10 +1,10 @@
 {
   "package_name": "isaac_ros2_messages",
   "non_idl_tuples": [
-    "/home/absolutezeno/Auto-BT-Generation/src/isaac_ros2_messages:srv/IsaacPose.srv",
-    "/home/absolutezeno/Auto-BT-Generation/src/isaac_ros2_messages:srv/GetPrims.srv",
-    "/home/absolutezeno/Auto-BT-Generation/src/isaac_ros2_messages:srv/GetPrimAttributes.srv",
-    "/home/absolutezeno/Auto-BT-Generation/src/isaac_ros2_messages:srv/GetPrimAttribute.srv",
-    "/home/absolutezeno/Auto-BT-Generation/src/isaac_ros2_messages:srv/SetPrimAttribute.srv"
+    "/home/drl-68/Auto-BT-Generation/src/isaac_ros2_messages:srv/IsaacPose.srv",
+    "/home/drl-68/Auto-BT-Generation/src/isaac_ros2_messages:srv/GetPrims.srv",
+    "/home/drl-68/Auto-BT-Generation/src/isaac_ros2_messages:srv/GetPrimAttributes.srv",
+    "/home/drl-68/Auto-BT-Generation/src/isaac_ros2_messages:srv/GetPrimAttribute.srv",
+    "/home/drl-68/Auto-BT-Generation/src/isaac_ros2_messages:srv/SetPrimAttribute.srv"
   ]
 }
