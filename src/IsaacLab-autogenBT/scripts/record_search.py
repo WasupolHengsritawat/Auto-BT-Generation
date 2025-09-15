@@ -14,9 +14,13 @@ project_root = os.path.abspath(os.path.join(script_dir, ".."))
 
 logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
 
-date_time = "2025-05-13_14-48-37"
-model_name = "rvnn_iter004"
+date_time = "2025-09-04_18-02-46-fibo2-ind-064-128-seedNA-199iters"
+model_name = "rvnn_iter198"
 full_model_name = f"{model_name}.pt"
+
+SEED = 1
+torch.manual_seed(SEED)
+np.random.seed(SEED)
 
 model_path = os.path.join(logs_dir, date_time, full_model_name)
 
@@ -25,7 +29,7 @@ sys.path.insert(0, script_dir)
 
 from learning.network import RvNN, RvNN_mem
 from learning.mcts import MCTS
-from learning.gymEnv import MultiBTEnv
+from learning.gymEnv import Simple_MultiBTEnv
 
 device = "cuda"
 
@@ -63,25 +67,24 @@ num_node_to_explore = 10
 
 # Flow Control
 node_dict = {   0 : '(0)', #patrol_node
-                1 : '(1)', #find_target_node
-                2 : '(2)', #go_to_nearest_target
-            # Behaviors
-                3 : 'a', #patrol_node
-                4 : 'b', #find_target_node
-                5 : 'c', #go_to_nearest_target
-                6 : 'e', #go_to_spawn_node
-                7 : 'f', #picking_object_node
-                8 : 'g', #drop_object_node
-            # Conditions
-                9 : 'B', #is_robot_at_the_spawn_node
-                10 : 'D', #are_object_existed_on_internal_map
-                11 : 'E', #are_object_nearby_node
-                12 : 'F', #is_object_in_hand_node
-                13 : 'G', #is_nearby_object_not_at_goal
-                14 : 'H', #are_five_objects_at_spawn
-            # Specials
-                15 : None, #stop node
-            }
+                    1 : '(1)', #find_target_node
+                    2 : '(2)', #go_to_nearest_target
+                    # Behaviors
+                    3 : 'a', #patrol_node
+                    4 : 'b', #find_target_node
+                    5 : 'c', #go_to_nearest_target
+                    6 : 'e', #go_to_spawn_node
+                    7 : 'f', #picking_object_node
+                    8 : 'g', #drop_object_node
+                    # Conditions
+                    9 : 'B', #is_robot_at_the_spawn_node
+                    10 : 'D', #are_object_existed_on_internal_map
+                    11 : 'E', #are_object_nearby_node
+                    12 : 'F', #is_object_in_hand_node
+                    13 : 'H', #are_five_objects_at_spawn
+                    # Specials
+                    14 : None, #stop node
+                    }
 
 # Maximum of nodes in the BT
 nodes_limit = 25
@@ -126,8 +129,8 @@ def modify_bt(node_dict, current_bt, node_type, node_location):
 # Instantiate the model
 model = RvNN(
         node_type_vocab_size=20,
-        embed_size=32,  # was 64
-        hidden_size=64, # was 128
+        embed_size=64,  # was 64
+        hidden_size=128, # was 128
         action1_size=len(node_dict.items()),    # Number of node types to choose from
         action2_size=2*nodes_limit,             # Max insertion locations (50 * 2) - 1 + 1
         device=device,
@@ -141,10 +144,10 @@ optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
 
 policy_net = model.to(device)
 
-env = MultiBTEnv(node_dict, 
-                    nodes_limit, 
-                    num_envs=num_search_agents,
-                    sim_step_limit=sim_step_limit, device=device, verbose=False)
+env = Simple_MultiBTEnv(node_dict, 
+                        nodes_limit, 
+                        num_envs=num_search_agents,
+                        verbose=False)
 mcts = MCTS(env, policy_net, num_simulations=num_search, exploration_weight=1.0, device=device)
 
 bt_string = ''
