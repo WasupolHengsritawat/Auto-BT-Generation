@@ -14,9 +14,13 @@ project_root = os.path.abspath(os.path.join(script_dir, ".."))
 
 logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
 
-date_time = "2025-09-10_02-58-50"
-model_name = "rvnn_iter124"
+date_time = "2025-09-11_15-05-17-fibo5-dep-seed01-200iters"
+model_name = "rvnn_iter199"
 full_model_name = f"{model_name}.pt"
+
+SEED = 1
+torch.manual_seed(SEED)
+np.random.seed(SEED)
 
 model_path = os.path.join(logs_dir, date_time, full_model_name)
 
@@ -25,7 +29,7 @@ sys.path.insert(0, script_dir)
 
 from learning.network import RvNN, RvNN_mem
 from learning.mcts import MCTS
-from learning.gymEnv import MultiBTEnv
+from learning.gymEnv import Simple_MultiBTEnv
 
 device = "cuda"
 
@@ -138,10 +142,10 @@ optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
 
 policy_net = model.to(device)
 
-env = MultiBTEnv(node_dict, 
-                    nodes_limit, 
-                    num_envs=num_search_agents,
-                    sim_step_limit=sim_step_limit, device=device, verbose=False)
+env = Simple_MultiBTEnv(node_dict, 
+                        nodes_limit, 
+                        num_envs=num_search_agents,
+                        verbose=False)
 mcts = MCTS(env, policy_net, num_simulations=num_search, exploration_weight=1.0, device=device)
 
 bt_string = ''
@@ -163,7 +167,7 @@ while True:
 
     # Get the action probabilities from MCTS search
     save_path = os.path.join(logs_dir, date_time, model_name, f"mcts_tree_{count}.json")
-    action_prob = mcts.run_search(root_state=bt_string,temperature=temperature, verbose=True) # Set verbose = True if want to see each search step run time
+    action_prob = mcts.run_search(root_state=bt_string,temperature=temperature, verbose=False, export_path=save_path) # Set verbose = True if want to see each search step run time
     
     # Store the sample data
     bt_strings.append(bt_string)
