@@ -60,17 +60,10 @@ node_dict = {   0 : '0', #patrol_node
                 3 : 'a', #patrol_node
                 4 : 'b', #find_target_node
                 5 : 'c', #go_to_nearest_target
-                6 : 'e', #go_to_spawn_node
-                7 : 'f', #picking_object_node
-                8 : 'g', #drop_object_node
                 # Conditions
-                9 : 'B', #is_robot_at_the_spawn_node
-                10 : 'D', #are_object_existed_on_internal_map
-                11 : 'E', #are_object_nearby_node
-                12 : 'F', #is_object_in_hand_node
-                13 : 'H', #are_five_objects_at_spawn
+                6 : 'D', #are_object_existed_on_internal_map
                 # Specials
-                14 : None, #stop node
+                7 : None, #stop node
                 }
 
 # === Inverted character -> type index ===

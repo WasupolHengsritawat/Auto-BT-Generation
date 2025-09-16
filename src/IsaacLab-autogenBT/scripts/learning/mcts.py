@@ -36,7 +36,7 @@ class MCTSNode:
             # If the BT is empty, only a location of the root node is valid
             self.all_actions = [(nt, 1) for nt in range(self.env.num_node_types - 1)]
         else:
-            self.all_actions = [(nt, 0) for nt in range(3)] + [(nt, loc) for nt in range(self.env.num_node_types - 1) for loc in range(1, len(valid_locs) + 1)]
+            self.all_actions = [(nt, 0) for nt in range(3)] + [(nt, loc) for nt in range(self.env.num_node_types - 1) for loc in range(1, len(valid_locs))]
 
         # If there are no valid locations, only the stop action is valid
         if (self.env.num_node_types - 1, 0) not in self.all_actions:
