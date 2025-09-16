@@ -623,7 +623,7 @@ class Simple_MultiBTEnv(MultiBTEnv):
         # Modify each BT and run it
         bt_with_evaluation_node = []
         for env_id in range(self.num_envs):
-            bt_with_evaluation_node.append('(1H' + self.current_bt[env_id] + ')')   # add evaluation node
+            bt_with_evaluation_node.append('(1E' + self.current_bt[env_id] + ')')   # add evaluation node
 
         # BT blackboard Initialization
         bb_client = py_trees.blackboard.Client(name="External")
@@ -677,7 +677,7 @@ class Simple_MultiBTEnv(MultiBTEnv):
                     env_state[env_id] = env_fsm[env_id].current_state.id
 
                     # Stop the individual simulation if the FSM reached the accepted state
-                    if env_state[env_id] == 'H':
+                    if env_state[env_id] == 'D':
                         env_done[env_id] = True
                 except Exception as e:
                     # Stop the individual simulation if the FSM rejects the command

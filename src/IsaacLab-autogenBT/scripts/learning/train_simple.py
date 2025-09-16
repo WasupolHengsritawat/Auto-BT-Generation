@@ -249,30 +249,23 @@ if __name__ == "__main__":
                     4 : 'a', #patrol_node
                     5 : 'b', #find_target_node
                     6 : 'c', #go_to_nearest_target
-                    7 : 'e', #go_to_spawn_node
-                    8 : 'f', #picking_object_node
-                    9 : 'g', #drop_object_node
                     # Conditions
-                    10 : 'B', #is_robot_at_the_spawn_node
-                    11 : 'D', #are_object_existed_on_internal_map
-                    12 : 'E', #are_object_nearby_node
-                    13 : 'F', #is_object_in_hand_node
-                    14 : 'H', #are_five_objects_at_spawn
+                    7 : 'D', #are_object_existed_on_internal_map
                     }
     
     # Maximum of nodes in the BT
-    nodes_limit = 25
+    nodes_limit = 10
 
     # Number of training epochs
-    num_epochs = 20
+    num_epochs = 10
 
     # ===============================================================================================================
 
     # Instantiate the model
     model = RvNN(
         node_type_vocab_size=20,
-        embed_size=32,  # was 64
-        hidden_size=64, # was 128
+        embed_size=16,  # was 64
+        hidden_size=32, # was 128
         action_size=4 + (len(node_dict.items()) - 1) * (2 * nodes_limit - 1),    # Number of node types to choose from * Max insertion locations (50 * 2) - 1 
         device=device,
         reward_head=False,                      # Set to True if you want to include a reward head
