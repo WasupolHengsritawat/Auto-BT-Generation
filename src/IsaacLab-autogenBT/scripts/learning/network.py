@@ -164,6 +164,10 @@ class RvNN_mem(nn.Module):
         super(RvNN_mem, self).__init__()
         
         self.device = device
+        self.node_type_vocab_size = node_type_vocab_size
+        self.embed_size = embed_size
+        self.hidden_size = hidden_size
+        self.action_size = action_size
         
         self.node_embedding = nn.Embedding(node_type_vocab_size, embed_size, device=self.device)
         self.W_c = nn.Linear(embed_size + hidden_size, hidden_size, device=self.device)
@@ -412,6 +416,10 @@ class RvNN(nn.Module):
         super(RvNN, self).__init__()
         
         self.device = device
+        self.node_type_vocab_size = node_type_vocab_size
+        self.embed_size = embed_size
+        self.hidden_size = hidden_size
+        self.action_size = action_size
         
         self.node_embedding = nn.Embedding(node_type_vocab_size, embed_size, device=self.device)
         self.W_c = nn.Linear(embed_size + hidden_size, hidden_size, device=self.device)
