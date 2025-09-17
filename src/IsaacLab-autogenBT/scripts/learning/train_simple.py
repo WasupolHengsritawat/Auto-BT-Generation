@@ -121,7 +121,7 @@ def modify_bt(node_dict, current_bt, node_type, node_location):
         
     return current_bt
 
-def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, policy_net, num_node_to_explore = 10, device='cuda:0', verbose = False):
+def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, policy_net, num_node_to_explore = 10, device='cuda:0', verbose = False, log_file=None):
     policy_net = policy_net.to(device)
 
     env = Simple_MultiBTEnv(node_dict, 
@@ -154,6 +154,11 @@ def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, po
         bt_strings.append(bt_string)
         action1_probs.append(nt_probs)
         action2_probs.append(loc_probs)
+
+        # log the BT string to file if log_file is provided
+        if log_file is not None:
+            log_file.write(f"Step {number_of_nodes}: {bt_string}\n")
+            log_file.flush()
         
         max_nt_probs = np.max(nt_probs)
         max_loc_probs = np.max(loc_probs)
@@ -262,12 +267,20 @@ if __name__ == "__main__":
     log_dir = os.path.join(project_root, "logs", datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
     writer = SummaryWriter(log_dir=log_dir)
 
+    # BT log path
+    bt_log_path = os.path.join(log_dir, f"bt_log.txt")
+    log_file = open(bt_log_path, "w")
+    print(f"[INFO] Logging BT strings to {bt_log_path}")
+
     global_step = 0
     start_time = time.time()
     dataset_queue = PeekableQueue()
 
     for iter_i in range(args_cli.training_iters):
         print(f"[INFO] Iteration {iter_i + 1}/{args_cli.training_iters}")
+
+        log_file.write(f"Iteration {iter_i + 1}/{args_cli.training_iters}\n")
+        log_file.flush()
 
         # Generate dataset
         current_dataset = dataset_generation(
@@ -277,7 +290,8 @@ if __name__ == "__main__":
             num_search=args_cli.num_search_times,
             policy_net=model,
             device=device,
-            verbose=True
+            verbose=True,
+            log_file=log_file
         )
 
         dataset_queue.put(current_dataset)
@@ -319,5 +333,7 @@ if __name__ == "__main__":
 
     print(f"Final Results: {current_dataset.bt_strings[-1]}")
     print(f"Total elapsed time: {time.time() - start_time:.2f} seconds")
+
+    log_file.close()
 
     # Use this command to view log -> tensorboard --logdir logs/
