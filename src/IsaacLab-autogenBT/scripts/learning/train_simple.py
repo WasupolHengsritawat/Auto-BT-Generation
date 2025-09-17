@@ -42,6 +42,7 @@ from torch.utils.tensorboard import SummaryWriter
 import numpy as np
 import rclpy
 import time
+import yaml
 
 # Get the absolute path to the directory containing this script and the root of the project
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -52,6 +53,11 @@ bt_dir = os.path.abspath(os.path.join(project_root, "scripts", "bt"))
 from gymEnv import Simple_MultiBTEnv
 from mcts import MCTS
 from network import RvNN_mem, RvNN
+
+if args_cli.seed is not None:
+    SEED = args_cli.seed
+    torch.manual_seed(SEED)
+    np.random.seed(SEED)
 
 class PeekableQueue(queue.Queue):
     def peek_all(self):
@@ -83,11 +89,59 @@ class BTDataset(Dataset):
             torch.tensor(self.action2_probs[idx], dtype=torch.float32, device=self.device),
             torch.tensor(self.rewards[idx], dtype=torch.float32, device=self.device)
         )
+    
+def save_config_to_yaml(
+    args,
+    node_dict,
+    nodes_limit,
+    num_epochs,
+    model,
+    optimizer,
+    num_node_to_explore,
+    l2_weight,
+    log_dir,
+    filename="config.yaml"
+):
+    # Extract optimizer info
+    optimizer_config = {
+        "class": optimizer.__class__.__name__,
+        "lr": optimizer.param_groups[0].get("lr", None),
+        "weight_decay": optimizer.param_groups[0].get("weight_decay", None),
+        "betas": optimizer.param_groups[0].get("betas", None),
+        "eps": optimizer.param_groups[0].get("eps", None),
+    }
 
-if args_cli.seed is not None:
-    SEED = args_cli.seed
-    torch.manual_seed(SEED)
-    np.random.seed(SEED)
+    config = {
+        "num_search_agents": args.num_search_agents,
+        "num_search_times": args.num_search_times,
+        "training_iters": args.training_iters,
+        "round_per_dataset": args.round_per_dataset,
+        "seed": args.seed,
+        "node_dict": node_dict,
+        "nodes_limit": nodes_limit,
+        "num_epochs": num_epochs,
+        "num_node_to_explore": num_node_to_explore,
+        "l2_weight": l2_weight,
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "model": {
+            "class": model.__class__.__name__,
+            "node_type_vocab_size": model.node_type_vocab_size,
+            "embed_size": model.embed_size,
+            "hidden_size": model.hidden_size,
+            "action1_size": model.action1_size,
+            "action2_size": model.action2_size,
+            "reward_head": model.reward_head,
+            "device": str(model.device),
+        },
+        "optimizer": optimizer_config,
+    }
+
+    yaml_path = os.path.join(log_dir, filename)
+    with open(yaml_path, "w") as f:
+        yaml.dump(config, f, default_flow_style=False)
+
+    print(f"[INFO] Parameters + model + optimizer + training settings saved to {yaml_path}")
+    return yaml_path
 
 def modify_bt(node_dict, current_bt, node_type, node_location):
     """Modify the BT string"""
@@ -247,6 +301,12 @@ if __name__ == "__main__":
     # Number of training epochs
     num_epochs = 10 
 
+    # Number of nodes to explore before switching to exploitation
+    num_node_to_explore = 10
+
+    # L2 regularization weight
+    l2_weight = 1e-4
+
     # ===============================================================================================================
 
     # Instantiate the model
@@ -276,6 +336,18 @@ if __name__ == "__main__":
     start_time = time.time()
     dataset_queue = PeekableQueue()
 
+    config_path = save_config_to_yaml(
+        args=args_cli,
+        node_dict=node_dict,
+        nodes_limit=nodes_limit,
+        num_epochs=num_epochs,
+        model=model,
+        optimizer=optimizer,
+        num_node_to_explore=num_node_to_explore,
+        l2_weight=l2_weight,
+        log_dir=log_dir,
+    )
+
     for iter_i in range(args_cli.training_iters):
         print(f"[INFO] Iteration {iter_i + 1}/{args_cli.training_iters}")
 
@@ -289,6 +361,7 @@ if __name__ == "__main__":
             num_search_agents=args_cli.num_search_agents,
             num_search=args_cli.num_search_times,
             policy_net=model,
+            num_node_to_explore=num_node_to_explore,
             device=device,
             verbose=True,
             log_file=log_file
@@ -308,7 +381,7 @@ if __name__ == "__main__":
             train_loader=train_loader,
             optimizer=optimizer,
             num_epochs=num_epochs,
-            l2_weight=1e-4,
+            l2_weight=l2_weight,
             writer=writer,
             global_step=global_step
         )
