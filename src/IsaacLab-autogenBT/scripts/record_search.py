@@ -2,6 +2,7 @@ import argparse
 import sys
 import os
 import torch
+import yaml
 import numpy as np
 
 torch.backends.cuda.matmul.allow_tf32 = True
@@ -14,15 +15,12 @@ project_root = os.path.abspath(os.path.join(script_dir, ".."))
 
 logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
 
-date_time = "2025-09-11_15-05-17-fibo5-dep-seed01-200iters"
-model_name = "rvnn_iter199"
+date_time = "2025-09-18_14-43-05"
+model_name = "rvnn_iter000"
 full_model_name = f"{model_name}.pt"
 
-SEED = 1
-torch.manual_seed(SEED)
-np.random.seed(SEED)
-
 model_path = os.path.join(logs_dir, date_time, full_model_name)
+yaml_path = os.path.join(logs_dir, date_time, "config.yaml")
 
 sys.path.insert(0, project_root)
 sys.path.insert(0, script_dir)
@@ -33,65 +31,63 @@ from learning.gymEnv import Simple_MultiBTEnv
 
 device = "cuda"
 
-num_search_agents = 16
-num_search = 800
+def load_config_from_yaml(config_path, device=None):
+    with open(config_path, "r") as f:
+        config = yaml.safe_load(f)
 
-num_node_to_explore = 10
+    # --- CLI arguments ---
+    args = {
+        "num_search_agents": config["num_search_agents"],
+        "num_search_times": config["num_search_times"],
+        "training_iters": config["training_iters"],
+        "round_per_dataset": config["round_per_dataset"],
+        "seed": config["seed"],
+    }
 
-# # Node dictionary
-#             # Flow Control
-# node_dict = {   0 : '(0)', #patrol_node
-#                 1 : '(1)', #find_target_node
-#                 2 : '(2)', #go_to_nearest_target
-#             # Behaviors
-#                 3 : 'a', #patrol_node
-#                 4 : 'b', #find_target_node
-#                 5 : 'c', #go_to_nearest_target
-#                 6 : 'd', #go_to_charger_node
-#                 7 : 'e', #go_to_spawn_node
-#                 8 : 'f', #picking_object_node
-#                 9 : 'g', #drop_object_node
-#                 10: 'h', #charge_node
-#             # Conditions
-#                 11 : 'A', #is_robot_at_the_charger_node
-#                 12 : 'B', #is_robot_at_the_spawn_node
-#                 13 : 'C', #is_battery_on_proper_level
-#                 14 : 'D', #are_object_existed_on_internal_map
-#                 15 : 'E', #are_object_nearby_node
-#                 16 : 'F', #is_object_in_hand_node
-#                 17 : 'G', #is_nearby_object_not_at_goal
-#                 18 : 'H', #are_five_objects_at_spawn
-#             # Specials
-#                 19 : None, #stop node
-#             }
+    # --- Node dictionary & BT parameters ---
+    node_dict = config["node_dict"]
+    nodes_limit = config["nodes_limit"]
+    num_epochs = config["num_epochs"]
+    num_node_to_explore = config["num_node_to_explore"]
+    l2_weight = config["l2_weight"]
+    exploration_weight = config["exploration_weight"]
 
-                # Specials
-node_dict = {   0 : None,
-                1 : '(0)', #patrol_node
-                2 : '(1)', #find_target_node
-                3 : '(2)', #go_to_nearest_target
-                # Behaviors
-                4 : 'a', #patrol_node
-                5 : 'b', #find_target_node
-                6 : 'c', #go_to_nearest_target
-                7 : 'e', #go_to_spawn_node
-                8 : 'f', #picking_object_node
-                9 : 'g', #drop_object_node
-                # Conditions
-                10 : 'B', #is_robot_at_the_spawn_node
-                11 : 'D', #are_object_existed_on_internal_map
-                12 : 'E', #are_object_nearby_node
-                13 : 'F', #is_object_in_hand_node
-                14 : 'H', #are_five_objects_at_spawn
-                }
+    # --- Model reconstruction ---
+    model_cfg = config["model"]
+    model = RvNN(
+        node_type_vocab_size=model_cfg["node_type_vocab_size"],
+        embed_size=model_cfg["embed_size"],
+        hidden_size=model_cfg["hidden_size"],
+        action_size=model_cfg["action_size"],
+        device=device or torch.device(model_cfg["device"]),
+        reward_head=model_cfg["reward_head"],
+    )
 
-# Maximum of nodes in the BT
-nodes_limit = 25
+    # --- Optimizer reconstruction ---
+    opt_cfg = config["optimizer"]
+    optimizer_class = getattr(torch.optim, opt_cfg["class"])  # e.g. Adam, SGD, etc.
+    optimizer = optimizer_class(
+        model.parameters(),
+        lr=opt_cfg.get("lr", 1e-3),
+        weight_decay=opt_cfg.get("weight_decay", 0),
+        betas=opt_cfg.get("betas", (0.9, 0.999)),
+        eps=opt_cfg.get("eps", 1e-8),
+    )
 
-# Number of training epochs
-num_epochs = 20
-
-sim_step_limit=20000
+    # --- Wrap everything into one dict ---
+    return {
+        "args": args,
+        "node_dict": node_dict,
+        "nodes_limit": nodes_limit,
+        "num_epochs": num_epochs,
+        "num_node_to_explore": num_node_to_explore,
+        "l2_weight": l2_weight,
+        "exploration_weight": exploration_weight,
+        "timestamp": config["timestamp"],
+        "model": model,
+        "optimizer": optimizer,
+        "raw_config": config,  # keep raw in case you want direct access
+    } 
 
 def modify_bt(node_dict, current_bt, node_type, node_location):
     """Modify the BT string"""
@@ -125,20 +121,23 @@ def modify_bt(node_dict, current_bt, node_type, node_location):
         
     return current_bt
 
+cfg = load_config_from_yaml(yaml_path, device=device)
+
+SEED = cfg["args"]["seed"]
+torch.manual_seed(SEED)
+np.random.seed(SEED)
+
+num_search_agents = cfg["args"]["num_search_agents"]
+num_search = cfg["args"]["num_search_times"]
+nodes_limit = cfg["nodes_limit"]
+num_node_to_explore = cfg["num_node_to_explore"]
+node_dict = cfg["node_dict"]
+exploration_weight = cfg["exploration_weight"]
+
 # Instantiate the model
-model = RvNN(
-    node_type_vocab_size=20,
-    embed_size=32,  # was 64
-    hidden_size=64, # was 128
-    action_size=4 + (len(node_dict.items()) - 1) * (2 * nodes_limit - 1),    # Number of node types to choose from * Max insertion locations (50 * 2) - 1 
-    device=device,
-    reward_head=False,                      # Set to True if you want to include a reward head
-)
+model = cfg["model"]
 model.load_state_dict(torch.load(model_path))
 model.eval()
-
-# Optimizer
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
 
 policy_net = model.to(device)
 
@@ -146,13 +145,12 @@ env = Simple_MultiBTEnv(node_dict,
                         nodes_limit, 
                         num_envs=num_search_agents,
                         verbose=False)
-mcts = MCTS(env, policy_net, num_simulations=num_search, exploration_weight=1.0, device=device)
+mcts = MCTS(env, policy_net, num_simulations=num_search, exploration_weight=exploration_weight, device=device)
 
 bt_string = ''
 
 bt_strings = []
 action_probs = []
-
 
 number_of_nodes = 0
 count = 0
