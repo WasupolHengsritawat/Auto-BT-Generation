@@ -19,10 +19,6 @@ date_time = "2025-09-04_18-02-46-fibo2-ind-064-128-seedNA-199iters"
 model_name = "rvnn_iter198"
 full_model_name = f"{model_name}.pt"
 
-SEED = 1
-torch.manual_seed(SEED)
-np.random.seed(SEED)
-
 model_path = os.path.join(logs_dir, date_time, full_model_name)
 yaml_path = os.path.join(logs_dir, date_time, "config.yaml")
 
