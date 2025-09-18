@@ -95,6 +95,7 @@ def save_config_to_yaml(
     node_dict,
     nodes_limit,
     num_epochs,
+    exploration_weight,
     model,
     optimizer,
     num_node_to_explore,
@@ -107,11 +108,12 @@ def save_config_to_yaml(
         "class": optimizer.__class__.__name__,
         "lr": optimizer.param_groups[0].get("lr", None),
         "weight_decay": optimizer.param_groups[0].get("weight_decay", None),
-        "betas": optimizer.param_groups[0].get("betas", None),
+        "betas": list(optimizer.param_groups[0].get("betas", None)),
         "eps": optimizer.param_groups[0].get("eps", None),
     }
 
     config = {
+        "exploration_weight": exploration_weight,
         "num_search_agents": args.num_search_agents,
         "num_search_times": args.num_search_times,
         "training_iters": args.training_iters,
@@ -175,14 +177,14 @@ def modify_bt(node_dict, current_bt, node_type, node_location):
         
     return current_bt
 
-def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, policy_net, num_node_to_explore = 10, device='cuda:0', verbose = False, log_file=None):
+def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, policy_net, exploration_weight, num_node_to_explore = 10, device='cuda:0', verbose = False, log_file=None):
     policy_net = policy_net.to(device)
 
     env = Simple_MultiBTEnv(node_dict, 
                             nodes_limit, 
                             num_envs=num_search_agents,
                             verbose=False)
-    mcts = MCTS(env, policy_net, num_simulations=num_search, exploration_weight=1.0, model_based=False, device=device)
+    mcts = MCTS(env, policy_net, num_simulations=num_search, exploration_weight=exploration_weight, model_based=False, device=device)
 
     bt_string = ''
 
@@ -307,6 +309,9 @@ if __name__ == "__main__":
     # L2 regularization weight
     l2_weight = 1e-4
 
+    # Exploration weight for MCTS
+    exploration_weight = 1.0
+
     # ===============================================================================================================
 
     # Instantiate the model
@@ -341,6 +346,7 @@ if __name__ == "__main__":
         node_dict=node_dict,
         nodes_limit=nodes_limit,
         num_epochs=num_epochs,
+        exploration_weight=exploration_weight,
         model=model,
         optimizer=optimizer,
         num_node_to_explore=num_node_to_explore,
@@ -361,6 +367,7 @@ if __name__ == "__main__":
             num_search_agents=args_cli.num_search_agents,
             num_search=args_cli.num_search_times,
             policy_net=model,
+            exploration_weight=exploration_weight,
             num_node_to_explore=num_node_to_explore,
             device=device,
             verbose=True,
