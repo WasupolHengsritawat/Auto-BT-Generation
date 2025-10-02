@@ -200,7 +200,7 @@ def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, po
             temperature = 1/(number_of_nodes - (num_node_to_explore - 1))
 
         # Get the action probabilities from MCTS search
-        action_prob = mcts.run_search(root_state=bt_string,temperature=temperature, verbose=True) # Set verbose = True if want to see each search step run time
+        action_prob = mcts.run_search(root_state=bt_string, PUCT=args_cli.puct, temperature=temperature, verbose=True) # Set verbose = True if want to see each search step run time
         
         # Store the sample data
         bt_strings.append(bt_string)
