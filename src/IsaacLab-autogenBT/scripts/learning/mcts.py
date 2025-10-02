@@ -8,7 +8,7 @@ import time
 import os
 
 class MCTSNode:
-    def __init__(self, state, env, policy_net, id = 0, parent_edge=None):
+    def __init__(self, state, env, policy_net, used_behavior_nodes = [], id = 0, parent_edge=None):
         """
         Represents a single state (node) in the MCTS tree for Behavior Tree construction.
 
@@ -24,19 +24,41 @@ class MCTSNode:
         self.is_terminated = False          # Flag to indicate if this node is terminal
         self.parent_edge = parent_edge      # Parent node
         self.reward = None
+        self.used_behavior_nodes = used_behavior_nodes
 
         # Get all possible actions
         bt_string = state
         valid_locs_on_string = [j for j in range(1,len(bt_string)) if j == len(bt_string) or not bt_string[j].isdigit()] # Find valid location on BT string
         valid_locs = range(len(valid_locs_on_string))
 
+        # [Experimental] Not allow adding a behavior node that is already used in the BT
+        valid_nt = [nt for nt in range(1, self.env.num_node_types) if nt not in self.used_behavior_nodes]
+
+        # [Experimental] Not allow above expansion if the root has only 1 child
+        allow_above_expansion_flag = True
+        
+        num_nodes_in_first_depth = 0
+        depth = 0
+        for node in bt_string[1:-1]:
+            if node == '(':
+                if depth == 0:
+                    num_nodes_in_first_depth += 1
+                depth += 1
+            elif node == ')' :
+                depth -= 1
+            elif not node.isdigit() and depth == 0:
+                num_nodes_in_first_depth += 1
+
+        if num_nodes_in_first_depth == 1:
+            allow_above_expansion_flag = False
+
         # Define all possible actions as (node_type, node_location) tuples
         # The node_location = 0 means the location of the parent node while the other n locations are the locations of the nth child node
         if bt_string == '':
             # If the BT is empty, only a location of the root node is valid
-            self.all_actions = [(nt, 1) for nt in range(1, self.env.num_node_types)]
+            self.all_actions = [(nt, 1) for nt in valid_nt]
         else:
-            self.all_actions = [(nt, 0) for nt in range(4)] + [(nt, loc) for loc in range(1, len(valid_locs)) for nt in range(1, self.env.num_node_types)]
+            self.all_actions = allow_above_expansion_flag * [(nt, 0) for nt in range(4)] + [(nt, loc) for loc in range(1, len(valid_locs)) for nt in valid_nt]
 
         # If there are no valid locations, only the stop action is valid
         if (0, 0) not in self.all_actions:
@@ -122,7 +144,9 @@ class MCTS:
             - nt_prob (np.ndarray): Normalized visit-based probability distribution over node types.
             - loc_prob (np.ndarray): Normalized visit-based probability distribution over node locations.
         """
-        root = MCTSNode(state=root_state, env=self.env, policy_net=self.policy_net)
+        used_behavior_nodes_at_root = list(set(ch for ch in root_state if (not ch.isdigit()) and (ch not in ('(', ')'))))
+        used_behavior_nodes_at_root = [k for k, v in self.env.node_dict.items() if v in used_behavior_nodes_at_root]
+        root = MCTSNode(state=root_state, env=self.env, policy_net=self.policy_net, used_behavior_nodes=used_behavior_nodes_at_root)
         # >> print(f"Root possible actions: {root.all_actions}")
 
         if verbose:
@@ -197,7 +221,7 @@ class MCTS:
 
         return action_probs
 
-    def select(self, node, dirichlet_noise_at_root=True):    
+    def select(self, node, PUCT=True, dirichlet_noise_at_root=True):    
         """
         Selects edges using PUCT from the root to a leaf for each agent.
 
@@ -221,10 +245,17 @@ class MCTS:
 
                 # Select the edge with the highest PUCT value
                 node_visits = sum([edge.visits for edge in node.edges])
-                scores = np.array([
-                            float(edge.q + self.exploration_weight * edge.prior * np.sqrt(node_visits) / (1 + edge.visits))
-                            for edge in node.edges
-                        ])
+                if PUCT:
+                    scores = np.array([
+                                float(edge.q + self.exploration_weight * edge.prior * np.sqrt(node_visits) / (1 + edge.visits))
+                                for edge in node.edges
+                            ])
+                else:
+                    scores = np.array([
+                                float(edge.q + self.exploration_weight * np.sqrt(node_visits) / (1 + edge.visits))
+                                for edge in node.edges
+                            ])
+
                 max_score = np.max(scores)
 
                 # Get indices of all edges with the maximal score
@@ -266,11 +297,22 @@ class MCTS:
         obs, _, dones, infos =  self.env.step_without_sim(actions)
         
         for env_id in range(self.env.num_envs):  
+            nt, loc = actions[env_id]
+            used_behavior_nodes = edges[env_id].parent.used_behavior_nodes.copy()
+
+            if nt not in [0, 1, 2, 3]:
+                used_behavior_nodes.append(nt)
+
             # Check if the child node is not already created
             if edges[env_id].child is None:
                 # Create a new child node for each selected edge
                 self.node_id += 1
-                edges[env_id].child = MCTSNode(state=obs[env_id], env=self.env, policy_net=self.policy_net, parent_edge=edges[env_id], id=self.node_id)
+                edges[env_id].child = MCTSNode(state=obs[env_id], 
+                                               env=self.env, 
+                                               policy_net=self.policy_net, 
+                                               parent_edge=edges[env_id], 
+                                               used_behavior_nodes=used_behavior_nodes, 
+                                               id=self.node_id)
                 
                 if dones[env_id]:
                     edges[env_id].child.is_terminated = True

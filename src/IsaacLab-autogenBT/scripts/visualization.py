@@ -10,9 +10,9 @@ from dash.dependencies import ClientsideFunction
 script_dir = os.path.dirname(os.path.abspath(__file__))
 logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
 
-date_time = "2025-05-13_14-48-37"
-model_name = "rvnn_iter250"
-count = 1
+date_time = "2025-09-17_12-25-54-fibo2-simdep-seed01-200iters"
+model_name = "rvnn_iter000"
+count = 3
 
 json_path = os.path.join(logs_dir, date_time, model_name, f"mcts_tree_{count}.json")
 output_path = os.path.join(logs_dir, date_time, model_name, f"mcts_tree_{count}.html")

@@ -333,8 +333,8 @@ if __name__ == "__main__":
     # Instantiate the model
     model = RvNN(
         node_type_vocab_size=20,
-        embed_size=16,  # was 64
-        hidden_size=32, # was 128
+        embed_size=4,  # was 64
+        hidden_size=8, # was 128
         action_size=4 + (len(node_dict.items()) - 1) * (2 * nodes_limit - 1),    # Number of node types to choose from * Max insertion locations (50 * 2) - 1 
         device=device,
         reward_head=False,                      # Set to True if you want to include a reward head
