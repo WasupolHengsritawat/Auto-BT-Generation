@@ -16,11 +16,12 @@ import sys
 
 # add argparse arguments
 parser = argparse.ArgumentParser(description="Train an RL agent with RSL-RL.")
-parser.add_argument("--num_search_agents",  type=int, default=16,   help="Number of search agents.") #64
-parser.add_argument("--num_search_times",   type=int, default=800,  help="Number of search times.")
-parser.add_argument("--training_iters",     type=int, default=100,  help="Training iterations.")
-parser.add_argument("--round_per_dataset",  type=int, default=10,  help="Number of latest rounds per dataset.")
-parser.add_argument("--seed",               type=int, default=None,   help="Random seed.")
+parser.add_argument("--num_search_agents",  type=int, default=16,       help="Number of search agents.") #64
+parser.add_argument("--num_search_times",   type=int, default=800,      help="Number of search times.")
+parser.add_argument("--training_iters",     type=int, default=100,      help="Training iterations.")
+parser.add_argument("--round_per_dataset",  type=int, default=10,       help="Number of latest rounds per dataset.")
+parser.add_argument("--puct",               type=bool, default=True,    help="PUCT exploration constant.")
+parser.add_argument("--seed",               type=int, default=None,     help="Random seed.")
 
 args_cli, hydra_args = parser.parse_known_args()
 
@@ -121,6 +122,7 @@ def save_config_to_yaml(
         "nodes_limit": nodes_limit,
         "num_epochs": num_epochs,
         "num_node_to_explore": num_node_to_explore,
+        "puct": args.puct,
         "l2_weight": l2_weight,
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "model": {
