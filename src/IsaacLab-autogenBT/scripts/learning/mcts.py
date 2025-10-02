@@ -103,7 +103,7 @@ class MCTSEdge:
         self.q = 0.0
 
 class MCTS:
-    def __init__(self, env, policy_net, num_simulations=50, exploration_weight=1.0, model_based = False, device='cpu'):
+    def __init__(self, env, policy_net=None, num_simulations=50, exploration_weight=1.0, model_based = False, device='cpu'):
         """
         Model-based Monte Carlo Tree Search with PUCT for Behavior Tree generation.
 
@@ -114,14 +114,16 @@ class MCTS:
         :param device: Compute device ('cpu' or 'cuda').
         """
         self.env = env
-        self.policy_net = policy_net.to(device)
         self.num_simulations = num_simulations
         self.exploration_weight = exploration_weight
         self.device = device
         self.node_id = 0
         self.model_based = model_based
 
-    def run_search(self, root_state, temperature=1.0, dirichlet_noise_at_root=True, verbose=False, export_path=None):
+        if policy_net is not None:
+            self.policy_net = policy_net.to(device)
+
+    def run_search(self, root_state, temperature=1.0, dirichlet_noise_at_root=True, PUCT=True, verbose=False, export_path=None):
         """
         Perform Monte Carlo Tree Search (MCTS) from a shared root Behavior Tree (BT) state.
 
@@ -149,6 +151,9 @@ class MCTS:
         root = MCTSNode(state=root_state, env=self.env, policy_net=self.policy_net, used_behavior_nodes=used_behavior_nodes_at_root)
         # >> print(f"Root possible actions: {root.all_actions}")
 
+        if PUCT and self.policy_net is None:
+            raise ValueError("PUCT requires a policy network to provide prior probabilities.")
+
         if verbose:
             select_time_elapsed_avg = 0
             expand_time_elapsed_avg = 0
@@ -162,7 +167,7 @@ class MCTS:
             # Select a leaf node
             # print('Selecting...')
             if verbose: start_time = time.time()
-            selected_edges = self.select(root, dirichlet_noise_at_root=dirichlet_noise_at_root)
+            selected_edges = self.select(root, PUCT=PUCT, dirichlet_noise_at_root=dirichlet_noise_at_root)
             if verbose: select_time = time.time()
 
             # Expand the selected leaf node
