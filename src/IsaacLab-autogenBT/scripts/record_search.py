@@ -15,8 +15,8 @@ project_root = os.path.abspath(os.path.join(script_dir, ".."))
 
 logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
 
-date_time = "2025-09-17_16-24-09-fibo5-simdep-seed01-200iters"
-model_name = "rvnn_iter199"
+date_time = "2025-10-02_15-11-58-fibo5-seed1-puct-8000searchiters"
+model_name = "rvnn_iter000"
 full_model_name = f"{model_name}.pt"
 
 model_path = os.path.join(logs_dir, date_time, full_model_name)
@@ -41,6 +41,7 @@ def load_config_from_yaml(config_path, device=None):
         "num_search_times": config["num_search_times"],
         "training_iters": config["training_iters"],
         "round_per_dataset": config["round_per_dataset"],
+        "puct": config["puct"],
         "seed": config["seed"],
     }
 
@@ -73,6 +74,8 @@ def load_config_from_yaml(config_path, device=None):
         betas=opt_cfg.get("betas", (0.9, 0.999)),
         eps=opt_cfg.get("eps", 1e-8),
     )
+
+    
 
     # --- Wrap everything into one dict ---
     return {
@@ -165,7 +168,7 @@ while True:
 
     # Get the action probabilities from MCTS search
     save_path = os.path.join(logs_dir, date_time, model_name, f"mcts_tree_{count}.json")
-    action_prob = mcts.run_search(root_state=bt_string,temperature=temperature, verbose=False, export_path=save_path) # Set verbose = True if want to see each search step run time
+    action_prob = mcts.run_search(root_state=bt_string, PUCT=cfg["args"]["puct"], temperature=temperature, verbose=False, export_path=save_path) # Set verbose = True if want to see each search step run time
     
     # Store the sample data
     bt_strings.append(bt_string)
