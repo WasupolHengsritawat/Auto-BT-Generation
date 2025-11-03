@@ -21,7 +21,7 @@ parser.add_argument("--num_search_times",   type=int, default=800,      help="Nu
 parser.add_argument("--training_iters",     type=int, default=100,      help="Training iterations.")
 parser.add_argument("--round_per_dataset",  type=int, default=10,       help="Number of latest rounds per dataset.")
 parser.add_argument("--puct",               type=bool, default=True,    help="PUCT exploration constant.")
-parser.add_argument("--seed",               type=int, default=None,     help="Random seed.")
+parser.add_argument("--seed",               type=int, default=1,     help="Random seed.")
 
 args_cli, hydra_args = parser.parse_known_args()
 

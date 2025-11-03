@@ -23,7 +23,7 @@ class MCTSNode:
         self.policy_net = policy_net        # RvNN model for policy and value
         self.is_terminated = False          # Flag to indicate if this node is terminal
         self.parent_edge = parent_edge      # Parent node
-        self.reward = None
+        self.value = None
         self.used_behavior_nodes = used_behavior_nodes
 
         # Get all possible actions
@@ -103,7 +103,7 @@ class MCTSEdge:
         self.q = 0.0
 
 class MCTS:
-    def __init__(self, env, policy_net=None, num_simulations=50, exploration_weight=1.0, model_based = False, device='cpu'):
+    def __init__(self, env, policy_net=None, num_simulations=50, exploration_weight=1.0, q_epsilon = 1e-3, model_based = False, device='cpu'):
         """
         Model-based Monte Carlo Tree Search with PUCT for Behavior Tree generation.
 
@@ -111,6 +111,8 @@ class MCTS:
         :param policy_net: Neural network to predict action probabilities.
         :param num_simulations: Number of simulations per search.
         :param exploration_weight: Weight for exploration in the PUCT formula.
+        :param model_based: If True, use model-based evaluation.
+        :param q_epsilon: Small constant to determine the information leaks.
         :param device: Compute device ('cpu' or 'cuda').
         """
         self.env = env
@@ -119,6 +121,12 @@ class MCTS:
         self.device = device
         self.node_id = 0
         self.model_based = model_based
+        self.transposition_nodes = []
+        self.q_epsilon = q_epsilon
+        self.traj_branch_histories = [[] for _ in range(self.env.num_envs)]
+
+        self.selected_depth = [0 for _ in range(self.env.num_envs)]
+        self.node_depth_dict = {0: []}
 
         if policy_net is not None:
             self.policy_net = policy_net.to(device)
@@ -146,9 +154,12 @@ class MCTS:
             - nt_prob (np.ndarray): Normalized visit-based probability distribution over node types.
             - loc_prob (np.ndarray): Normalized visit-based probability distribution over node locations.
         """
+        self.transposition_nodes = []
+
         used_behavior_nodes_at_root = list(set(ch for ch in root_state if (not ch.isdigit()) and (ch not in ('(', ')'))))
         used_behavior_nodes_at_root = [k for k, v in self.env.node_dict.items() if v in used_behavior_nodes_at_root]
         root = MCTSNode(state=root_state, env=self.env, policy_net=self.policy_net, used_behavior_nodes=used_behavior_nodes_at_root)
+        self.node_depth_dict = {0: [root]}
         # >> print(f"Root possible actions: {root.all_actions}")
 
         if PUCT and self.policy_net is None:
@@ -236,10 +247,16 @@ class MCTS:
         """
         epsilon = 0.25
         selected_edges = []
+        self.selected_depth = [0 for _ in range(self.env.num_envs)]
+        root_node = node
 
-        for _ in range(self.env.num_envs):
+        for env_id in range(self.env.num_envs):
             is_root_flag = dirichlet_noise_at_root
+            node = root_node
             while True:
+                # Indicate the depth of the selected node
+                self.selected_depth[env_id] += 1
+
                 # Add Dirichlet noise at root node
                 if is_root_flag:
                     actual_prior = []
@@ -280,7 +297,18 @@ class MCTS:
                 # Check if already reached a leaf node
                 if selected_edge.child is None or selected_edge.child.is_terminated:
                     break
-                
+
+                # Check if next node is transposition node 
+                if selected_edge.child in self.transposition_nodes:
+                    self.traj_branch_histories[env_id].append(selected_edge)
+
+                    # Determine the information leak (Q_delta)
+                    Q_delta = selected_edge.child.value - selected_edge.q
+
+                    if abs(Q_delta) > self.q_epsilon:
+                        # Stop the selection and treat as leaf node to correct the information leak
+                        break
+
                 # Traverse to the child node
                 node = selected_edge.child
             
@@ -305,22 +333,48 @@ class MCTS:
             nt, loc = actions[env_id]
             used_behavior_nodes = edges[env_id].parent.used_behavior_nodes.copy()
 
+            # Store the used behavior nodes
             if nt not in [0, 1, 2, 3]:
                 used_behavior_nodes.append(nt)
 
             # Check if the child node is not already created
             if edges[env_id].child is None:
-                # Create a new child node for each selected edge
-                self.node_id += 1
-                edges[env_id].child = MCTSNode(state=obs[env_id], 
-                                               env=self.env, 
-                                               policy_net=self.policy_net, 
-                                               parent_edge=edges[env_id], 
-                                               used_behavior_nodes=used_behavior_nodes, 
-                                               id=self.node_id)
-                
-                if dones[env_id]:
-                    edges[env_id].child.is_terminated = True
+                # Find the index of the transposition node at the selected depth if exists
+                try:
+                    index = [node.state for node in self.node_depth_dict[self.selected_depth[env_id]]].index(obs[env_id])
+                except:
+                    index = None
+
+                # Check if the node is transposition node
+                if index is not None:
+                    edges[env_id].child = self.node_depth_dict[self.selected_depth[env_id]][index]
+
+                    # Update the parent edge of the transposition node
+                    self.node_depth_dict[self.selected_depth[env_id]][index].parent_edge.append(edges[env_id])
+
+                    # Record the transposition node in the list
+                    self.transposition_nodes.append(self.node_depth_dict[self.selected_depth[env_id]][index])
+
+                    self.traj_branch_histories[env_id].append(edges[env_id])
+
+                else:
+                    # Create a new child node for each selected edge if node is not transposition node 
+                    self.node_id += 1
+                    edges[env_id].child = MCTSNode(state=obs[env_id], 
+                                                env=self.env, 
+                                                policy_net=self.policy_net, 
+                                                parent_edge=[edges[env_id]], 
+                                                used_behavior_nodes=used_behavior_nodes, 
+                                                id=self.node_id)
+                    
+                    # Update node depth dictionary
+                    if self.selected_depth[env_id] not in self.node_depth_dict.keys():
+                        self.node_depth_dict[self.selected_depth[env_id]] = [edges[env_id].child]
+                    else:
+                        self.node_depth_dict[self.selected_depth[env_id]].append(edges[env_id].child)
+
+                    if dones[env_id]:
+                        edges[env_id].child.is_terminated = True
 
     def evaluate(self, nodes):
         """
@@ -409,6 +463,10 @@ class MCTS:
         # Get the reward by runnung the BT in IsaacSim Simulation
         _, rews, _, infos =  self.env.evaluate_bt_in_sim()
 
+        # Update the value for each node
+        for env_id in range(self.env.num_envs):
+            nodes[env_id].value = rews[env_id]
+
         return rews
 
     def _evaluate_modelbased(self, nodes):
@@ -430,6 +488,9 @@ class MCTS:
             nodes[env_id].reward = rew
             rews.append(rew)
 
+            # Update the value for each node
+            nodes[env_id].value = rew
+
         return rews
 
     def backpropagate(self, nodes, rewards):
@@ -444,12 +505,19 @@ class MCTS:
             reward = rewards[env_id]    # reward for the leaf node
    
             while True:
-                # Find the traversed edge
-                traversed_edge = node.parent_edge
-
-                # If the traversed edge is None, we reached the root
-                if traversed_edge is None:
+                # If node.parent_edge is None, we reached the root
+                if node.parent_edge is None:
                     break
+                
+                if len(node.parent_edge) > 1:
+                    # If the node has multiple parent edges (transposition node), update only the traversed edge
+                    try:
+                        traversed_edge = self.traj_branch_histories[env_id].pop()
+                    except:
+                        traversed_edge = node.parent_edge[0]
+                else:
+                    # Find the traversed edge
+                    traversed_edge = node.parent_edge[0]
 
                 # Update the edge statistics
                 traversed_edge.visits += 1
@@ -475,7 +543,7 @@ class MCTS:
             nodes.append({
                 "id": node.id,
                 "state": node.state,
-                "reward": node.reward,
+                "value": node.value,
                 "is_terminal": node.is_terminated
             })
 

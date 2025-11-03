@@ -10,9 +10,9 @@ from dash.dependencies import ClientsideFunction
 script_dir = os.path.dirname(os.path.abspath(__file__))
 logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
 
-date_time = "2025-09-17_12-25-54-fibo2-simdep-seed01-200iters"
+date_time = "2025-11-03_12-31-00-fibo0-seed1-mcgs-uct-80000searchiters"
 model_name = "rvnn_iter000"
-count = 3
+count = 1
 
 json_path = os.path.join(logs_dir, date_time, model_name, f"mcts_tree_{count}.json")
 output_path = os.path.join(logs_dir, date_time, model_name, f"mcts_tree_{count}.html")
@@ -40,7 +40,7 @@ for node_id, (x, y) in pos.items():
     node = G.nodes[node_id]
     node_x.append(x)
     node_y.append(y)  # NO flip → top-down preserved
-    node_text.append(f"ID: {node_id}<br>State: {node['state']}<br>Reward: {node['reward']}<br>Terminal: {node['is_terminal']}")
+    node_text.append(f"ID: {node_id}<br>State: {node['state']}<br>Value: {node['value']}<br>Terminal: {node['is_terminal']}")
     node_ids.append(node_id)
 
 edge_x, edge_y, edge_hover_x, edge_hover_y, edge_text, edge_ids = [], [], [], [], [], []
@@ -148,7 +148,7 @@ def update_annotations(clickData, fig_dict, pinned_annotations):
     # Define annotation text based on whether it's node or edge
     if isinstance(customdata, int):
         node = G.nodes[customdata]
-        annotation_text = f"Node {customdata}State: {node['state']}<br>Reward: {node['reward']}<br>Terminal: {node['is_terminal']}"
+        annotation_text = f"Node {customdata}State: {node['state']}<br>Value: {node['value']}<br>Terminal: {node['is_terminal']}"
         key = f"Node-{customdata}"
     else:
         u, v = map(int, customdata.split('-'))
