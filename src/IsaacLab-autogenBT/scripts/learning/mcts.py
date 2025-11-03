@@ -236,9 +236,11 @@ class MCTS:
         """
         epsilon = 0.25
         selected_edges = []
+        root_node = node
 
         for _ in range(self.env.num_envs):
             is_root_flag = dirichlet_noise_at_root
+            node = root_node
             while True:
                 # Add Dirichlet noise at root node
                 if is_root_flag:

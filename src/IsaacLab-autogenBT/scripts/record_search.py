@@ -15,7 +15,7 @@ project_root = os.path.abspath(os.path.join(script_dir, ".."))
 
 logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
 
-date_time = "2025-10-02_15-11-58-fibo5-seed1-puct-8000searchiters"
+date_time = "2025-10-07_13-39-53-fibo5-seed1-uct-80000searchiters"
 model_name = "rvnn_iter000"
 full_model_name = f"{model_name}.pt"
 
