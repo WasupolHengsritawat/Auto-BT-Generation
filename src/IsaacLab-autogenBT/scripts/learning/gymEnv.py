@@ -598,12 +598,19 @@ class Simple_MultiBTEnv(MultiBTEnv):
 
         self.loop_allowed = loop_allowed
 
-        self.reward_weight = [  25,     # Is object found
-                                50,     # Was robot been to object
-                                75,     # Is object picked
-                               100,     # Was robot been to final
-                               200,     # Is object delivered
-                                -0.25]  # Tree complexity penalty term
+        # self.reward_weight = [  25,     # Is object found
+        #                         50,     # Was robot been to object
+        #                         75,     # Is object picked
+        #                        100,     # Was robot been to final
+        #                        200,     # Is object delivered
+        #                         -0.25]  # Tree complexity penalty term
+
+        self.reward_weight = [  0.025,     # Is object found
+                                0.050,     # Was robot been to object
+                                0.05,     # Is object picked
+                               0.100,     # Was robot been to final
+                               0.200,     # Is object delivered
+                                -0.00025]  # Tree complexity penalty term
 
         # State Progress for Reward Calculation
         self.state_progress = {
