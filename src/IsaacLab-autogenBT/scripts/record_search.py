@@ -180,10 +180,11 @@ while True:
 
     # Randomly select one of the best indices
     selected_action = np.random.choice(best_action_indices)
+    print(f"[INFO] Selected action: {selected_action}")
 
     if selected_action > 3:
-        selected_nt = (selected_action - 3) % (len(node_dict.items()) - 1)
-        selected_loc = (selected_action - 3) // (len(node_dict.items()) - 1) + 1
+            selected_nt = (selected_action - 4) % (len(node_dict.items()) - 1) + 1
+            selected_loc = (selected_action - 4) // (len(node_dict.items()) - 1) + 1
     else:
         selected_nt = selected_action
         selected_loc = 0

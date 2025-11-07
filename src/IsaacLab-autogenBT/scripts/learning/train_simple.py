@@ -219,8 +219,8 @@ def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, po
         selected_action = np.random.choice(best_action_indices)
 
         if selected_action > 3:
-            selected_nt = (selected_action - 3) % (len(node_dict.items()) - 1)
-            selected_loc = (selected_action - 3) // (len(node_dict.items()) - 1) + 1
+            selected_nt = (selected_action - 4) % (len(node_dict.items()) - 1) + 1
+            selected_loc = (selected_action - 4) // (len(node_dict.items()) - 1) + 1
         else:
             selected_nt = selected_action
             selected_loc = 0
@@ -257,9 +257,9 @@ if __name__ == "__main__":
     # Specify Hyperparameters =======================================================================================
     # Node dictionary
     #             # Flow Control
-    # node_dict = {   0 : '(0)', #patrol_node
-    #                 1 : '(1)', #find_target_node
-    #                 2 : '(2)', #go_to_nearest_target
+    # node_dict = {   0 : '(0)', #sequence_node
+    #                 1 : '(1)', #fallback_node
+    #                 2 : '(2)', #parallel_node
     #             # Behaviors
     #                 3 : 'a', #patrol_node
     #                 4 : 'b', #find_target_node
@@ -282,9 +282,9 @@ if __name__ == "__main__":
     #                 19 : None, #stop node
     #             }
     
-    # node_dict = {   0 : '(0)', #patrol_node
-    #                 1 : '(1)', #find_target_node
-    #                 2 : '(2)', #go_to_nearest_target
+    # node_dict = {   0 : '(0)', #sequence_node
+    #                 1 : '(1)', #fallback_node
+    #                 2 : '(2)', #parallel_node
     #                 # Behaviors
     #                 3 : 'a', #patrol_node
     #                 4 : 'b', #find_target_node
@@ -304,9 +304,9 @@ if __name__ == "__main__":
     
                     # Specials
     node_dict = {   0 : None,
-                    1 : '(0)', #patrol_node
-                    2 : '(1)', #find_target_node
-                    3 : '(2)', #go_to_nearest_target
+                    1 : '(0)', #sequence_node
+                    2 : '(1)', #fallback_node
+                    3 : '(2)', #parallel_node
                     # Behaviors
                     4 : 'a', #patrol_node
                     5 : 'b', #find_target_node
