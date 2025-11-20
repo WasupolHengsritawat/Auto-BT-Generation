@@ -15,7 +15,7 @@ project_root = os.path.abspath(os.path.join(script_dir, ".."))
 
 logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
 
-date_time = "2025-11-07_23-21-00-fibo0-seed1-mcgs-uct-8000searchiters"
+date_time = "2025-11-20_15-44-38"
 model_name = "rvnn_iter000"
 full_model_name = f"{model_name}.pt"
 
@@ -50,6 +50,7 @@ def load_config_from_yaml(config_path, device=None):
     nodes_limit = config["nodes_limit"]
     num_epochs = config["num_epochs"]
     num_node_to_explore = config["num_node_to_explore"]
+    epsilon = config["epsilon"]
     l2_weight = config["l2_weight"]
     exploration_weight = config["exploration_weight"]
 
@@ -84,6 +85,7 @@ def load_config_from_yaml(config_path, device=None):
         "nodes_limit": nodes_limit,
         "num_epochs": num_epochs,
         "num_node_to_explore": num_node_to_explore,
+        "epsilon": epsilon,
         "l2_weight": l2_weight,
         "exploration_weight": exploration_weight,
         "timestamp": config["timestamp"],

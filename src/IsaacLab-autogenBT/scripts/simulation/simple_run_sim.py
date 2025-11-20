@@ -37,12 +37,24 @@ from simple_behavior import (
 from env_state_machine import SearchAndDeliverMachine
 
 ######## Hyperparameters ########
-num_envs = 100
-loop_allowed = 2
+num_envs = 1
+loop_allowed = 4
 
 # bt_string_array = ['(1H(0(1F(0(1E(0(1D(2ab))c))f))(1Be)g))'] * num_envs
 # bt_string_array = '(1H(0(1F(0(1E(0(1D(2ab))c))f))(1Be)g))'
-bt_string_array = ['(1H(0(1D(2ab))c))'] * num_envs
+# bt_string_array = ['(1E(1(0D(2ab(0)))))'] * num_envs
+# bt_string_array = ['(1E(0(0(0(0))(2ab))))'] * num_envs
+# bt_string_array = ['(1E(0(1(1)D)(2ab)))'] * num_envs
+# bt_string_array = ['(1E(0(2(2(2)(2))ab)))'] * num_envs
+# bt_string_array = ['(1E(1(0)(2a(1)b(0))))'] * num_envs
+# bt_string_array = ['(1E(0(2(2)(1)ab(1))))'] * num_envs
+
+bt_string_array = ['(0(1D(2ab)))'] * num_envs
+
+# bt_string_array = ['(1E(1(2a(1)b(0))))'] * num_envs
+# bt_string_array = ['(1E(1(0)(2a(1)b(0))))'] * num_envs
+
+# bt_string_array = ['(1E(0c(2ab)))'] * num_envs
 # bt_string_array = ['(1H)'] * num_envs
 #################################
 

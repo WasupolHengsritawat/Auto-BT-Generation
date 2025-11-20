@@ -607,7 +607,7 @@ class Simple_MultiBTEnv(MultiBTEnv):
 
         self.reward_weight = [  0.025,     # Is object found
                                 0.050,     # Was robot been to object
-                                0.05,     # Is object picked
+                                0.075,     # Is object picked
                                0.100,     # Was robot been to final
                                0.200,     # Is object delivered
                                 -0.00025]  # Tree complexity penalty term

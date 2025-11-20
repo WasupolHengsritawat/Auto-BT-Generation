@@ -60,6 +60,9 @@ class MCTSNode:
         else:
             self.all_actions = allow_above_expansion_flag * [(nt, 0) for nt in range(4)] + [(nt, loc) for loc in range(1, len(valid_locs)) for nt in valid_nt]
 
+        if sum(1 for c in bt_string if c not in ('(', ')')) >= self.env.nodes_limit:
+            self.all_actions = []
+
         # If there are no valid locations, only the stop action is valid
         if (0, 0) not in self.all_actions:
             self.all_actions.append((0, 0))

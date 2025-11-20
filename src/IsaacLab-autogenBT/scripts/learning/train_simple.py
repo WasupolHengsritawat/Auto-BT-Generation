@@ -23,6 +23,15 @@ parser.add_argument("--round_per_dataset",  type=int, default=10,       help="Nu
 parser.add_argument("--puct",               type=bool, default=True,    help="PUCT exploration constant.")
 parser.add_argument("--seed",               type=int, default=1,     help="Random seed.")
 
+# ============================================= For Debugging =============================================
+# parser.add_argument("--num_search_agents",  type=int, default=1,       help="Number of search agents.") #64
+# parser.add_argument("--num_search_times",   type=int, default=12800,      help="Number of search times.")
+# parser.add_argument("--training_iters",     type=int, default=600,      help="Training iterations.")
+# parser.add_argument("--round_per_dataset",  type=int, default=10,       help="Number of latest rounds per dataset.")
+# parser.add_argument("--puct",               type=bool, default=True,    help="PUCT exploration constant.")
+# parser.add_argument("--seed",               type=int, default=1,     help="Random seed.")
+# =========================================================================================================
+
 args_cli, hydra_args = parser.parse_known_args()
 
 """Rest everything follows."""
@@ -98,6 +107,7 @@ def save_config_to_yaml(
     model,
     optimizer,
     num_node_to_explore,
+    epsilon,
     l2_weight,
     log_dir,
     filename="config.yaml"
@@ -122,6 +132,7 @@ def save_config_to_yaml(
         "nodes_limit": nodes_limit,
         "num_epochs": num_epochs,
         "num_node_to_explore": num_node_to_explore,
+        "epsilon": epsilon,
         "puct": args.puct,
         "l2_weight": l2_weight,
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -176,7 +187,7 @@ def modify_bt(node_dict, current_bt, node_type, node_location):
         
     return current_bt
 
-def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, policy_net, exploration_weight, num_node_to_explore = 10, device='cuda:0', verbose = False, log_file=None):
+def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, policy_net, exploration_weight, num_node_to_explore = 10, epsilon = 0.7, device='cuda:0', verbose = False, log_file=None):
     policy_net = policy_net.to(device)
 
     env = Simple_MultiBTEnv(node_dict, 
@@ -211,12 +222,16 @@ def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, po
             log_file.write(f"Step {number_of_nodes}: {bt_string}\n")
             log_file.flush()
 
-        max_action_prob = np.max(action_prob)
+        # Select action based on epsilon-greedy strategy
+        if np.random.rand() < epsilon:
+             # Sample an action according to the action probabilities
+            selected_action = np.random.choice(len(action_prob), p=action_prob)
+        else:
+            max_action_prob = np.max(action_prob)
+            best_action_indices = np.where(action_prob == max_action_prob)[0]
 
-        best_action_indices = np.where(action_prob == max_action_prob)[0]
-
-        # Randomly select one of the best indices
-        selected_action = np.random.choice(best_action_indices)
+            # Randomly select one of the best indices
+            selected_action = np.random.choice(best_action_indices)
 
         if selected_action > 3:
             selected_nt = (selected_action - 4) % (len(node_dict.items()) - 1) + 1
@@ -330,6 +345,8 @@ if __name__ == "__main__":
     # MCTS exploration weight
     exploration_weight = 1.0
 
+    epsilon = 0.7
+
     # ===============================================================================================================
 
     # Instantiate the model
@@ -367,6 +384,7 @@ if __name__ == "__main__":
         model=model,
         optimizer=optimizer,
         num_node_to_explore=num_node_to_explore,
+        epsilon=epsilon,
         l2_weight=l2_weight,
         log_dir=log_dir,
     )
@@ -388,6 +406,7 @@ if __name__ == "__main__":
             num_node_to_explore=num_node_to_explore,
             device=device,
             verbose=True,
+            epsilon=epsilon,
             log_file=log_file
         )
         dataset_queue.put(current_dataset)
