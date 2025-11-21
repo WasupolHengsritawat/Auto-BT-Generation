@@ -210,7 +210,7 @@ def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, po
         else:
             temperature = 1/(number_of_nodes - (num_node_to_explore - 1))
 
-        # Get the action probabilities from MCTS search
+        # [1] Get the action probabilities from MCTS search ============================================
         action_prob = mcts.run_search(root_state=bt_string, PUCT=args_cli.puct, temperature=temperature, verbose=True) # Set verbose = True if want to see each search step run time
         
         # Store the sample data
@@ -222,7 +222,7 @@ def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, po
             log_file.write(f"Step {number_of_nodes}: {bt_string}\n")
             log_file.flush()
 
-        # Select action based on epsilon-greedy strategy
+        # [2] Select action based on epsilon-greedy strategy ==========================================
         if np.random.rand() < epsilon:
              # Sample an action according to the action probabilities
             selected_action = np.random.choice(len(action_prob), p=action_prob)
@@ -233,6 +233,7 @@ def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, po
             # Randomly select one of the best indices
             selected_action = np.random.choice(best_action_indices)
 
+        # Decode the selected action into node type and location
         if selected_action > 3:
             selected_nt = (selected_action - 4) % (len(node_dict.items()) - 1) + 1
             selected_loc = (selected_action - 4) // (len(node_dict.items()) - 1) + 1
@@ -240,6 +241,7 @@ def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, po
             selected_nt = selected_action
             selected_loc = 0
 
+        # [3] Modify the BT string based on the selected action ======================================
         bt_string = modify_bt(node_dict, bt_string, selected_nt, selected_loc)
         number_of_nodes += 1
 
