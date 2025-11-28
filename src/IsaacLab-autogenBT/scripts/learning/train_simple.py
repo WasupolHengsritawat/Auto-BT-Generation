@@ -64,6 +64,10 @@ from gymEnv import Simple_MultiBTEnv
 from mcts import MCTS
 from network import RvNN_mem, RvNN
 
+import psutil
+
+process = psutil.Process(os.getpid())
+
 if args_cli.seed is not None:
     SEED = args_cli.seed
     torch.manual_seed(SEED)
@@ -98,6 +102,10 @@ class BTDataset(Dataset):
             torch.tensor(self.rewards[idx], dtype=torch.float32, device=self.device)
         )
     
+def log_mem(prefix=""):
+    mem = process.memory_info().rss / 1024**2
+    print(f"{prefix}Memory: {mem:.2f} MB")
+    
 def save_config_to_yaml(
     args,
     node_dict,
@@ -108,6 +116,7 @@ def save_config_to_yaml(
     optimizer,
     num_node_to_explore,
     epsilon,
+    fitness_mode,
     l2_weight,
     log_dir,
     filename="config.yaml"
@@ -134,6 +143,7 @@ def save_config_to_yaml(
         "num_node_to_explore": num_node_to_explore,
         "epsilon": epsilon,
         "puct": args.puct,
+        "fitness_mode": fitness_mode,
         "l2_weight": l2_weight,
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "model": {
@@ -187,14 +197,14 @@ def modify_bt(node_dict, current_bt, node_type, node_location):
         
     return current_bt
 
-def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, policy_net, exploration_weight, num_node_to_explore = 10, epsilon = 0.7, device='cuda:0', verbose = False, log_file=None):
+def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, policy_net, exploration_weight, num_node_to_explore = 10, epsilon = 0.7, fitness_mode="random", device='cuda:0', verbose = False, log_file=None):
     policy_net = policy_net.to(device)
 
     env = Simple_MultiBTEnv(node_dict, 
                             nodes_limit, 
                             num_envs=num_search_agents,
                             verbose=False)
-    mcts = MCTS(env, policy_net, num_simulations=num_search, exploration_weight=exploration_weight, model_based=False, device=device)
+    mcts = MCTS(env, policy_net, num_simulations=num_search, exploration_weight=exploration_weight, fitness_mode=fitness_mode, model_based=False, device=device)
 
     bt_string = ''
 
@@ -245,7 +255,7 @@ def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, po
         bt_string = modify_bt(node_dict, bt_string, selected_nt, selected_loc)
         number_of_nodes += 1
 
-        if verbose: print(f"[INFO] Dataset {number_of_nodes}/{nodes_limit} << {bt_strings[-1]}, ({selected_nt}, {selected_loc})")
+        if verbose: log_mem(f"[INFO] Dataset {number_of_nodes}/{nodes_limit} << {bt_strings[-1]}, ({selected_nt}, {selected_loc})   ")
 
         if selected_nt == 0 or number_of_nodes >= nodes_limit:
             break
@@ -344,10 +354,11 @@ if __name__ == "__main__":
     # L2 regularization weight
     l2_weight = 1e-4
 
-    # MCTS exploration weight
-    exploration_weight = 1.0
+    # MMCGS Settings
+    exploration_weight = 1.0    
+    fitness_mode = "less_nodes" 
 
-    epsilon = 0.7
+    epsilon = 0.0
 
     # ===============================================================================================================
 
@@ -387,6 +398,7 @@ if __name__ == "__main__":
         optimizer=optimizer,
         num_node_to_explore=num_node_to_explore,
         epsilon=epsilon,
+        fitness_mode=fitness_mode,
         l2_weight=l2_weight,
         log_dir=log_dir,
     )
@@ -409,6 +421,7 @@ if __name__ == "__main__":
             device=device,
             verbose=True,
             epsilon=epsilon,
+            fitness_mode=fitness_mode,
             log_file=log_file
         )
         dataset_queue.put(current_dataset)

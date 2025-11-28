@@ -40,7 +40,7 @@ from simulation.env_state_machine import SearchAndDeliverMachine
 script_dir = os.path.dirname(os.path.abspath(__file__))
 logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
 
-date_time = "2025-11-07_23-21-00-fibo0-seed1-mcgs-uct-8000searchiters"
+date_time = "2025-11-27_13-51-02"
 model_name = "rvnn_iter000"
 
 loop_allowed = 2

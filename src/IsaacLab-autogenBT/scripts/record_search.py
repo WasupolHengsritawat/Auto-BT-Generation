@@ -15,7 +15,7 @@ project_root = os.path.abspath(os.path.join(script_dir, ".."))
 
 logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
 
-date_time = "2025-11-20_15-44-38"
+date_time = "2025-11-27_14-30-04"
 model_name = "rvnn_iter000"
 full_model_name = f"{model_name}.pt"
 
@@ -150,7 +150,7 @@ env = Simple_MultiBTEnv(node_dict,
                         nodes_limit, 
                         num_envs=num_search_agents,
                         verbose=False)
-mcts = MCTS(env, policy_net, num_simulations=num_search, exploration_weight=exploration_weight, device=device)
+mcts = MCTS(env, policy_net, num_simulations=num_search, exploration_weight=exploration_weight, fitness_mode='less_nodes', device=device)
 
 bt_string = ''
 

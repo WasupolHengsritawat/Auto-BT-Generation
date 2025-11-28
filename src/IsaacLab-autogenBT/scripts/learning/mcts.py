@@ -106,7 +106,7 @@ class MCTSEdge:
         self.q = 0.0
 
 class MCTS:
-    def __init__(self, env, policy_net=None, num_simulations=50, exploration_weight=1.0, q_epsilon = 1e-3, model_based = False, device='cpu'):
+    def __init__(self, env, policy_net=None, num_simulations=50, num_pivots = 5, exploration_weight=1.0, fitness_mode = 'random', q_epsilon = 1e-3, model_based = False, device='cpu'):
         """
         Model-based Monte Carlo Tree Search with PUCT for Behavior Tree generation.
 
@@ -125,11 +125,14 @@ class MCTS:
         self.node_id = 0
         self.model_based = model_based
         self.transposition_nodes = []
+        self.fitness_mode = fitness_mode
         self.q_epsilon = q_epsilon
         self.traj_branch_histories = [[] for _ in range(self.env.num_envs)]
 
         self.selected_depth = [0 for _ in range(self.env.num_envs)]
         self.node_depth_dict = {0: []}
+
+        self.num_pivots = num_pivots
 
         if policy_net is not None:
             self.policy_net = policy_net.to(device)
@@ -163,7 +166,11 @@ class MCTS:
         used_behavior_nodes_at_root = [k for k, v in self.env.node_dict.items() if v in used_behavior_nodes_at_root]
         root = MCTSNode(state=root_state, env=self.env, policy_net=self.policy_net, used_behavior_nodes=used_behavior_nodes_at_root)
         self.node_depth_dict = {0: [root]}
+        self.non_terminated_node_list = []
         # >> print(f"Root possible actions: {root.all_actions}")
+
+        pivots = [root for _ in range(self.env.num_envs)]
+        self.selected_depth = [sum(1 for c in root.state if c not in ('(', ')')) for _ in range(self.env.num_envs)]
 
         if PUCT and self.policy_net is None:
             raise ValueError("PUCT requires a policy network to provide prior probabilities.")
@@ -181,7 +188,7 @@ class MCTS:
             # Select a leaf node
             # print('Selecting...')
             if verbose: start_time = time.time()
-            selected_edges = self.select(root, PUCT=PUCT, dirichlet_noise_at_root=dirichlet_noise_at_root)
+            selected_edges = self.select(pivots, PUCT=PUCT, dirichlet_noise_at_root=dirichlet_noise_at_root)
             if verbose: select_time = time.time()
 
             # Expand the selected leaf node
@@ -194,6 +201,12 @@ class MCTS:
             # print('Evaluating...')
             rewards = self.evaluate(leave_nodes)
             if verbose: evaluate_time = time.time()
+
+            # Pivot new roots
+            pivots = self.pivot(self.non_terminated_node_list, mode=self.fitness_mode)
+            pivots = pivots + [root] * (self.env.num_envs - len(pivots))
+            self.selected_depth = [sum(1 for c in pivot.state if c not in ('(', ')')) for pivot in pivots]
+            # print(f'New pivots selected: {[node.state for node in pivots]}')
 
             # Backpropagate the results
             # print('Backpropagating...')
@@ -240,22 +253,22 @@ class MCTS:
 
         return action_probs
 
-    def select(self, node, PUCT=True, dirichlet_noise_at_root=True):    
+    def select(self, nodes, PUCT=True, dirichlet_noise_at_root=True):    
         """
         Selects edges using PUCT from the root to a leaf for each agent.
 
-        :param node: Root node.
+        :param nodes: List of root nodes (one per agent).
         :param dirichlet_noise_at_root: If True, applies noise to root node priors.
         :return: List of selected edges (one per agent).
         """
         epsilon = 0.25
         selected_edges = []
-        self.selected_depth = [0 for _ in range(self.env.num_envs)]
-        root_node = node
+        
+        root_nodes = nodes
 
         for env_id in range(self.env.num_envs):
             is_root_flag = dirichlet_noise_at_root
-            node = root_node
+            node = root_nodes[env_id]
             while True:
                 # Indicate the depth of the selected node
                 self.selected_depth[env_id] += 1
@@ -369,7 +382,7 @@ class MCTS:
                                                 parent_edge=[edges[env_id]], 
                                                 used_behavior_nodes=used_behavior_nodes, 
                                                 id=self.node_id)
-                    
+
                     # Update node depth dictionary
                     if self.selected_depth[env_id] not in self.node_depth_dict.keys():
                         self.node_depth_dict[self.selected_depth[env_id]] = [edges[env_id].child]
@@ -378,6 +391,8 @@ class MCTS:
 
                     if dones[env_id]:
                         edges[env_id].child.is_terminated = True
+                    else:
+                        self.non_terminated_node_list.append(edges[env_id].child)
 
     def evaluate(self, nodes):
         """
@@ -495,6 +510,41 @@ class MCTS:
             nodes[env_id].value = rew
 
         return rews
+    
+    def pivot(self, nodes, mode='random'):
+
+        if mode == 'random':
+            ind = self._random_fitness(nodes)
+        elif mode == 'less_nodes':
+            ind = self._less_nodes_fitness(nodes)
+
+        pivots = []
+        for i in ind[:self.num_pivots]:
+            pivots.append(nodes[i])
+
+        pivots = pivots * (self.env.num_envs // self.num_pivots)
+
+        return pivots
+    
+    def _random_fitness(self, nodes):
+        values = np.array([node.value for node in nodes])
+
+        # Generate a random key to break ties
+        rand_key = np.random.random(len(nodes))
+
+        # Sort by: (1) values descending, (2) random key
+        ind = np.lexsort((rand_key, -values))
+
+        return ind
+    
+    def _less_nodes_fitness(self, nodes):
+        values = np.array([node.value for node in nodes])
+        num_nodes = [sum(1 for c in node.state if c not in ('(', ')')) for node in nodes]
+
+        # Sort by: (1) values descending, (2) numnode ascending
+        ind = np.lexsort((num_nodes, -values))
+
+        return ind
 
     def backpropagate(self, nodes, rewards):
         """

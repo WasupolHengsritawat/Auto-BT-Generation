@@ -49,10 +49,12 @@ loop_allowed = 4
 # bt_string_array = ['(1E(1(0)(2a(1)b(0))))'] * num_envs
 # bt_string_array = ['(1E(0(2(2)(1)ab(1))))'] * num_envs
 
-bt_string_array = ['(0(1D(2ab)))'] * num_envs
+# bt_string_array = ['(0(1D(2ab)))'] * num_envs
 
 # bt_string_array = ['(1E(1(2a(1)b(0))))'] * num_envs
 # bt_string_array = ['(1E(1(0)(2a(1)b(0))))'] * num_envs
+
+bt_string_array = ['(1H(0(1D(2ab))(1(0EG)c)(1Ff)(1Be)g))'] * num_envs
 
 # bt_string_array = ['(1E(0c(2ab)))'] * num_envs
 # bt_string_array = ['(1H)'] * num_envs
