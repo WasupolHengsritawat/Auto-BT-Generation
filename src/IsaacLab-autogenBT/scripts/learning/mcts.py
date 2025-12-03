@@ -7,6 +7,48 @@ from tqdm import trange
 import time
 import os
 
+def get_valid_action(bt_string, env, used_behavior_nodes):
+    valid_locs_on_string = [j for j in range(1,len(bt_string)) if j == len(bt_string) or not bt_string[j].isdigit()] # Find valid location on BT string
+    valid_locs = range(len(valid_locs_on_string))
+
+    # [Experimental] Not allow adding a behavior node that is already used in the BT
+    valid_nt = [nt for nt in range(1, env.num_node_types) if nt not in used_behavior_nodes]
+
+    # [Experimental] Not allow above expansion if the root has only 1 child
+    allow_above_expansion_flag = True
+    
+    num_nodes_in_first_depth = 0
+    depth = 0
+    for node in bt_string[1:-1]:
+        if node == '(':
+            if depth == 0:
+                num_nodes_in_first_depth += 1
+            depth += 1
+        elif node == ')' :
+            depth -= 1
+        elif not node.isdigit() and depth == 0:
+            num_nodes_in_first_depth += 1
+
+    if num_nodes_in_first_depth == 1:
+        allow_above_expansion_flag = False
+
+    # Define all possible actions as (node_type, node_location) tuples
+    # The node_location = 0 means the location of the parent node while the other n locations are the locations of the nth child node
+    if bt_string == '':
+        # If the BT is empty, only a location of the root node is valid
+        all_actions = [(nt, 1) for nt in valid_nt]
+    else:
+        all_actions = allow_above_expansion_flag * [(nt, 0) for nt in range(4)] + [(nt, loc) for loc in range(1, len(valid_locs)) for nt in valid_nt]
+
+    if sum(1 for c in bt_string if c not in ('(', ')')) >= env.nodes_limit:
+        all_actions = []
+
+    # If there are no valid locations, only the stop action is valid
+    if (0, 0) not in all_actions:
+        all_actions.append((0, 0))
+
+    return all_actions
+
 class MCTSNode:
     def __init__(self, state, env, policy_net, used_behavior_nodes = [], id = 0, parent_edge=None):
         """
@@ -25,47 +67,11 @@ class MCTSNode:
         self.parent_edge = parent_edge      # Parent node
         self.value = None
         self.used_behavior_nodes = used_behavior_nodes
+        self.evaluated_bt = None           # Store the BT used to evaluate this node (if modelfree)
 
         # Get all possible actions
         bt_string = state
-        valid_locs_on_string = [j for j in range(1,len(bt_string)) if j == len(bt_string) or not bt_string[j].isdigit()] # Find valid location on BT string
-        valid_locs = range(len(valid_locs_on_string))
-
-        # [Experimental] Not allow adding a behavior node that is already used in the BT
-        valid_nt = [nt for nt in range(1, self.env.num_node_types) if nt not in self.used_behavior_nodes]
-
-        # [Experimental] Not allow above expansion if the root has only 1 child
-        allow_above_expansion_flag = True
-        
-        num_nodes_in_first_depth = 0
-        depth = 0
-        for node in bt_string[1:-1]:
-            if node == '(':
-                if depth == 0:
-                    num_nodes_in_first_depth += 1
-                depth += 1
-            elif node == ')' :
-                depth -= 1
-            elif not node.isdigit() and depth == 0:
-                num_nodes_in_first_depth += 1
-
-        if num_nodes_in_first_depth == 1:
-            allow_above_expansion_flag = False
-
-        # Define all possible actions as (node_type, node_location) tuples
-        # The node_location = 0 means the location of the parent node while the other n locations are the locations of the nth child node
-        if bt_string == '':
-            # If the BT is empty, only a location of the root node is valid
-            self.all_actions = [(nt, 1) for nt in valid_nt]
-        else:
-            self.all_actions = allow_above_expansion_flag * [(nt, 0) for nt in range(4)] + [(nt, loc) for loc in range(1, len(valid_locs)) for nt in valid_nt]
-
-        if sum(1 for c in bt_string if c not in ('(', ')')) >= self.env.nodes_limit:
-            self.all_actions = []
-
-        # If there are no valid locations, only the stop action is valid
-        if (0, 0) not in self.all_actions:
-            self.all_actions.append((0, 0))
+        self.all_actions = get_valid_action(bt_string, self.env, self.used_behavior_nodes)
 
         # Get prior probabilities from the policy network
         action_probs, pred_rew = self.policy_net.predict(state)
@@ -415,12 +421,11 @@ class MCTS:
         """
         states = [node.state for node in nodes]
         dones = [False for _ in range(self.env.num_envs)]
+        used_behavior_nodes = [node.used_behavior_nodes.copy() for node in nodes]
 
         # Make sure that the BT string is matched with the state in leaf node
         for env_id in range(self.env.num_envs):
             self.env.set_bt(env_id=env_id, bt_string=states[env_id])
-
-        # print(f"[INFO] \tBTs after expand: {states}")
             
         # Expand the BT until it reaches a terminal state (stop action or max depth)
         while True:
@@ -441,17 +446,7 @@ class MCTS:
   
                 # Get all possible actions
                 bt_string = state
-                valid_locs_on_string = [j for j in range(1,len(bt_string)) if j == len(bt_string) or not bt_string[j].isdigit()] # Find valid location on BT string
-                valid_locs = range(len(valid_locs_on_string))
-
-                # Define all possible actions as (node_type, node_location) tuples
-                # The node_location = 0 means the location of the parent node while the other n locations are the locations of the nth child node
-                all_actions = [(0, 0)]
-                if bt_string == '':
-                    # If the BT is empty, only a location of the root node is valid
-                    all_actions += [(nt, 1) for nt in range(1, self.env.num_node_types)]
-                else:
-                    all_actions += [(nt, 0) for nt in range(1, 4)] + [(nt, loc) for loc in range(1, len(valid_locs) + 1) for nt in range(1, self.env.num_node_types)]
+                all_actions = get_valid_action(bt_string, self.env, used_behavior_nodes[env_id])
 
                 # Select the best action according to its joint probability
                 probs = []
@@ -463,6 +458,12 @@ class MCTS:
 
                 best_ind = np.where(probs == np.max(probs))[0]
                 selected_ind = np.random.choice(best_ind)
+
+                nt, loc = all_actions[selected_ind]
+
+                # Store the used behavior nodes
+                if nt not in [0, 1, 2, 3]:
+                    used_behavior_nodes[env_id].append(nt)
 
                 actions.append(all_actions[selected_ind])
 
@@ -477,6 +478,10 @@ class MCTS:
                 break
 
         # print(f"[INFO] \tBTs constructed: {states}")
+
+        # Store the evaluated BT strings in the nodes
+        for env_id in range(self.env.num_envs):
+            nodes[env_id].evaluated_bt = states[env_id]
 
         # Get the reward by runnung the BT in IsaacSim Simulation
         _, rews, _, infos =  self.env.evaluate_bt_in_sim()
@@ -597,6 +602,7 @@ class MCTS:
                 "id": node.id,
                 "state": node.state,
                 "value": node.value,
+                "evaluated_bt": node.evaluated_bt,
                 "is_terminal": node.is_terminated
             })
 

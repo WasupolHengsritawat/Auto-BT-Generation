@@ -610,7 +610,7 @@ class Simple_MultiBTEnv(MultiBTEnv):
                                 0.075,     # Is object picked
                                0.100,     # Was robot been to final
                                0.200,     # Is object delivered
-                                -0.00025]  # Tree complexity penalty term
+                                -0.0025]  # Tree complexity penalty term
 
         # State Progress for Reward Calculation
         self.state_progress = {
