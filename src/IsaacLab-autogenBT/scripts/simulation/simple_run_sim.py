@@ -13,8 +13,6 @@ import py_trees
 
 from autogen_bt_interface.msg import StringStamped
 
-import py_trees
-
 # Import local files
 # Get the absolute path to the directory containing this script and the root of the project
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -56,7 +54,8 @@ loop_allowed = 4
 
 # bt_string_array = ['(1H(0(1D(2ab))(1(0EG)c)(1Ff)(1Be)g))'] * num_envs
 
-bt_string_array = ['(0(2ab)c)'] * num_envs
+# bt_string_array = ['(0(1c(0))(2aDb))'] * num_envs
+bt_string_array = ['(0(1c)(2ab))'] * num_envs
 
 # bt_string_array = ['(1E(0c(2ab)))'] * num_envs
 # bt_string_array = ['(1H)'] * num_envs

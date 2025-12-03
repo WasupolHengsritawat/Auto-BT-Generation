@@ -76,107 +76,173 @@
 
 # ##########################################################################################
 
+# import py_trees
+
+# # -----------------------
+# # Writer Behaviour
+# # -----------------------
+# class WriterA(py_trees.behaviour.Behaviour):
+#     def __init__(self, name="WriterA"):
+#         super().__init__(name)
+#         self.blackboard = self.attach_blackboard_client(name=name)
+#         self.blackboard.register_key(key="shared_data", access=py_trees.common.Access.READ)
+#         self.blackboard.register_key(key="shared_data", access=py_trees.common.Access.WRITE)
+#         self.blackboard.shared_data = ""
+#         self.is_running = False
+
+#     def update(self):
+#         if self.is_running:
+#             self.is_running = False
+#             return py_trees.common.Status.SUCCESS
+        
+#         self.blackboard.shared_data = self.blackboard.shared_data + "a"
+#         self.is_running = True
+#         return py_trees.common.Status.RUNNING
+
+# class WriterB(py_trees.behaviour.Behaviour):
+#     def __init__(self, name="WriterB"):
+#         super().__init__(name)
+#         self.blackboard = self.attach_blackboard_client(name=name)
+#         self.blackboard.register_key(key="shared_data", access=py_trees.common.Access.READ)
+#         self.blackboard.register_key(key="shared_data", access=py_trees.common.Access.WRITE)
+#         self.blackboard.shared_data = ""
+#         self.is_running = False
+
+#     def update(self):
+#         if self.is_running:
+#             self.is_running = False
+#             return py_trees.common.Status.SUCCESS
+
+#         self.blackboard.shared_data = self.blackboard.shared_data + "b"
+#         self.is_running = True
+#         return py_trees.common.Status.RUNNING
+    
+# class WriterC(py_trees.behaviour.Behaviour):
+#     def __init__(self, name="WriterC"):
+#         super().__init__(name)
+#         self.blackboard = self.attach_blackboard_client(name=name)
+#         self.blackboard.register_key(key="shared_data", access=py_trees.common.Access.READ)
+#         self.blackboard.register_key(key="shared_data", access=py_trees.common.Access.WRITE)
+#         self.blackboard.shared_data = ""
+#         self.is_running = False
+
+#     def update(self):
+#         if self.is_running:
+#             self.is_running = False
+#             return py_trees.common.Status.SUCCESS
+
+#         self.blackboard.shared_data = self.blackboard.shared_data + "c"
+#         self.is_running = True
+#         return py_trees.common.Status.RUNNING
+    
+# def subtract_prefix(s: str, prefix: str) -> str:
+#     if s.startswith(prefix):
+#         return s[len(prefix):]
+#     return s  # if prefix doesn't match, return original string
+
+# # -----------------------
+# # Main
+# # -----------------------
+# if __name__ == "__main__":
+#     # Build a simple tree with just the Writer
+#     writerA1 = WriterA()
+#     writerA2 = WriterA()
+#     writerB1 = WriterB()
+#     writerC1 = WriterC()
+#     root = py_trees.composites.Sequence(name="Root", memory=False)
+#     # parallel1 = py_trees.composites.Parallel(name="Parallel1", policy=py_trees.common.ParallelPolicy.SuccessOnAll(synchronise=False))
+#     # root = py_trees.composites.Parallel(name="Root", policy=py_trees.common.ParallelPolicy.SuccessOnAll(synchronise=False))
+#     # parallel1.add_child(writerA1)
+#     # parallel1.add_child(writerB1)
+#     # root.add_child(writerC1)
+#     root.add_child(writerA1)
+#     root.add_child(writerB1)
+
+#     tree = py_trees.trees.BehaviourTree(root)
+#     tree.setup(timeout=15)
+
+#     bb = py_trees.blackboard.Client(name="External")
+#     bb.register_key(key="shared_data", access=py_trees.common.Access.READ)
+#     bb.register_key(key="shared_data", access=py_trees.common.Access.WRITE)
+
+#     bb_shared_data_last = ""
+
+#     for _ in range(10):
+#         tree.tick()
+
+#         bb.shared_data = subtract_prefix(bb.shared_data, bb_shared_data_last)
+#         bb_shared_data_last = bb.shared_data
+
+#         # -----------------------
+#         # Access Blackboard Outside the Tree
+#         # -----------------------
+#         print("\n[External] Blackboard shared_data:", bb.shared_data)
+
+# ##########################################################################################
+
 import py_trees
 
-# -----------------------
-# Writer Behaviour
-# -----------------------
-class WriterA(py_trees.behaviour.Behaviour):
-    def __init__(self, name="WriterA"):
-        super().__init__(name)
-        self.blackboard = self.attach_blackboard_client(name=name)
-        self.blackboard.register_key(key="shared_data", access=py_trees.common.Access.READ)
-        self.blackboard.register_key(key="shared_data", access=py_trees.common.Access.WRITE)
-        self.blackboard.shared_data = ""
-        self.is_running = False
+from learning.mcts import MCTSNode, MCTS
+from simulation.env_state_machine import SearchAndDeliverMachine
+from bt.simple_behavior import (
+    PatrolNode, FindTargetNode, AreObjectsExistOnInternalMap, 
+    GoToNearestTarget, AreObjectNearby, PickObject, IsRobotAtTheSpawn, 
+    IsObjectInHand, DropObject, GoToSpawnNode, AreXObjectsAtSpawn
+)
+from simulation.simple_run_sim import loop_allowed, TaskState, create_tree, subtract_prefix
+from learning.gymEnv import Simple_MultiBTEnv
+from learning.network import RvNN
 
-    def update(self):
-        if self.is_running:
-            self.is_running = False
-            return py_trees.common.Status.SUCCESS
-        
-        self.blackboard.shared_data = self.blackboard.shared_data + "a"
-        self.is_running = True
-        return py_trees.common.Status.RUNNING
+import torch
+import os 
 
-class WriterB(py_trees.behaviour.Behaviour):
-    def __init__(self, name="WriterB"):
-        super().__init__(name)
-        self.blackboard = self.attach_blackboard_client(name=name)
-        self.blackboard.register_key(key="shared_data", access=py_trees.common.Access.READ)
-        self.blackboard.register_key(key="shared_data", access=py_trees.common.Access.WRITE)
-        self.blackboard.shared_data = ""
-        self.is_running = False
+script_dir = os.path.dirname(os.path.abspath(__file__))
+logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
 
-    def update(self):
-        if self.is_running:
-            self.is_running = False
-            return py_trees.common.Status.SUCCESS
+######## Hyperparameters ########
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-        self.blackboard.shared_data = self.blackboard.shared_data + "b"
-        self.is_running = True
-        return py_trees.common.Status.RUNNING
-    
-class WriterC(py_trees.behaviour.Behaviour):
-    def __init__(self, name="WriterC"):
-        super().__init__(name)
-        self.blackboard = self.attach_blackboard_client(name=name)
-        self.blackboard.register_key(key="shared_data", access=py_trees.common.Access.READ)
-        self.blackboard.register_key(key="shared_data", access=py_trees.common.Access.WRITE)
-        self.blackboard.shared_data = ""
-        self.is_running = False
+                # Specials
+node_dict = {   0 : None,
+                1 : '(0)', #sequence_node
+                2 : '(1)', #fallback_node
+                3 : '(2)', #parallel_node
+                # Behaviors
+                4 : 'a', #patrol_node
+                5 : 'b', #find_target_node
+                6 : 'c', #go_to_nearest_target
+                # Conditions
+                7 : 'D', #are_object_existed_on_internal_map
+                }
 
-    def update(self):
-        if self.is_running:
-            self.is_running = False
-            return py_trees.common.Status.SUCCESS
+nodes_limit = 10
+allow_duplicate_nodes = True
 
-        self.blackboard.shared_data = self.blackboard.shared_data + "c"
-        self.is_running = True
-        return py_trees.common.Status.RUNNING
-    
-def subtract_prefix(s: str, prefix: str) -> str:
-    if s.startswith(prefix):
-        return s[len(prefix):]
-    return s  # if prefix doesn't match, return original string
+# ===============================================================================================================
 
-# -----------------------
-# Main
-# -----------------------
-if __name__ == "__main__":
-    # Build a simple tree with just the Writer
-    writerA1 = WriterA()
-    writerA2 = WriterA()
-    writerB1 = WriterB()
-    writerC1 = WriterC()
-    root = py_trees.composites.Sequence(name="Root", memory=False)
-    # parallel1 = py_trees.composites.Parallel(name="Parallel1", policy=py_trees.common.ParallelPolicy.SuccessOnAll(synchronise=False))
-    # root = py_trees.composites.Parallel(name="Root", policy=py_trees.common.ParallelPolicy.SuccessOnAll(synchronise=False))
-    # parallel1.add_child(writerA1)
-    # parallel1.add_child(writerB1)
-    # root.add_child(writerC1)
-    root.add_child(writerA1)
-    root.add_child(writerB1)
+# Instantiate the model
+model = RvNN(
+    node_type_vocab_size=20,
+    embed_size=4,  # was 64
+    hidden_size=8, # was 128
+    action_size=4 + (len(node_dict.items()) - 1) * (2 * nodes_limit - 1),    # Number of node types to choose from * Max insertion locations (50 * 2) - 1 
+    device=device,
+    reward_head=False,                      # Set to True if you want to include a reward head
+)
 
-    tree = py_trees.trees.BehaviourTree(root)
-    tree.setup(timeout=15)
+allow_duplicate_nodes = True
 
-    bb = py_trees.blackboard.Client(name="External")
-    bb.register_key(key="shared_data", access=py_trees.common.Access.READ)
-    bb.register_key(key="shared_data", access=py_trees.common.Access.WRITE)
+#################################
 
-    bb_shared_data_last = ""
+env = Simple_MultiBTEnv(node_dict, 
+                        nodes_limit, 
+                        num_envs=1,
+                        verbose=False)
 
-    for _ in range(10):
-        tree.tick()
+mcts = MCTS(env, model, allow_duplicate_nodes=allow_duplicate_nodes, model_based=False, device=device)
 
-        bb.shared_data = subtract_prefix(bb.shared_data, bb_shared_data_last)
-        bb_shared_data_last = bb.shared_data
+root_state = ""  # or your current BT string
+max_depth = 8    # max number of BT nodes (non-parenthesis chars)
 
-        # -----------------------
-        # Access Blackboard Outside the Tree
-        # -----------------------
-        print("\n[External] Blackboard shared_data:", bb.shared_data)
-
-    
-
+save_path = os.path.join(logs_dir, f"mcts_tree_full_sim.json")
+mcts.export_tree_full_sim(root_state, max_depth, save_path=save_path)

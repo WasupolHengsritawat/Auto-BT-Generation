@@ -12,7 +12,7 @@ logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
 
 date_time = "2025-11-28_16-24-57"
 model_name = "rvnn_iter000"
-count = 2
+count = 4
 
 json_path = os.path.join(logs_dir, date_time, model_name, f"mcts_tree_{count}.json")
 # ------------------------------------------------

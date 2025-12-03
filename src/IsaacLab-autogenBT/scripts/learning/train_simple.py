@@ -116,6 +116,7 @@ def save_config_to_yaml(
     optimizer,
     num_node_to_explore,
     epsilon,
+    allow_duplicate_nodes,
     fitness_mode,
     l2_weight,
     log_dir,
@@ -142,6 +143,7 @@ def save_config_to_yaml(
         "num_epochs": num_epochs,
         "num_node_to_explore": num_node_to_explore,
         "epsilon": epsilon,
+        "allow_duplicate_nodes": allow_duplicate_nodes,
         "puct": args.puct,
         "fitness_mode": fitness_mode,
         "l2_weight": l2_weight,
@@ -197,14 +199,14 @@ def modify_bt(node_dict, current_bt, node_type, node_location):
         
     return current_bt
 
-def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, policy_net, exploration_weight, num_node_to_explore = 10, epsilon = 0.7, fitness_mode="random", device='cuda:0', verbose = False, log_file=None):
+def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, policy_net, exploration_weight, num_node_to_explore = 10, epsilon = 0.7, allow_duplicate_nodes=True, fitness_mode="random", device='cuda:0', verbose = False, log_file=None):
     policy_net = policy_net.to(device)
 
     env = Simple_MultiBTEnv(node_dict, 
                             nodes_limit, 
                             num_envs=num_search_agents,
                             verbose=False)
-    mcts = MCTS(env, policy_net, num_simulations=num_search, exploration_weight=exploration_weight, fitness_mode=fitness_mode, model_based=False, device=device)
+    mcts = MCTS(env, policy_net, num_simulations=num_search, exploration_weight=exploration_weight, allow_duplicate_nodes=allow_duplicate_nodes, fitness_mode=fitness_mode, model_based=False, device=device)
 
     bt_string = ''
 
@@ -357,6 +359,7 @@ if __name__ == "__main__":
     # MMCGS Settings
     exploration_weight = 1.0    
     fitness_mode = "less_nodes" 
+    allow_duplicate_nodes = True
 
     epsilon = 0.0
 
@@ -397,6 +400,7 @@ if __name__ == "__main__":
         model=model,
         optimizer=optimizer,
         num_node_to_explore=num_node_to_explore,
+        allow_duplicate_nodes=allow_duplicate_nodes,
         epsilon=epsilon,
         fitness_mode=fitness_mode,
         l2_weight=l2_weight,
@@ -418,6 +422,7 @@ if __name__ == "__main__":
             policy_net=model,
             exploration_weight=exploration_weight,
             num_node_to_explore=num_node_to_explore,
+            allow_duplicate_nodes=allow_duplicate_nodes,
             device=device,
             verbose=True,
             epsilon=epsilon,
