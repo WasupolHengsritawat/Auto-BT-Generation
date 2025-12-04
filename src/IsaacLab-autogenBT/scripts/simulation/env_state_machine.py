@@ -32,5 +32,5 @@ class SearchAndDeliverMachine(StateMachine):
         super().__init__()
 
     def send(self, event_name: str):
-        event_name = ''.join(map(str, sorted(event_name)))
+        event_name = ''.join(map(str, sorted(set(event_name))))
         return super().send(event_name)

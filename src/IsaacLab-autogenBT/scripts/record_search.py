@@ -15,7 +15,7 @@ project_root = os.path.abspath(os.path.join(script_dir, ".."))
 
 logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
 
-date_time = "2025-12-02_23-54-30"
+date_time = "2025-12-04_02-36-23-fibo2-seed1-mmcgs-dup-100iters"
 model_name = "rvnn_iter000"
 full_model_name = f"{model_name}.pt"
 
@@ -53,6 +53,8 @@ def load_config_from_yaml(config_path, device=None):
     epsilon = config["epsilon"]
     l2_weight = config["l2_weight"]
     exploration_weight = config["exploration_weight"]
+    fitness_mode = config["fitness_mode"]
+    allow_duplicate_nodes = config["allow_duplicate_nodes"]
 
     # --- Model reconstruction ---
     model_cfg = config["model"]
@@ -88,6 +90,8 @@ def load_config_from_yaml(config_path, device=None):
         "epsilon": epsilon,
         "l2_weight": l2_weight,
         "exploration_weight": exploration_weight,
+        "fitness_mode": fitness_mode,
+        "allow_duplicate_nodes": allow_duplicate_nodes,
         "timestamp": config["timestamp"],
         "model": model,
         "optimizer": optimizer,
@@ -138,6 +142,8 @@ nodes_limit = cfg["nodes_limit"]
 num_node_to_explore = cfg["num_node_to_explore"]
 node_dict = cfg["node_dict"]
 exploration_weight = cfg["exploration_weight"]
+fitness_mode = cfg["fitness_mode"]
+allow_duplicate_nodes = cfg["allow_duplicate_nodes"]
 
 # Instantiate the model
 model = cfg["model"]
@@ -150,7 +156,13 @@ env = Simple_MultiBTEnv(node_dict,
                         nodes_limit, 
                         num_envs=num_search_agents,
                         verbose=False)
-mcts = MCTS(env, policy_net, num_simulations=num_search, exploration_weight=exploration_weight, fitness_mode='less_nodes', device=device)
+mcts = MCTS(env, 
+            policy_net, 
+            num_simulations=num_search, 
+            exploration_weight=exploration_weight, 
+            fitness_mode=fitness_mode, 
+            allow_duplicate_nodes=allow_duplicate_nodes, 
+            device=device)
 
 bt_string = ''
 
