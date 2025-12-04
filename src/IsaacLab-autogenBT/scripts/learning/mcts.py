@@ -650,27 +650,23 @@ class MCTS:
         Fully expand the MCTS tree from root_state up to BT-size = max_depth (counting non-parenthesis chars).
         Uses expand() but, since env.num_envs == 1, calls expand() for each edge one-by-one.
         Evaluates each node's own BT via simulation only (env.evaluate_bt_in_sim()).
-
-        Behavior:
-         - Create a root MCTSNode from root_state (id = self.node_id which we reset to 0).
-         - BFS-expand every outgoing edge of each node (use self.expand([edge]) so expand receives a single action).
-         - Before calling expand() for an edge, set self.selected_depth = [parent_size + 1] to match run_search() semantics.
-         - After expand(), rely on expand() for transposition detection (node_depth_dict), parent_edge management, and node id assignment.
-         - Evaluate each created unique node (its own BT string) by setting the env BT and calling env.evaluate_bt_in_sim().
-         - Stop descending when BT-size (non-parenthesis chars) >= max_depth or node.is_terminated is True.
+        Includes a progress bar that tracks number of expanded nodes.
         """
-        # This implementation assumes a single-environment setup
+        from tqdm import tqdm
+        from collections import deque
+        import os, json
+
+        # -------- ENV REQUIREMENTS --------
         if self.env.num_envs != 1:
             raise ValueError("export_tree_full_sim requires env.num_envs == 1.")
 
-        # Reset MCTS internals used by expand() so behaviour matches a fresh run
+        # -------- RESET MCTS INTERNALS --------
         self.transposition_nodes = []
         self.non_terminated_node_list = []
         self.node_depth_dict = {}
-        # Start node ids from 0 so root will be 0 (consistent with run_search root creation)
-        self.node_id = 0
+        self.node_id = 0  # root id will be 0
 
-        # Determine used_behavior_nodes at root (same logic as run_search)
+        # --- Determine used_behavior_nodes at root ---
         if not self.allow_duplicate_nodes:
             used_behavior_nodes_at_root = list(
                 set(ch for ch in root_state if (not ch.isdigit()) and (ch not in ('(', ')')))
@@ -681,7 +677,7 @@ class MCTS:
         else:
             used_behavior_nodes_at_root = []
 
-        # Create root node with current node_id (0)
+        # -------- CREATE ROOT NODE --------
         root = MCTSNode(
             state=root_state,
             env=self.env,
@@ -691,51 +687,44 @@ class MCTS:
             parent_edge=None
         )
 
-        # Helper to compute BT-size (number of non-parenthesis characters)
         def bt_size(bt_str):
             return sum(1 for c in bt_str if c not in ('(', ')'))
 
-        # Register root in node_depth_dict under its size
         root_depth = bt_size(root.state)
         self.node_depth_dict[root_depth] = [root]
 
-        # BFS queue (node instances)
-        from collections import deque
+        # -------- PREPARE BFS --------
         queue = deque([root])
-
         nodes_json = []
         edges_json = []
+        evaluated = set()   # track evaluated node ids
+        expanded = set()    # track expanded node ids
 
-        # Track which node ids we've evaluated and expanded
-        evaluated = set()   # node.id for which we've run simulation evaluation
-        expanded = set()    # node.id which we've expanded (to avoid re-expansion)
+        # -------- PROGRESS BAR --------
+        pbar = tqdm(total=1, desc="[export_tree_full_sim] expanding", dynamic_ncols=True)
 
-        # Simulation-only evaluation helper
+        # -------- NODE EVALUATION (SIM ONLY) --------
         def evaluate_node_sim(node):
-            """Evaluate node.state using simulation and store node.value & node.evaluated_bt"""
+            """Evaluate node.state using simulation and store node.value & node.evaluated_bt."""
             if node.id in evaluated:
                 return
-            # Set the single env's BT and call evaluate_bt_in_sim()
             self.env.set_bt(env_id=0, bt_string=node.state)
             _, rews, _, _ = self.env.evaluate_bt_in_sim()
-            # Expect a single reward (num_envs == 1)
-            try:
-                rew = float(rews[0])
-            except Exception:
-                rew = float(rews)
+            rew = float(rews[0]) if isinstance(rews, (list, tuple)) else float(rews)
             node.value = rew
             node.evaluated_bt = node.state
             evaluated.add(node.id)
 
-        # BFS expansion loop
+        # -------- BFS LOOP --------
         while queue:
             node = queue.popleft()
+            parent_size = bt_size(node.state)
 
-            # Evaluate the node (its own BT) via simulation
+            # Evaluate node
             evaluate_node_sim(node)
 
-            # Add node record to JSON if not already present
-            if not any(x["id"] == node.id for x in nodes_json):
+            # Record node
+            if not any(n["id"] == node.id for n in nodes_json):
                 nodes_json.append({
                     "id": node.id,
                     "state": node.state,
@@ -744,21 +733,24 @@ class MCTS:
                     "is_terminal": node.is_terminated
                 })
 
-            current_size = bt_size(node.state)
-
-            # Stop expanding this node if it reached max_depth or is terminal
-            if current_size >= max_depth or node.is_terminated:
+            # Stop expanding further if depth limit reached
+            if parent_size >= max_depth or node.is_terminated:
                 continue
 
-            # Avoid re-expanding nodes (transpositions may requeue nodes)
+            # Avoid re-expansion of transpositions
             if node.id in expanded:
                 continue
             expanded.add(node.id)
 
-            # Expand each outgoing edge one-by-one because env.num_envs == 1
-            # iterate over a copy since expand() will modify edges/children
+            # Update progress bar
+            pbar.update(1)
+            pbar.total = len(expanded) + len(queue) + 1  # dynamic resizing
+            pbar.refresh()
+
+            # Expand children (edge by edge)
             for edge in list(node.edges):
-                # If edge already has a child (maybe from earlier expansion/transposition), record and potentially queue it
+
+                # Child already exists (transposition path)?
                 if edge.child is not None:
                     child = edge.child
                     edges_json.append({
@@ -770,27 +762,21 @@ class MCTS:
                         "prior": edge.prior
                     })
                     child_depth = bt_size(child.state)
-                    # enqueue child for further expansion if within depth and not terminal
-                    if (child_depth < max_depth) and (not child.is_terminated) and (child.id not in expanded):
+                    if child_depth < max_depth and not child.is_terminated and child.id not in expanded:
                         queue.append(child)
                     continue
 
-                # Set selected_depth to match run_search() semantics:
-                # the depth of the selected edge (child) = parent_size + 1
-                child_selected_depth = current_size + 1
-                self.selected_depth = [child_selected_depth]
+                # Set selected_depth like run_search(): always parent_size + 1
+                self.selected_depth = [parent_size + 1]
 
-                # Call expand() with the single selected edge in a list (vectorized API expects list length == num_envs)
-                selected_edges = [edge]
-                self.expand(selected_edges)
+                # Expand using single-edge list
+                self.expand([edge])
 
-                # After expand(), edge.child should be set (or transposition handled by expand())
                 child = edge.child
                 if child is None:
-                    # Defensive: if expand did not produce a child, skip this action
-                    continue
+                    continue  # sanity guard
 
-                # Record edge metadata
+                # Record edge
                 edges_json.append({
                     "source": node.id,
                     "target": child.id,
@@ -800,16 +786,18 @@ class MCTS:
                     "prior": edge.prior
                 })
 
-                # Evaluate the child node via simulation
+                # Evaluate child
                 evaluate_node_sim(child)
 
-                # Enqueue child for further expansion if within depth limit and not terminal
+                # Queue child if allowed
                 child_depth = bt_size(child.state)
-                if (child_depth < max_depth) and (not child.is_terminated):
+                if child_depth < max_depth and not child.is_terminated:
                     if child.id not in expanded:
                         queue.append(child)
 
-        # Ensure directory exists and write out JSON
+        pbar.close()
+
+        # -------- SAVE JSON --------
         save_dir = os.path.dirname(save_path)
         if save_dir != "":
             os.makedirs(save_dir, exist_ok=True)
@@ -823,3 +811,4 @@ class MCTS:
             }, f, indent=2)
 
         print(f"[export_tree_full_sim] Exported full tree (BT-size ≤ {max_depth}) to {save_path}")
+
