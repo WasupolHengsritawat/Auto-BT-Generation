@@ -360,35 +360,36 @@ class MultiBTEnv(gym.Env):
         :param env_id: Index of the environment.
         :return: Floating point value representing the complexity score.
         """
-        depth = 0
-        complexity = 0
-        depth_width = {}
         bt_string = self.current_bt[env_id]
+        # depth = 0
+        # complexity = 0
+        # depth_width = {}
 
-        # First pass to compute depth_width
-        for char in bt_string:
-            if char == '(':
-                depth += 1
-            elif char == ')':
-                depth -= 1
-            elif char.isdigit():
-                depth_width[depth - 1] = depth_width.get(depth - 1, 0) + 1
-            else:
-                depth_width[depth] = depth_width.get(depth, 0) + 1
+        # # First pass to compute depth_width
+        # for char in bt_string:
+        #     if char == '(':
+        #         depth += 1
+        #     elif char == ')':
+        #         depth -= 1
+        #     elif char.isdigit():
+        #         depth_width[depth - 1] = depth_width.get(depth - 1, 0) + 1
+        #     else:
+        #         depth_width[depth] = depth_width.get(depth, 0) + 1
 
-        # Reset depth for second pass to compute complexity
-        depth = 0
-        for char in bt_string:
-            if char == '(':
-                depth += 1
-            elif char == ')':
-                depth -= 1
-            elif char.isdigit():
-                if depth > 0 and depth - 1 in depth_width and depth > 0:
-                    complexity += depth * np.log(depth_width[depth - 1]) * np.log(depth)
-            else:
-                if depth in depth_width:
-                    complexity += (depth + 1) * np.log(depth_width[depth]) * np.log(depth + 1)
+        # # Reset depth for second pass to compute complexity
+        # depth = 0
+        # for char in bt_string:
+        #     if char == '(':
+        #         depth += 1
+        #     elif char == ')':
+        #         depth -= 1
+        #     elif char.isdigit():
+        #         if depth > 0 and depth - 1 in depth_width and depth > 0:
+        #             complexity += depth * np.log(depth_width[depth - 1]) * np.log(depth)
+        #     else:
+        #         if depth in depth_width:
+        #             complexity += (depth + 1) * np.log(depth_width[depth]) * np.log(depth + 1)
+        complexity = np.log(sum(1 for c in bt_string if c not in ('(', ')')) + 1)
 
         return complexity
 
@@ -610,7 +611,7 @@ class Simple_MultiBTEnv(MultiBTEnv):
                                 0.075,     # Is object picked
                                0.100,     # Was robot been to final
                                0.200,     # Is object delivered
-                                -0.0025]  # Tree complexity penalty term
+                                -0.005]  # Tree complexity penalty term
 
         # State Progress for Reward Calculation
         self.state_progress = {
@@ -707,7 +708,8 @@ class Simple_MultiBTEnv(MultiBTEnv):
                     self.reward_weight[2] * self.state_progress[final_state]._was_object_picked() +
                     self.reward_weight[3] * self.state_progress[final_state]._was_robot_been_to_final() +
                     self.reward_weight[4] * self.state_progress[final_state]._was_object_delivered() +
-                    self.reward_weight[5] * self.state_progress[final_state]._was_object_delivered() * self._BT_complexity(env_id) for env_id, final_state in enumerate(env_state) ]
+                    # self.reward_weight[5] * self.state_progress[final_state]._was_object_delivered() * self._BT_complexity(env_id) +
+                    self.reward_weight[5] * self._BT_complexity(env_id) for env_id, final_state in enumerate(env_state) ]
 
         return rewards     
 
