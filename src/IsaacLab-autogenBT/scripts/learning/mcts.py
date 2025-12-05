@@ -7,6 +7,40 @@ from tqdm import trange
 import time
 import os
 
+# Top-level helper used by multiprocessing.Pool (must be importable/picklable)
+def _worker_init(builder):
+    # store builder globally in the worker process
+    global _WORKER_BUILDER
+    _WORKER_BUILDER = builder
+
+def _worker_eval_state(state):
+    """
+    Worker function that evaluates a single BT string `state` using a worker-local env.
+    Requires that the worker has a global `_WORKER_BUILDER` function that returns an env.
+    Returns (state, reward).
+    """
+    # Create the env lazily and cache it in the worker
+    global _WORKER_ENV
+    try:
+        _WORKER_ENV
+    except NameError:
+        _WORKER_ENV = _WORKER_BUILDER()
+
+    env = _WORKER_ENV
+    # Ensure env is reset/clean if your builder doesn't return fresh clean envs
+    try:
+        env.set_bt(env_id=0, bt_string=state)
+        _, rews, _, _ = env.evaluate_bt_in_sim()
+        try:
+            reward = float(rews[0])
+        except Exception:
+            reward = float(rews)
+    except Exception as e:
+        # On any error, propagate exception (will show up in worker trace)
+        raise
+
+    return (state, reward)
+
 def get_valid_action(bt_string, env, used_behavior_nodes):
     valid_locs_on_string = [j for j in range(1,len(bt_string)) if j == len(bt_string) or not bt_string[j].isdigit()] # Find valid location on BT string
     valid_locs = range(len(valid_locs_on_string))
@@ -74,7 +108,11 @@ class MCTSNode:
         self.all_actions = get_valid_action(bt_string, self.env, self.used_behavior_nodes)
 
         # Get prior probabilities from the policy network
-        action_probs, pred_rew = self.policy_net.predict(state)
+        # Run policy network in inference mode without tracking gradients to avoid
+        # accumulating autograd graphs during many predictions (memory leak).
+        import torch as _torch
+        with _torch.no_grad():
+            action_probs, pred_rew = self.policy_net.predict(state)
 
         # Ensure probs are detached from GPU
         action_probs = action_probs.detach().cpu().numpy()
@@ -177,6 +215,8 @@ class MCTS:
             - loc_prob (np.ndarray): Normalized visit-based probability distribution over node locations.
         """
         self.transposition_nodes = []
+        # reset trajectory branch histories to avoid unbounded growth across searches
+        self.traj_branch_histories = [[] for _ in range(self.env.num_envs)]
 
         if not self.allow_duplicate_nodes:
             used_behavior_nodes_at_root = list(set(ch for ch in root_state if (not ch.isdigit()) and (ch not in ('(', ')'))))
@@ -458,7 +498,10 @@ class MCTS:
                     continue
 
                 # Get the action probablities from the policy network
-                action_probs, _ = self.policy_net.predict(state) 
+                # Inference: prevent autograd graph allocation
+                import torch as _torch
+                with _torch.no_grad():
+                    action_probs, _ = self.policy_net.predict(state)
 
                 # Convert torch tensors to numpy arrays
                 action_probs = action_probs.detach().cpu().numpy()
@@ -522,9 +565,12 @@ class MCTS:
             
         # Evaluate the BTs using the policy network
         rews = []
+        import torch as _torch
         for env_id in range(self.env.num_envs):
             state = states[env_id]
-            nt_probs, loc_probs, pred_rew = self.policy_net.predict(state)
+            # Use no_grad during model-based prediction to avoid autograd overhead
+            with _torch.no_grad():
+                nt_probs, loc_probs, pred_rew = self.policy_net.predict(state)
             rew = float(pred_rew.detach().cpu().item())
 
             nodes[env_id].reward = rew
@@ -645,28 +691,35 @@ class MCTS:
 
         print(f"Tree exported to {save_path}")
 
-    def export_tree_full_sim(self, root_state, max_depth, save_path="mcts_tree_full_sim.json"):
+    def export_tree_full_sim(self,
+                              root_state,
+                              max_depth,
+                              save_path="mcts_tree_full_sim.json",
+                              num_eval_workers=0,
+                              env_builder=None,
+                              max_nodes=None,
+                              max_time_seconds=None,
+                              show_progress=True):
         """
-        Fully expand the MCTS tree from root_state up to BT-size = max_depth (counting non-parenthesis chars).
-        Uses expand() but, since env.num_envs == 1, calls expand() for each edge one-by-one.
-        Evaluates each node's own BT via simulation only (env.evaluate_bt_in_sim()).
-        Includes a progress bar that tracks number of expanded nodes.
+        Faster full expansion + simulation-evaluated export (no pruning).
+        Fixed, reliable progress bar (indeterminate — updates on each expanded node).
         """
+
         from tqdm import tqdm
         from collections import deque
-        import os, json
+        import time, os, json
+        import multiprocessing as mp
 
-        # -------- ENV REQUIREMENTS --------
         if self.env.num_envs != 1:
             raise ValueError("export_tree_full_sim requires env.num_envs == 1.")
 
-        # -------- RESET MCTS INTERNALS --------
+        # Reset internals used by expand()
         self.transposition_nodes = []
         self.non_terminated_node_list = []
         self.node_depth_dict = {}
-        self.node_id = 0  # root id will be 0
+        self.node_id = 0
 
-        # --- Determine used_behavior_nodes at root ---
+        # Compute root used_behavior_nodes as in run_search()
         if not self.allow_duplicate_nodes:
             used_behavior_nodes_at_root = list(
                 set(ch for ch in root_state if (not ch.isdigit()) and (ch not in ('(', ')')))
@@ -677,7 +730,7 @@ class MCTS:
         else:
             used_behavior_nodes_at_root = []
 
-        # -------- CREATE ROOT NODE --------
+        # Create root node
         root = MCTSNode(
             state=root_state,
             env=self.env,
@@ -690,69 +743,140 @@ class MCTS:
         def bt_size(bt_str):
             return sum(1 for c in bt_str if c not in ('(', ')'))
 
+        # register root
         root_depth = bt_size(root.state)
         self.node_depth_dict[root_depth] = [root]
 
-        # -------- PREPARE BFS --------
+        # BFS queue
         queue = deque([root])
+
+        # containers
         nodes_json = []
+        nodes_recorded = set()
         edges_json = []
-        evaluated = set()   # track evaluated node ids
-        expanded = set()    # track expanded node ids
+        edges_recorded = set()
 
-        # -------- PROGRESS BAR --------
-        pbar = tqdm(total=1, desc="[export_tree_full_sim] expanding", dynamic_ncols=True)
+        expanded = set()
+        evaluated = set()
+        eval_cache = {}   # state -> reward
 
-        # -------- NODE EVALUATION (SIM ONLY) --------
-        def evaluate_node_sim(node):
-            """Evaluate node.state using simulation and store node.value & node.evaluated_bt."""
-            if node.id in evaluated:
-                return
-            self.env.set_bt(env_id=0, bt_string=node.state)
-            _, rews, _, _ = self.env.evaluate_bt_in_sim()
-            rew = float(rews[0]) if isinstance(rews, (list, tuple)) else float(rews)
-            node.value = rew
-            node.evaluated_bt = node.state
-            evaluated.add(node.id)
+        start_time = time.time()
+        expanded_count = 0
 
-        # -------- BFS LOOP --------
+        # prepare multiprocessing pool if requested
+        pool = None
+        use_pool = False
+        if num_eval_workers and num_eval_workers > 0:
+            if env_builder is None:
+                raise ValueError("env_builder must be provided when num_eval_workers > 0.")
+            ctx = mp.get_context("spawn")
+            pool = ctx.Pool(processes=num_eval_workers, initializer=_worker_init, initargs=(env_builder,))
+            use_pool = True
+
+        # progress bar: indeterminate (no total). Update on each expanded node.
+        pbar = None
+        if show_progress:
+            pbar = tqdm(desc="[export_tree_full_sim] expanded nodes", unit="nodes", dynamic_ncols=True)
+
+        # helper to evaluate a batch of unique states (pool or local)
+        def evaluate_states_batch(states):
+            results = {}
+            if not states:
+                return results
+            if use_pool:
+                mapped = pool.map(_worker_eval_state, states)
+                for s, r in mapped:
+                    results[s] = float(r)
+                return results
+            else:
+                for s in states:
+                    self.env.set_bt(env_id=0, bt_string=s)
+                    _, rews, _, _ = self.env.evaluate_bt_in_sim()
+                    try:
+                        r = float(rews[0])
+                    except Exception:
+                        r = float(rews)
+                    results[s] = r
+                return results
+
+        # BFS main loop
         while queue:
+            # early stops
+            if max_time_seconds is not None and (time.time() - start_time) > max_time_seconds:
+                if pbar is not None:
+                    pbar.set_description("[export_tree_full_sim] stopped: time limit reached")
+                break
+            if max_nodes is not None and expanded_count >= max_nodes:
+                if pbar is not None:
+                    pbar.set_description("[export_tree_full_sim] stopped: node limit reached")
+                break
+
             node = queue.popleft()
             parent_size = bt_size(node.state)
 
-            # Evaluate node
-            evaluate_node_sim(node)
+            # If cached, populate node.value immediately
+            if node.state in eval_cache:
+                node.value = eval_cache[node.state]
+                node.evaluated_bt = node.state
+                evaluated.add(node.id)
 
-            # Record node
-            if not any(n["id"] == node.id for n in nodes_json):
+            # record node
+            if node.id not in nodes_recorded:
                 nodes_json.append({
                     "id": node.id,
                     "state": node.state,
-                    "value": node.value,
-                    "evaluated_bt": node.evaluated_bt,
+                    "value": node.value if node.id in evaluated else None,
+                    "evaluated_bt": node.evaluated_bt if node.id in evaluated else None,
                     "is_terminal": node.is_terminated
                 })
+                nodes_recorded.add(node.id)
 
-            # Stop expanding further if depth limit reached
+            # stop if depth reached or terminal
             if parent_size >= max_depth or node.is_terminated:
                 continue
 
-            # Avoid re-expansion of transpositions
+            # avoid re-expansion
             if node.id in expanded:
                 continue
             expanded.add(node.id)
 
-            # Update progress bar
-            pbar.update(1)
-            pbar.total = len(expanded) + len(queue) + 1  # dynamic resizing
-            pbar.refresh()
+            # update counters & progress (indeterminate)
+            expanded_count += 1
+            if pbar is not None:
+                pbar.update(1)
+                pbar.set_postfix_str(f"expanded={expanded_count}")
 
-            # Expand children (edge by edge)
+            # Expand children edge-by-edge
             for edge in list(node.edges):
-
-                # Child already exists (transposition path)?
                 if edge.child is not None:
                     child = edge.child
+                    edge_key = (node.id, child.id, edge.action)
+                    if edge_key not in edges_recorded:
+                        edges_json.append({
+                            "source": node.id,
+                            "target": child.id,
+                            "action": edge.action,
+                            "visits": edge.visits,
+                            "q": edge.q,
+                            "prior": edge.prior
+                        })
+                        edges_recorded.add(edge_key)
+                    child_depth = bt_size(child.state)
+                    if (child_depth < max_depth) and (not child.is_terminated) and (child.id not in expanded):
+                        queue.append(child)
+                    continue
+
+                # set selected_depth = parent_size + 1 (match run_search)
+                self.selected_depth = [parent_size + 1]
+
+                # call expand for this single edge
+                self.expand([edge])
+                child = edge.child
+                if child is None:
+                    continue
+
+                edge_key = (node.id, child.id, edge.action)
+                if edge_key not in edges_recorded:
                     edges_json.append({
                         "source": node.id,
                         "target": child.id,
@@ -761,43 +885,69 @@ class MCTS:
                         "q": edge.q,
                         "prior": edge.prior
                     })
-                    child_depth = bt_size(child.state)
-                    if child_depth < max_depth and not child.is_terminated and child.id not in expanded:
-                        queue.append(child)
-                    continue
+                    edges_recorded.add(edge_key)
 
-                # Set selected_depth like run_search(): always parent_size + 1
-                self.selected_depth = [parent_size + 1]
-
-                # Expand using single-edge list
-                self.expand([edge])
-
-                child = edge.child
-                if child is None:
-                    continue  # sanity guard
-
-                # Record edge
-                edges_json.append({
-                    "source": node.id,
-                    "target": child.id,
-                    "action": edge.action,
-                    "visits": edge.visits,
-                    "q": edge.q,
-                    "prior": edge.prior
-                })
-
-                # Evaluate child
-                evaluate_node_sim(child)
-
-                # Queue child if allowed
+                # If child state not in cache, collect for batch eval later (we evaluate after node expansion)
+                # Enqueue child for expansion if allowed
                 child_depth = bt_size(child.state)
-                if child_depth < max_depth and not child.is_terminated:
+                if (child_depth < max_depth) and (not child.is_terminated):
                     if child.id not in expanded:
                         queue.append(child)
 
-        pbar.close()
+            # After expanding this node, evaluate a small batch of missing states to keep memory in check.
+            BATCH_LIMIT = 128
+            missing_states = []
+            for rec in nodes_json[::-1]:  # iterate recent nodes first
+                st = rec["state"]
+                if st not in eval_cache and st not in missing_states:
+                    missing_states.append(st)
+                    if len(missing_states) >= BATCH_LIMIT:
+                        break
 
-        # -------- SAVE JSON --------
+            if missing_states:
+                results = evaluate_states_batch(missing_states)
+                for s, v in results.items():
+                    eval_cache[s] = v
+                # update nodes_json records and any in-memory node objects
+                for rec in nodes_json:
+                    st = rec["state"]
+                    if rec["value"] is None and st in eval_cache:
+                        rec["value"] = eval_cache[st]
+                        rec["evaluated_bt"] = st
+                        # update actual node instances if present
+                        for depth_nodes in self.node_depth_dict.values():
+                            for n_node in depth_nodes:
+                                if n_node.state == st and getattr(n_node, "value", None) is None:
+                                    n_node.value = eval_cache[st]
+                                    n_node.evaluated_bt = st
+                                    evaluated.add(n_node.id)
+
+            # early-stop checks again
+            if max_time_seconds is not None and (time.time() - start_time) > max_time_seconds:
+                if pbar is not None:
+                    pbar.set_description("[export_tree_full_sim] stopped: time limit reached")
+                break
+            if max_nodes is not None and expanded_count >= max_nodes:
+                if pbar is not None:
+                    pbar.set_description("[export_tree_full_sim] stopped: node limit reached")
+                break
+
+        # cleanup pool and progress bar
+        if pool is not None:
+            pool.close()
+            pool.join()
+
+        if pbar is not None:
+            pbar.close()
+
+        # final fill of any remaining cached values into nodes_json
+        for rec in nodes_json:
+            st = rec["state"]
+            if rec["value"] is None and st in eval_cache:
+                rec["value"] = eval_cache[st]
+                rec["evaluated_bt"] = st
+
+        # write file
         save_dir = os.path.dirname(save_path)
         if save_dir != "":
             os.makedirs(save_dir, exist_ok=True)
@@ -807,8 +957,13 @@ class MCTS:
                 "nodes": nodes_json,
                 "edges": edges_json,
                 "root_state": root_state,
-                "max_depth": max_depth
+                "max_depth": max_depth,
+                "exported_at": time.time(),
+                "eval_cache_size": len(eval_cache),
+                "expanded_count": expanded_count
             }, f, indent=2)
 
-        print(f"[export_tree_full_sim] Exported full tree (BT-size ≤ {max_depth}) to {save_path}")
+        print(f"[export_tree_full_sim] Export finished: expanded {expanded_count} nodes; export saved to {save_path}")
+
+
 

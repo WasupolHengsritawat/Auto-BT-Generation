@@ -305,7 +305,9 @@ class RvNN_mem(nn.Module):
                 - Probabilities for action2 (location)
                 - Scalar reward prediction
         """
-        torch.autograd.set_detect_anomaly(True)
+        # Prediction should typically run without anomaly detection and without
+        # building an autograd graph when called from inference paths. Do not
+        # enable global anomaly detection here (it increases memory usage).
         h = self.forward(bt_string)
 
         action_logits = self.output_action(h)
@@ -349,7 +351,6 @@ class RvNN_mem(nn.Module):
                     l2_reg = sum((param**2).sum() for param in self.parameters())
                     loss = loss1 + loss2 + l2_weight * l2_reg
 
-                    torch.autograd.set_detect_anomaly(True)
                     loss.backward()
                     optimizer.step()
 

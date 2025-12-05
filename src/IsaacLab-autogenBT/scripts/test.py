@@ -196,9 +196,6 @@ from learning.network import RvNN
 import torch
 import os 
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
-
 ######## Hyperparameters ########
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -220,29 +217,52 @@ allow_duplicate_nodes = True
 
 # ===============================================================================================================
 
-# Instantiate the model
-model = RvNN(
-    node_type_vocab_size=20,
-    embed_size=4,  # was 64
-    hidden_size=8, # was 128
-    action_size=4 + (len(node_dict.items()) - 1) * (2 * nodes_limit - 1),    # Number of node types to choose from * Max insertion locations (50 * 2) - 1 
-    device=device,
-    reward_head=False,                      # Set to True if you want to include a reward head
-)
+def env_builder():
+    """
+    Must return a NEW environment instance.
+    Called once per worker process.
+    """
+    # Example arguments — replace with YOUR actual constructor args:
+    env = Simple_MultiBTEnv(node_dict, 
+                            nodes_limit, 
+                            num_envs=1,
+                            verbose=False)
+    return env
 
-allow_duplicate_nodes = True
+if __name__ == "__main__":
 
-#################################
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
 
-env = Simple_MultiBTEnv(node_dict, 
-                        nodes_limit, 
-                        num_envs=1,
-                        verbose=False)
+    # Instantiate the model
+    model = RvNN(
+        node_type_vocab_size=20,
+        embed_size=4,  # was 64
+        hidden_size=8, # was 128
+        action_size=4 + (len(node_dict.items()) - 1) * (2 * nodes_limit - 1),    # Number of node types to choose from * Max insertion locations (50 * 2) - 1 
+        device=device,
+        reward_head=False,                      # Set to True if you want to include a reward head
+    )
 
-mcts = MCTS(env, model, allow_duplicate_nodes=allow_duplicate_nodes, model_based=False, device=device)
+    allow_duplicate_nodes = True
 
-root_state = ""  # or your current BT string
-max_depth = 8    # max number of BT nodes (non-parenthesis chars)
+    #################################
 
-save_path = os.path.join(logs_dir, f"mcts_tree_full_sim.json")
-mcts.export_tree_full_sim(root_state, max_depth, save_path=save_path)
+    env = Simple_MultiBTEnv(node_dict, 
+                            nodes_limit, 
+                            num_envs=1,
+                            verbose=False)
+
+    mcts = MCTS(env, model, allow_duplicate_nodes=allow_duplicate_nodes, model_based=False, device=device)
+
+    root_state = ""  # or your current BT string
+    max_depth = 5    # max number of BT nodes (non-parenthesis chars)
+
+    save_path = os.path.join(logs_dir, f"mcts_tree_full_sim.json")
+    mcts.export_tree_full_sim(
+        root_state=root_state, 
+        max_depth=max_depth, 
+        save_path=save_path,
+        num_eval_workers=4,
+        env_builder=env_builder
+        )

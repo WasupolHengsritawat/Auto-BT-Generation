@@ -609,9 +609,9 @@ class Simple_MultiBTEnv(MultiBTEnv):
         self.reward_weight = [  0.025,     # Is object found
                                 0.050,     # Was robot been to object
                                 0.075,     # Is object picked
-                               0.100,     # Was robot been to final
-                               0.200,     # Is object delivered
-                                -0.005]  # Tree complexity penalty term
+                                0.100,     # Was robot been to final
+                                0.200,     # Is object delivered
+                               -0.002]  # Tree complexity penalty term
 
         # State Progress for Reward Calculation
         self.state_progress = {
@@ -624,6 +624,9 @@ class Simple_MultiBTEnv(MultiBTEnv):
             'G' : TaskStateProgress(position='Final' , object_found=True , object_picked=False, object_delivered=False), # Initial State with known object location
             'H' : TaskStateProgress(position='Final' , object_found=True , object_picked=True , object_delivered=True)   # Final State
         }
+
+        # BT blackboard Initialization
+        self.bb_client = py_trees.blackboard.Client(name="External")
     
     def evaluate_bt_in_sim(self):
         obs, rews, dones, infos = [], [], [], []
@@ -632,9 +635,6 @@ class Simple_MultiBTEnv(MultiBTEnv):
         bt_with_evaluation_node = []
         for env_id in range(self.num_envs):
             bt_with_evaluation_node.append('(1E' + self.current_bt[env_id] + ')')   # add evaluation node
-
-        # BT blackboard Initialization
-        bb_client = py_trees.blackboard.Client(name="External")
 
         # Behavior Tree Setup
         trees = []
@@ -645,13 +645,12 @@ class Simple_MultiBTEnv(MultiBTEnv):
             tree.setup()
             trees.append(tree)
 
-            # BT blackboard variable registration
-            bb_client.register_key(key=f"action_{env_id}", access=py_trees.common.Access.READ)
-            bb_client.register_key(key=f"action_{env_id}", access=py_trees.common.Access.WRITE)
+            # bb_client.register_key(key=f"action_{env_id}", access=py_trees.common.Access.READ)
+            self.bb_client.register_key(key=f"action_{env_id}", access=py_trees.common.Access.WRITE)
 
-            bb_client.register_key(key=f"env_state_{env_id}", access=py_trees.common.Access.WRITE)
+            self.bb_client.register_key(key=f"env_state_{env_id}", access=py_trees.common.Access.WRITE)
 
-            bb_client.set(f"action_{env_id}", '')
+            self.bb_client.set(f"action_{env_id}", '')
 
         # Environment Finite State Machine Setup
         env_fsm = [SearchAndDeliverMachine() for _ in range(self.num_envs)]
@@ -668,20 +667,20 @@ class Simple_MultiBTEnv(MultiBTEnv):
             # Update state in BT blackboard
             for env_id in range(self.num_envs):
                 # Update the environment state in the blackboard
-                bb_client.set(f"env_state_{env_id}", env_state[env_id])
+                self.bb_client.set(f"env_state_{env_id}", env_state[env_id])
 
                 # Execute a BT tick
                 trees[env_id].tick()
 
                 # Update the action in the blackboard
-                bb_client.set(f"action_{env_id}", subtract_prefix(bb_client.get(f"action_{env_id}"), bb_shared_data_last[env_id]))
-                bb_shared_data_last[env_id] = bb_client.get(f"action_{env_id}")
+                self.bb_client.set(f"action_{env_id}", subtract_prefix(self.bb_client.get(f"action_{env_id}"), bb_shared_data_last[env_id]))
+                bb_shared_data_last[env_id] = self.bb_client.get(f"action_{env_id}")
 
                 # print(f"[External] BT Action {env_id}: {bb_client.get(f'action_{env_id}')}")
 
                 try:
                     # Send the action to the environment FSM
-                    env_fsm[env_id].send(bb_client.get(f"action_{env_id}"))
+                    env_fsm[env_id].send(self.bb_client.get(f"action_{env_id}"))
                     env_state[env_id] = env_fsm[env_id].current_state.id
 
                     # Stop the individual simulation if the FSM reached the accepted state
@@ -689,7 +688,7 @@ class Simple_MultiBTEnv(MultiBTEnv):
                         env_done[env_id] = True
                 except Exception as e:
                     # Stop the individual simulation if the FSM rejects the command
-                    if bb_client.get(f'action_{env_id}') != "":
+                    if self.bb_client.get(f'action_{env_id}') != "":
                         env_done[env_id] = True
 
                 # Stop the individual simulation if the FSM reached the maximum number of loops
@@ -698,6 +697,13 @@ class Simple_MultiBTEnv(MultiBTEnv):
                     env_done[env_id] = True
         
         rews = self._get_reward(env_state)
+
+        self.bb_client.unregister_all_keys()
+
+        for env_id in range(self.num_envs):
+            trees[env_id].shutdown()
+
+        trees.clear()
 
         return obs, rews, dones, infos
     

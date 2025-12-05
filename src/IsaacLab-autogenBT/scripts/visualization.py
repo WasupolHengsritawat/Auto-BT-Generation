@@ -10,7 +10,7 @@ import dash_bootstrap_components as dbc
 script_dir = os.path.dirname(os.path.abspath(__file__))
 logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
 
-date_time = "2025-12-04_02-36-23-fibo2-seed1-mmcgs-dup-100iters"
+date_time = "2025-12-04_14-18-18-fibo2-seed1-comp-penalty"
 model_name = "rvnn_iter000"
 count = 1
 
@@ -376,6 +376,7 @@ def update_annotations(clickData, fig_dict, pinned_annotations):
                 f"Node {node_id}<br>"
                 f"State: {node.get('state')}<br>"
                 f"Value: {node.get('value')}<br>"
+                f"Evaluated by {node.get('evaluated_bt')}<br>"
                 f"Terminal: {node.get('is_terminal')}"
             )
             key = f"Node-{node_id}"

@@ -58,7 +58,7 @@ loop_allowed = 4
 # bt_string_array = ['(0(1c)(2ab))'] * num_envs
 
 # bt_string_array = ['(2ba(0)(0)(0(2)(2)(2))b)'] * num_envs
-bt_string_array = ['(2baaD)'] * num_envs
+bt_string_array = ['(2b(1(0(2)(2)Dca)a))'] * num_envs
 
 # bt_string_array = ['(1E(0c(2ab)))'] * num_envs
 # bt_string_array = ['(1H)'] * num_envs
@@ -173,7 +173,7 @@ if __name__ == '__main__':
         trees.append(tree)
 
         # BT blackboard variable registration
-        bb_client.register_key(key=f"action_{env_id}", access=py_trees.common.Access.READ)
+        # bb_client.register_key(key=f"action_{env_id}", access=py_trees.common.Access.READ)
         bb_client.register_key(key=f"action_{env_id}", access=py_trees.common.Access.WRITE)
 
         bb_client.register_key(key=f"env_state_{env_id}", access=py_trees.common.Access.WRITE)
@@ -223,6 +223,11 @@ if __name__ == '__main__':
             env_state_history[env_id] += env_state[env_id]
             if env_state_history[env_id].count(env_state[env_id]) >= (loop_allowed + 1):
                 env_done[env_id] = True
+
+    bb_client.unregister_all_keys()
+
+    for env_id in range(num_envs):
+        trees[env_id].shutdown()
 
     print("\n*************** Pass ***************")
     print("\n[External] Final State:", env_state)

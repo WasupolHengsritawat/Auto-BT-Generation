@@ -29,7 +29,7 @@ class PatrolNode(py_trees.behaviour.Behaviour):
 
         self.blackboard = self.attach_blackboard_client(name=name)
 
-        self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.READ)
+        # self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.READ)
         self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.WRITE)
 
         # Initialize blackboard variables if it not already initialized
@@ -61,7 +61,7 @@ class FindTargetNode(py_trees.behaviour.Behaviour):
 
         self.blackboard = self.attach_blackboard_client(name=name)
 
-        self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.READ)
+        # self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.READ)
         self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.WRITE)
 
         # Initialize blackboard variables if it not already initialized
@@ -93,7 +93,7 @@ class GoToSpawnNode(py_trees.behaviour.Behaviour):
 
         self.blackboard = self.attach_blackboard_client(name=name)
 
-        self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.READ)
+        # self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.READ)
         self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.WRITE)
 
         # Initialize blackboard variables if it not already initialized
@@ -129,7 +129,7 @@ class GoToNearestTarget(py_trees.behaviour.Behaviour):
 
         self.blackboard = self.attach_blackboard_client(name=name)
 
-        self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.READ)
+        # self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.READ)
         self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.WRITE)
 
         # Initialize blackboard variables if it not already initialized
@@ -165,7 +165,7 @@ class PickObject(py_trees.behaviour.Behaviour):
 
         self.blackboard = self.attach_blackboard_client(name=name)
 
-        self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.READ)
+        # self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.READ)
         self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.WRITE)
 
         # Initialize blackboard variables if it not already initialized
@@ -201,7 +201,7 @@ class DropObject(py_trees.behaviour.Behaviour):
 
         self.blackboard = self.attach_blackboard_client(name=name)
 
-        self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.READ)
+        # self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.READ)
         self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.WRITE)
 
         # Initialize blackboard variables if it not already initialized
