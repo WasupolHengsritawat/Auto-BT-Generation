@@ -545,7 +545,7 @@ class MCTS:
         for env_id in range(self.env.num_envs):
             nodes[env_id].evaluated_bt = states[env_id]
 
-        # Get the reward by runnung the BT in IsaacSim Simulation
+        # Get the reward by running the BT in IsaacSim Simulation
         _, rews, _, infos =  self.env.evaluate_bt_in_sim()
 
         # Update the value for each node

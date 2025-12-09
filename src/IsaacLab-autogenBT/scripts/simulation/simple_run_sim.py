@@ -35,7 +35,7 @@ from simple_behavior import (
 from env_state_machine import SearchAndDeliverMachine
 
 ######## Hyperparameters ########
-num_envs = 1
+num_envs = 3
 loop_allowed = 4
 
 # bt_string_array = ['(1H(0(1F(0(1E(0(1D(2ab))c))f))(1Be)g))'] * num_envs
@@ -58,7 +58,15 @@ loop_allowed = 4
 # bt_string_array = ['(0(1c)(2ab))'] * num_envs
 
 # bt_string_array = ['(2ba(0)(0)(0(2)(2)(2))b)'] * num_envs
-bt_string_array = ['(2b(1(0(2)(2)Dca)a))'] * num_envs
+
+# bt_string_array = ['(2b(1(0(2)(2)Dca)a))'] * num_envs
+
+# bt_string_array = ['(2(1)b(1a(1))(1cDb))'] * num_envs
+
+# bt_string_array = ['(2(1)(1)(1)b(0a(1)bc))'] * num_envs
+
+bt_string_array = ['(2b(0D(2)(2)(2)(2)(2)(2)))', '(2Dba(2)(2)(2)(2)(2)c)', '(0)']
+# bt_string_array = ['(2Dba(2)(2)(2)(2)(2)c)'] * num_envs
 
 # bt_string_array = ['(1E(0c(2ab)))'] * num_envs
 # bt_string_array = ['(1H)'] * num_envs
@@ -207,13 +215,14 @@ if __name__ == '__main__':
             print(f"[External] BT Action {env_id}: {bb_client.get(f'action_{env_id}')}")
 
             try:
-                # Send the action to the environment FSM
-                env_fsm[env_id].send(bb_client.get(f"action_{env_id}"))
-                env_state[env_id] = env_fsm[env_id].current_state.id
+                if not env_done[env_id]:
+                    # Send the action to the environment FSM
+                    env_fsm[env_id].send(bb_client.get(f"action_{env_id}"))
+                    env_state[env_id] = env_fsm[env_id].current_state.id
 
-                # Stop the individual simulation if the FSM reached the accepted state
-                if env_state[env_id] == 'H':
-                    env_done[env_id] = True
+                    # Stop the individual simulation if the FSM reached the accepted state
+                    if env_state[env_id] == 'H':
+                        env_done[env_id] = True
             except Exception as e:
                 # Stop the individual simulation if the FSM rejects the command
                 if bb_client.get(f'action_{env_id}') != "":

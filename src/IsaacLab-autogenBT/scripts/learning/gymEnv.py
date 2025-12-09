@@ -679,13 +679,14 @@ class Simple_MultiBTEnv(MultiBTEnv):
                 # print(f"[External] BT Action {env_id}: {bb_client.get(f'action_{env_id}')}")
 
                 try:
-                    # Send the action to the environment FSM
-                    env_fsm[env_id].send(self.bb_client.get(f"action_{env_id}"))
-                    env_state[env_id] = env_fsm[env_id].current_state.id
+                    if not env_done[env_id]:
+                        # Send the action to the environment FSM
+                        env_fsm[env_id].send(self.bb_client.get(f"action_{env_id}"))
+                        env_state[env_id] = env_fsm[env_id].current_state.id
 
-                    # Stop the individual simulation if the FSM reached the accepted state
-                    if env_state[env_id] == 'D':
-                        env_done[env_id] = True
+                        # Stop the individual simulation if the FSM reached the accepted state
+                        if env_state[env_id] == 'D':
+                            env_done[env_id] = True
                 except Exception as e:
                     # Stop the individual simulation if the FSM rejects the command
                     if self.bb_client.get(f'action_{env_id}') != "":

@@ -10,7 +10,7 @@ import dash_bootstrap_components as dbc
 script_dir = os.path.dirname(os.path.abspath(__file__))
 logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
 
-date_time = "2025-12-04_14-18-18-fibo2-seed1-comp-penalty"
+date_time = "2025-12-09_12-42-00"
 model_name = "rvnn_iter000"
 count = 1
 
@@ -50,7 +50,7 @@ node_text = [
     for n in node_ids
 ]
 
-# Edge geometry / hover data
+# Edge geometry / hover data (global fallbacks)
 edge_x, edge_y = [], []
 edge_hover_x, edge_hover_y, edge_text, edge_ids = [], [], [], []
 for (u, v, attr) in G.edges(data=True):
@@ -86,11 +86,12 @@ def compute_ranges_for_nodes(node_set, pad=0.15):
     return [x_min - x_pad, x_max + x_pad], [y_min - y_pad, y_max + y_pad]
 
 # Function to build figure with view options:
-def build_figure(highlight_ids=None, view_mode="whole", autozoom=False):
+def build_figure(highlight_ids=None, view_mode="whole", autozoom=False, highlight_positive_edges=False):
     """
     highlight_ids: set of node IDs to be marked as 'matched' (gold)
     view_mode: "whole" (show full tree), or "neighborhood" (show only matched + parents + children)
     autozoom: when True and view_mode is 'neighborhood', set axis ranges to fit nodes
+    highlight_positive_edges: when True, edges where (value_child - value_parent) > 0 are drawn gold and thicker
     """
     if highlight_ids is None:
         highlight_ids = set()
@@ -129,54 +130,75 @@ def build_figure(highlight_ids=None, view_mode="whole", autozoom=False):
             node_marker_colors.append("tomato" if is_terminal else "lightblue")
             node_marker_opacity.append(1.0)
 
-    # Edges opacity: if neighborhood mode, keep edges only if both endpoints in neighbor_set (or involve matched node)
-    edge_line_colors = []
-    edge_line_opacity = []
-    # we will recreate edge lists (x/y) selectively so easier to control visibility
-    filtered_edge_x, filtered_edge_y = [], []
-    filtered_edge_hover_x, filtered_edge_hover_y, filtered_edge_text, filtered_edge_ids = [], [], [], []
+    fig = go.Figure()
+
+    # --- Edges ---
+    # We'll add one trace per visible edge so we can color/width them individually
+    filtered_edge_hover_x = []
+    filtered_edge_hover_y = []
+    filtered_edge_text = []
+    filtered_edge_ids = []
 
     for (u, v, attr) in G.edges(data=True):
         show_edge = True
         if view_mode == "neighborhood" and highlight_ids:
-            # only show edges if both endpoints are in neighbor_set
             if not (u in neighbor_set and v in neighbor_set):
                 show_edge = False
 
-        if show_edge:
-            x0, y0 = pos[u]
-            x1, y1 = pos[v]
-            filtered_edge_x += [x0, x1, None]
-            filtered_edge_y += [y0, y1, None]
-            filtered_edge_hover_x.append((x0 + x1) / 2)
-            filtered_edge_hover_y.append((y0 + y1) / 2)
-            e_id = f"{u}-{v}"
-            filtered_edge_ids.append(e_id)
-            filtered_edge_text.append(
-                f"Edge {u}→{v}<br>"
-                f"Action: {attr.get('action')}<br>"
-                f"Visits: {attr.get('visits')}<br>"
-                f"Q: {float(attr.get('q', 0)):.3f}<br>"
-                f"Prior: {float(attr.get('prior', 0)):.6f}"
-            )
-            # edges for neighborhood are full opacity; otherwise default low-opacity line color
-            edge_line_colors.append("#888")
-            edge_line_opacity.append(1.0 if view_mode == "whole" or show_edge else 0.15)
+        if not show_edge:
+            continue
 
-    fig = go.Figure()
+        # coordinates
+        x0, y0 = pos[u]
+        x1, y1 = pos[v]
 
-    # Edges trace (lines)
-    fig.add_trace(go.Scatter(
-        x=filtered_edge_x if filtered_edge_x else edge_x,
-        y=filtered_edge_y if filtered_edge_y else edge_y,
-        mode='lines',
-        line=dict(width=1, color='#888'),
-        hoverinfo='none',
-        name='edges',
-        opacity=1.0
-    ))
+        # compute value difference (child - parent)
+        try:
+            val_u = float(G.nodes[u].get('value', 0) or 0)
+        except Exception:
+            val_u = 0.0
+        try:
+            val_v = float(G.nodes[v].get('value', 0) or 0)
+        except Exception:
+            val_v = 0.0
+
+        delta = val_v - val_u
+
+        # decide color & width
+        if highlight_positive_edges and (delta > 0):
+            edge_color = "#FFD700"  # gold
+            edge_width = 3
+        else:
+            edge_color = "#888"
+            edge_width = 1
+
+        # Add a single-line trace for this edge
+        fig.add_trace(go.Scatter(
+            x=[x0, x1],
+            y=[y0, y1],
+            mode='lines',
+            line=dict(width=edge_width, color=edge_color),
+            hoverinfo='none',
+            showlegend=False,
+            name=f"edge-{u}-{v}",
+            opacity=1.0
+        ))
+
+        # collect hover marker data (midpoint) so we still have a single invisible marker layer for hover/click
+        filtered_edge_hover_x.append((x0 + x1) / 2)
+        filtered_edge_hover_y.append((y0 + y1) / 2)
+        e_id = f"{u}-{v}"
+        filtered_edge_ids.append(e_id)
+        filtered_edge_text.append(
+            f"Edge {u}→{v}<br>"
+            f"Action: {attr.get('action')}<br>"
+            f"Visits: {attr.get('visits')}<br>"
+            f"Q: {float(attr.get('q', 0)):.3f}<br>"
+            f"Prior: {float(attr.get('prior', 0)):.6f}"
+        )
 
     # Invisible markers for edge hover & clicks (only for shown edges)
+    # If no edges are shown, fall back to the precomputed global edge hover arrays
     fig.add_trace(go.Scatter(
         x=filtered_edge_hover_x if filtered_edge_hover_x else edge_hover_x,
         y=filtered_edge_hover_y if filtered_edge_hover_y else edge_hover_y,
@@ -246,7 +268,7 @@ app.layout = dbc.Container([
                 placeholder="Search node ID or state (e.g., 12, patrol, g01). Multiple: '12, patrol'",
                 style={"width": "100%"}
             ),
-            width=7
+            width=6
         ),
         dbc.Col(
             dbc.Button("Search", id="search-button", color="primary", style={"width": "100%"}),
@@ -263,6 +285,16 @@ app.layout = dbc.Container([
                 inline=True
             ),
             width=3
+        ),
+        # NEW: toggle switch for highlighting positive-delta edges
+        dbc.Col(
+            dbc.Switch(
+                id="edge-delta-switch",
+                label="Highlight positive Δ edges",
+                value=False,
+                style={"marginTop": "6px"}
+            ),
+            width=1
         )
     ], className="mb-3"),
 
@@ -277,26 +309,33 @@ app.layout = dbc.Container([
     dcc.Store(id='pinned-annotations', data=[])
 ], fluid=True)
 
-# ------------- Search callback ----------------
+# ------------- Search / Switch / ViewMode callback ----------------
+# The callback triggers on Search click, toggle switch, or view-mode change.
+# It rebuilds the figure and applies highlight_positive_edges in both modes.
 @app.callback(
     Output("mcts-graph", "figure"),
     Input("search-button", "n_clicks"),
+    Input("edge-delta-switch", "value"),
+    Input("view-mode", "value"),
     State("search-box", "value"),
-    State("view-mode", "value"),
-    prevent_initial_call=True
+    prevent_initial_call=False
 )
-def search_nodes(n_clicks, query, view_mode):
+def search_nodes(n_clicks, highlight_delta_toggle, view_mode, query):
     """
-    When user clicks Search:
+    When user clicks Search, toggles the edge-delta switch, or changes view-mode:
      - parse query tokens
      - find matched node ids (by id or substring in state)
      - build figure with view_mode option
      - if view_mode == 'neighborhood' autozoom to fit the neighborhood
+     - highlight_positive_edges applies in both whole and neighborhood modes
     """
-    if not query or not str(query).strip():
-        # empty query -> just return whole tree
-        return build_figure(view_mode="whole")
+    highlight_delta_toggle = bool(highlight_delta_toggle)
 
+    # If query empty -> show whole tree (respect toggle)
+    if not query or not str(query).strip():
+        return build_figure(view_mode="whole", highlight_positive_edges=highlight_delta_toggle)
+
+    # Non-empty query: do search
     query = str(query).strip()
     tokens = [q.strip().lower() for q in query.split(",") if q.strip()]
 
@@ -312,11 +351,16 @@ def search_nodes(n_clicks, query, view_mode):
                 matched.add(n)
 
     if not matched:
-        # nothing found -> show whole tree unchanged
-        return build_figure(view_mode="whole")
+        # nothing found -> show whole tree unchanged (respect toggle)
+        return build_figure(view_mode="whole", highlight_positive_edges=highlight_delta_toggle)
 
     # Build figure with selected view_mode; autozoom only for neighborhood
-    return build_figure(highlight_ids=matched, view_mode=view_mode, autozoom=(view_mode == "neighborhood"))
+    return build_figure(
+        highlight_ids=matched,
+        view_mode=view_mode,
+        autozoom=(view_mode == "neighborhood"),
+        highlight_positive_edges=highlight_delta_toggle
+    )
 
 # ------------- Annotation toggle (click) -------------
 @app.callback(
@@ -408,4 +452,4 @@ def update_annotations(clickData, fig_dict, pinned_annotations):
 
 # ---------- run ----------
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)

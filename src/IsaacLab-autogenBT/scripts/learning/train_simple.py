@@ -24,9 +24,9 @@ parser.add_argument("--puct",               type=bool, default=True,    help="PU
 parser.add_argument("--seed",               type=int, default=1,     help="Random seed.")
 
 # ============================================= For Debugging =============================================
-# parser.add_argument("--num_search_agents",  type=int, default=1,       help="Number of search agents.") #64
-# parser.add_argument("--num_search_times",   type=int, default=12800,      help="Number of search times.")
-# parser.add_argument("--training_iters",     type=int, default=600,      help="Training iterations.")
+# parser.add_argument("--num_search_agents",  type=int, default=3,       help="Number of search agents.") #64
+# parser.add_argument("--num_search_times",   type=int, default=1000,      help="Number of search times.")
+# parser.add_argument("--training_iters",     type=int, default=1,      help="Training iterations.")
 # parser.add_argument("--round_per_dataset",  type=int, default=10,       help="Number of latest rounds per dataset.")
 # parser.add_argument("--puct",               type=bool, default=True,    help="PUCT exploration constant.")
 # parser.add_argument("--seed",               type=int, default=1,     help="Random seed.")
@@ -53,6 +53,8 @@ import numpy as np
 import rclpy
 import time
 import yaml
+import json
+import pandas as pd
 
 # Get the absolute path to the directory containing this script and the root of the project
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -407,6 +409,17 @@ if __name__ == "__main__":
         log_dir=log_dir,
     )
 
+    # path to store persistent dataset file (same directory as config.yaml)
+    dataset_dir = os.path.dirname(config_path)
+    csv_dataset_path = os.path.join(dataset_dir, "dataset.csv")
+    json_dataset_path = os.path.join(dataset_dir, "dataset_all.json")
+
+    # If you want a fresh dataset file each run, uncomment the following:
+    # if os.path.exists(csv_dataset_path):
+    #     os.remove(csv_dataset_path)
+    # if os.path.exists(json_dataset_path):
+    #     os.remove(json_dataset_path)
+
     for iter_i in range(args_cli.training_iters):
         print(f"[INFO] Iteration {iter_i + 1}/{args_cli.training_iters}")
 
@@ -431,6 +444,62 @@ if __name__ == "__main__":
         )
         dataset_queue.put(current_dataset)
 
+        # ------------------ Persist the newly generated dataset to disk (CSV + JSON snapshot) ------------------
+        try:
+            # gather arrays/lists from current_dataset
+            bt_strings = list(current_dataset.bt_strings)
+            # action_probs might be numpy array with shape (N, action_dim)
+            action_probs_arr = np.array(current_dataset.action_probs)
+            # convert to list-of-lists for JSON-friendly storing
+            action_probs_list = [ap.tolist() for ap in action_probs_arr]
+            rewards_arr = np.array(current_dataset.rewards).tolist()
+
+            # create pandas DataFrame
+            df = pd.DataFrame({
+                "bt_string": bt_strings,
+                "action_probs": [json.dumps(ap) for ap in action_probs_list],  # store as JSON string in CSV
+                "reward": rewards_arr,
+                "iteration": [int(iter_i + 1)] * len(bt_strings)  # 1-based iteration index saved
+            })
+
+            # Append to CSV (create if not exists)
+            if not os.path.exists(csv_dataset_path):
+                df.to_csv(csv_dataset_path, index=False)
+                print(f"[INFO] Created dataset CSV at {csv_dataset_path} with {len(df)} rows (iter {iter_i+1}).")
+            else:
+                df.to_csv(csv_dataset_path, mode="a", header=False, index=False)
+                print(f"[INFO] Appended {len(df)} rows to dataset CSV at {csv_dataset_path} (iter {iter_i+1}).")
+
+            # Also save/overwrite a JSON snapshot of the accumulated datasets for quick programmatic load
+            accumulated = []
+            if os.path.exists(json_dataset_path):
+                try:
+                    with open(json_dataset_path, "r") as jf:
+                        accumulated = json.load(jf)
+                        if not isinstance(accumulated, list):
+                            accumulated = []
+                except Exception as e:
+                    print(f"[WARN] Failed to load existing JSON snapshot (will recreate): {e}")
+                    accumulated = []
+
+            # extend with current iteration entries
+            for bs, ap, rw in zip(bt_strings, action_probs_list, rewards_arr):
+                accumulated.append({"bt_string": bs, "action_probs": ap, "reward": float(rw), "iteration": int(iter_i + 1)})
+
+            # save JSON snapshot (atomic write)
+            try:
+                tmp_path = json_dataset_path + ".tmp"
+                with open(tmp_path, "w") as jf:
+                    json.dump(accumulated, jf, ensure_ascii=False)
+                os.replace(tmp_path, json_dataset_path)
+                print(f"[INFO] Saved JSON dataset snapshot at {json_dataset_path} (total samples: {len(accumulated)}).")
+            except Exception as e:
+                print(f"[WARN] Failed to save JSON dataset snapshot: {e}")
+
+        except Exception as e:
+            print(f"[WARN] Failed to persist dataset for iteration {iter_i + 1}: {e}")
+        # --------------------------------------------------------------------------------------------------------
+
         if dataset_queue.qsize() > args_cli.round_per_dataset:
             dataset_queue.get()
 
@@ -449,7 +518,11 @@ if __name__ == "__main__":
         )
 
         # Log final evaluation reward
-        writer.add_scalar("Eval/FinalReward", current_dataset.rewards[-1].item(), iter_i)
+        # current_dataset.rewards is a numpy array on device or on CPU; convert safely
+        last_reward_val = current_dataset.rewards[-1]
+        if isinstance(last_reward_val, torch.Tensor):
+            last_reward_val = last_reward_val.item()
+        writer.add_scalar("Eval/FinalReward", float(last_reward_val), iter_i)
 
         # Save model after each iteration (optional: adjust to save best only)
         model_path = os.path.join(log_dir, f"rvnn_iter{iter_i:03d}.pt")

@@ -40,17 +40,17 @@ from simulation.env_state_machine import SearchAndDeliverMachine
 script_dir = os.path.dirname(os.path.abspath(__file__))
 logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
 
-date_time = "2025-11-27_13-51-02"
+date_time = "2025-12-05_13-58-07-fibo2-seed1-comp-penalty"
 model_name = "rvnn_iter000"
 
 loop_allowed = 2
 
-reward_weight = [  0.025,     # Is object found
+reward_weight = [   0.025,     # Is object found
                     0.050,     # Was robot been to object
                     0.075,     # Is object picked
                     0.100,     # Was robot been to final
                     0.200,     # Is object delivered
-                    -0.00025]  # Tree complexity penalty term
+                   -0.002]     # Tree complexity penalty term
 
 # Create log directory if it doesn't exist
 os.makedirs(logs_dir, exist_ok=True)
@@ -81,7 +81,24 @@ class TaskStateProgress:
     def _was_robot_been_to_final(self): return self.position == 'Final'
     def _was_object_delivered(self): return self.object_delivered
 
-def get_reward(env_state):
+def BT_complexity(bt_string):
+    """
+    Compute the complexity of the BT for a given environment.
+
+    Complexity is based on:
+    - Tree depth.
+    - Number of nodes at each depth.
+    - Logarithmic weighting for balance and branching factor.
+
+    :param env_id: Index of the environment.
+    :return: Floating point value representing the complexity score.
+    """
+
+    complexity = np.log(sum(1 for c in bt_string if c not in ('(', ')')) + 1)
+
+    return complexity
+
+def get_reward(env_state, bt_strings):
     state_progress = {
             'A' : TaskStateProgress(position='Start' , object_found=False, object_picked=False, object_delivered=False), # Initial state
             'B' : TaskStateProgress(position='InMap' , object_found=False, object_picked=False, object_delivered=False), # Patroling
@@ -97,7 +114,8 @@ def get_reward(env_state):
                 reward_weight[1] * state_progress[final_state]._was_robot_been_to_object() +
                 reward_weight[2] * state_progress[final_state]._was_object_picked() +
                 reward_weight[3] * state_progress[final_state]._was_robot_been_to_final() +
-                reward_weight[4] * state_progress[final_state]._was_object_delivered() for final_state in env_state ]
+                reward_weight[4] * state_progress[final_state]._was_object_delivered() + 
+                reward_weight[5] * BT_complexity(bt_string) for final_state, bt_string in zip(env_state, bt_strings) ]
 
     return rewards
 
@@ -186,155 +204,335 @@ def create_tree(env_id, tree_string, verbose = False):
 if __name__ == '__main__':
     count = 1
 
-    while True:
-        try:
+    # while True:
+    #     try:
 
-            # Create a timestamped log file
-            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            log_file_path = os.path.join(logs_dir, date_time, model_name, f"mcts_tree_{count}_verification.txt")
+    #         # Create a timestamped log file
+    #         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    #         log_file_path = os.path.join(logs_dir, date_time, model_name, f"mcts_tree_{count}_verification.txt")
 
-            # Redirect stdout and stderr
-            sys.stdout = open(log_file_path, "w")
-            sys.stderr = sys.stdout
+    #         # Redirect stdout and stderr
+    #         sys.stdout = open(log_file_path, "w")
+    #         sys.stderr = sys.stdout
 
-            print(f"[INFO] Logging started at {timestamp}")
-            print(f"[INFO] Log file path: {log_file_path}")
+    #         print(f"[INFO] Logging started at {timestamp}")
+    #         print(f"[INFO] Log file path: {log_file_path}")
 
-            json_path = os.path.join(logs_dir, date_time, model_name, f"mcts_tree_{count}.json")
-            output_path = os.path.join(logs_dir, date_time, model_name, f"mcts_tree_{count}.html")
+    #         json_path = os.path.join(logs_dir, date_time, model_name, f"mcts_tree_{count}.json")
+    #         output_path = os.path.join(logs_dir, date_time, model_name, f"mcts_tree_{count}.html")
 
-            # Load JSON data
-            with open(json_path, "r") as f:
-                data = json.load(f)
+    #         # Load JSON data
+    #         with open(json_path, "r") as f:
+    #             data = json.load(f)
 
-            node_list = []
-            for node in data["nodes"]:
-                node_list.append(node)
+    #         node_list = []
+    #         for node in data["nodes"]:
+    #             node_list.append(node)
 
-            node_list.pop(0)
+    #         node_list.pop(0)
 
-            state_value_pair = [(node["state"], node["value"]) for node in node_list if node["state"] != '']
-            bt_string_list, bt_value_list = list(zip(*state_value_pair))
-            num_envs = len(state_value_pair)
+    #         state_value_pair = [(node["evaluated_bt"], node["value"]) for node in node_list if node["evaluated_bt"] != '']
+    #         bt_string_list, bt_value_list = list(zip(*state_value_pair))
+    #         num_envs = len(state_value_pair)
 
-            # BT blackboard Initialization
-            bb_client = py_trees.blackboard.Client(name="External")
+    #         # BT blackboard Initialization
+    #         bb_client = py_trees.blackboard.Client(name="External")
 
-            # Behavior Tree Setup
-            trees = []
+    #         # Behavior Tree Setup
+    #         trees = []
+    #         for env_id in range(num_envs):
+    #             # BT initialization
+    #             root = create_tree(env_id, bt_string_list[env_id], verbose=False)
+    #             tree = py_trees.trees.BehaviourTree(root)
+    #             tree.setup(timeout=15)
+    #             trees.append(tree)
+
+    #             # BT blackboard variable registration
+    #             # bb_client.register_key(key=f"action_{env_id}", access=py_trees.common.Access.READ)
+    #             bb_client.register_key(key=f"action_{env_id}", access=py_trees.common.Access.WRITE)
+
+    #             bb_client.register_key(key=f"env_state_{env_id}", access=py_trees.common.Access.WRITE)
+
+    #             bb_client.set(f"action_{env_id}", '')
+
+    #         # Environment Finite State Machine Setup
+    #         env_fsm = [SearchAndDeliverMachine() for _ in range(num_envs)]
+    #         env_state = [fsm.current_state.id for fsm in env_fsm]
+    #         env_state_history = [fsm.current_state.id for fsm in env_fsm]
+    #         env_done = [False for _ in range(num_envs)]
+    #         bb_shared_data_last = ["" for _ in range(num_envs)]
+
+    #         # print(f"[INFO] Initial State: {env_state}")
+
+    #         while not all(env_done):  
+    #             # print("\n[External] State:", env_state)
+
+    #             # Update state in BT blackboard
+    #             for env_id in range(num_envs):
+    #                 # Update the environment state in the blackboard
+    #                 bb_client.set(f"env_state_{env_id}", env_state[env_id])
+
+    #                 # Execute a BT tick
+    #                 trees[env_id].tick()
+
+    #                 # Update the action in the blackboard
+    #                 bb_client.set(f"action_{env_id}", subtract_prefix(bb_client.get(f"action_{env_id}"), bb_shared_data_last[env_id]))
+    #                 bb_shared_data_last[env_id] = bb_client.get(f"action_{env_id}")
+
+    #                 # print(f"[External] BT Action {env_id}: {bb_client.get(f'action_{env_id}')}")
+
+    #                 try:
+    #                     # Send the action to the environment FSM
+    #                     env_fsm[env_id].send(bb_client.get(f"action_{env_id}"))
+    #                     env_state[env_id] = env_fsm[env_id].current_state.id
+
+    #                     # Stop the individual simulation if the FSM reached the accepted state
+    #                     if env_state[env_id] == 'H':
+    #                         env_done[env_id] = True
+    #                 except Exception as e:
+    #                     # Stop the individual simulation if the FSM rejects the command
+    #                     if bb_client.get(f'action_{env_id}') != "":
+    #                         env_done[env_id] = True
+
+    #                 # Stop the individual simulation if the FSM reached the maximum number of loops
+    #                 env_state_history[env_id] += env_state[env_id]
+    #                 if env_state_history[env_id].count(env_state[env_id]) >= (loop_allowed + 1):
+    #                     env_done[env_id] = True
+
+    #         bb_client.unregister_all_keys()
+
+    #         for env_id in range(num_envs):
+    #             trees[env_id].shutdown()
+
+    #         print("\n*************** Pass ***************")
+    #         # print("\n[External] Final State:", env_state)
+
+    #         final_rewards = get_reward(env_state, bt_string_list)
+
+    #         # expected_rewards = []
+    #         # for state in env_state:
+    #         #     if state == 'C':
+    #         #         expected_rewards.append(0.025)
+    #         #     elif state == 'D':
+    #         #         expected_rewards.append(0.075)
+    #         #     else:
+    #         #         expected_rewards.append(0.0)
+
+    #         match_count_actual = 0
+    #         # expected_match_count = 0
+
+    #         recorded_mismatch = []
+    #         calculation_mismatch = []
+    #         flag = False
+
+    #         # for bt_string, expected_reward, actual_reward, value in zip(bt_string_list, final_rewards, final_rewards, bt_value_list):   
+    #         for bt_string, env_state, actual_reward, value in zip(bt_string_list, env_state, final_rewards, bt_value_list):
+                            
+    #             if abs(actual_reward - value) < 1e-5:
+    #                 match_count_actual += 1
+    #             else:
+    #                 flag = True
+
+    #             # if abs(expected_reward - value) < 1e-5:
+    #             #     expected_match_count += 1
+    #             # else:
+    #             #     flag = True
+
+    #             if flag:
+    #                 # recorded_mismatch.append((bt_string, env_state, expected_reward, actual_reward, value))
+    #                 recorded_mismatch.append((bt_string, env_state, actual_reward, value))
+    #                 flag = False
+
+    #             # if abs(expected_reward - actual_reward) > 1e-5:
+    #             #     calculation_mismatch.append((bt_string, env_state, expected_reward, actual_reward, value))
+
+    #         print(f"[INFO] Matching rewards: {match_count_actual}/{num_envs} -> {match_count_actual / num_envs:.2%} (with actual reward calculations)")
+    #         # print(f"[INFO] Expected matches: {expected_match_count}/{num_envs} -> {expected_match_count / num_envs:.2%} (with expected reward calculations)")
+
+    #         if recorded_mismatch:
+    #             print("\n[WARNING] Mismatched BT strings and rewards:")
+    #             # for i, (bt_string, env_state, expected_reward, actual_reward, value) in enumerate(recorded_mismatch):
+    #             for i, (bt_string, env_state, actual_reward, value) in enumerate(recorded_mismatch):
+    #                 # print(f"  [{i:4d}] BT String: {bt_string:<30} | Final State: {env_state:<8} | Expected Reward: {expected_reward:8.3f} | Actual Reward: {actual_reward:8.3f} | Recorded Value: {value:8.3f}")
+    #                 print(f"  [{i:4d}] BT String: {bt_string:<30} | Final State: {env_state:<8} | Actual Reward: {actual_reward:8.5f} | Recorded Value: {value:8.5f}")
+
+
+    #         if calculation_mismatch:
+    #             print("\n[WARNING] Calculation mismatched BT strings and rewards:")
+    #             # for i, (bt_string, env_state, expected_reward, actual_reward, value) in enumerate(calculation_mismatch):
+    #             for i, (bt_string, env_state, actual_reward, value) in enumerate(calculation_mismatch):
+    #                 # print(f"  [{i:4d}] BT String: {bt_string:<30} | Final State: {env_state:<8} | Expected Reward: {expected_reward:8.3f} | Actual Reward: {actual_reward:8.3f} | Recorded Value: {value:8.3f}")
+    #                 print(f"  [{i:4d}] BT String: {bt_string:<30} | Final State: {env_state:<8} | Actual Reward: {actual_reward:8.5f} | Recorded Value: {value:8.5f}")
+        
+    #         count += 1
+            
+    #     except:
+    #         break
+
+    try:
+
+        # # Create a timestamped log file
+        # timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        # log_file_path = os.path.join(logs_dir, date_time, model_name, f"mcts_tree_{count}_verification.txt")
+
+        # # Redirect stdout and stderr
+        # sys.stdout = open(log_file_path, "w")
+        # sys.stderr = sys.stdout
+
+        # print(f"[INFO] Logging started at {timestamp}")
+        # print(f"[INFO] Log file path: {log_file_path}")
+
+        # json_path = os.path.join(logs_dir, date_time, model_name, f"mcts_tree_{count}.json")
+        # output_path = os.path.join(logs_dir, date_time, model_name, f"mcts_tree_{count}.html")
+
+        # # Load JSON data
+        # with open(json_path, "r") as f:
+        #     data = json.load(f)
+
+        # node_list = []
+        # for node in data["nodes"]:
+        #     node_list.append(node)
+
+        # node_list.pop(0)
+
+        # state_value_pair = [(node["evaluated_bt"], node["value"]) for node in node_list if node["evaluated_bt"] != '']
+        # bt_string_list, bt_value_list = list(zip(*state_value_pair))
+        # num_envs = len(state_value_pair)
+
+        num_envs = 100
+        bt_string_list = ['(2b(2a(1aa)(0cc)))'] * num_envs
+
+        # BT blackboard Initialization
+        bb_client = py_trees.blackboard.Client(name="External")
+
+        # Behavior Tree Setup
+        trees = []
+        for env_id in range(num_envs):
+            # BT initialization
+            root = create_tree(env_id, bt_string_list[env_id], verbose=False)
+            tree = py_trees.trees.BehaviourTree(root)
+            tree.setup(timeout=15)
+            trees.append(tree)
+
+            # BT blackboard variable registration
+            # bb_client.register_key(key=f"action_{env_id}", access=py_trees.common.Access.READ)
+            bb_client.register_key(key=f"action_{env_id}", access=py_trees.common.Access.WRITE)
+
+            bb_client.register_key(key=f"env_state_{env_id}", access=py_trees.common.Access.WRITE)
+
+            bb_client.set(f"action_{env_id}", '')
+
+        # Environment Finite State Machine Setup
+        env_fsm = [SearchAndDeliverMachine() for _ in range(num_envs)]
+        env_state = [fsm.current_state.id for fsm in env_fsm]
+        env_state_history = [fsm.current_state.id for fsm in env_fsm]
+        env_done = [False for _ in range(num_envs)]
+        bb_shared_data_last = ["" for _ in range(num_envs)]
+
+        # print(f"[INFO] Initial State: {env_state}")
+
+        while not all(env_done):  
+            # print("\n[External] State:", env_state)
+
+            # Update state in BT blackboard
             for env_id in range(num_envs):
-                # BT initialization
-                root = create_tree(env_id, bt_string_list[env_id], verbose=False)
-                tree = py_trees.trees.BehaviourTree(root)
-                tree.setup(timeout=15)
-                trees.append(tree)
+                # Update the environment state in the blackboard
+                bb_client.set(f"env_state_{env_id}", env_state[env_id])
 
-                # BT blackboard variable registration
-                bb_client.register_key(key=f"action_{env_id}", access=py_trees.common.Access.READ)
-                bb_client.register_key(key=f"action_{env_id}", access=py_trees.common.Access.WRITE)
+                # Execute a BT tick
+                trees[env_id].tick()
 
-                bb_client.register_key(key=f"env_state_{env_id}", access=py_trees.common.Access.WRITE)
+                # Update the action in the blackboard
+                bb_client.set(f"action_{env_id}", subtract_prefix(bb_client.get(f"action_{env_id}"), bb_shared_data_last[env_id]))
+                bb_shared_data_last[env_id] = bb_client.get(f"action_{env_id}")
 
-                bb_client.set(f"action_{env_id}", '')
+                # print(f"[External] BT Action {env_id}: {bb_client.get(f'action_{env_id}')}")
 
-            # Environment Finite State Machine Setup
-            env_fsm = [SearchAndDeliverMachine() for _ in range(num_envs)]
-            env_state = [fsm.current_state.id for fsm in env_fsm]
-            env_state_history = [fsm.current_state.id for fsm in env_fsm]
-            env_done = [False for _ in range(num_envs)]
-            bb_shared_data_last = ["" for _ in range(num_envs)]
+                try:
+                    # Send the action to the environment FSM
+                    env_fsm[env_id].send(bb_client.get(f"action_{env_id}"))
+                    env_state[env_id] = env_fsm[env_id].current_state.id
 
-            # print(f"[INFO] Initial State: {env_state}")
-
-            while not all(env_done):  
-                # print("\n[External] State:", env_state)
-
-                # Update state in BT blackboard
-                for env_id in range(num_envs):
-                    # Update the environment state in the blackboard
-                    bb_client.set(f"env_state_{env_id}", env_state[env_id])
-
-                    # Execute a BT tick
-                    trees[env_id].tick()
-
-                    # Update the action in the blackboard
-                    bb_client.set(f"action_{env_id}", subtract_prefix(bb_client.get(f"action_{env_id}"), bb_shared_data_last[env_id]))
-                    bb_shared_data_last[env_id] = bb_client.get(f"action_{env_id}")
-
-                    # print(f"[External] BT Action {env_id}: {bb_client.get(f'action_{env_id}')}")
-
-                    try:
-                        # Send the action to the environment FSM
-                        env_fsm[env_id].send(bb_client.get(f"action_{env_id}"))
-                        env_state[env_id] = env_fsm[env_id].current_state.id
-
-                        # Stop the individual simulation if the FSM reached the accepted state
-                        if env_state[env_id] == 'H':
-                            env_done[env_id] = True
-                    except Exception as e:
-                        # Stop the individual simulation if the FSM rejects the command
-                        if bb_client.get(f'action_{env_id}') != "":
-                            env_done[env_id] = True
-
-                    # Stop the individual simulation if the FSM reached the maximum number of loops
-                    env_state_history[env_id] += env_state[env_id]
-                    if env_state_history[env_id].count(env_state[env_id]) >= (loop_allowed + 1):
+                    # Stop the individual simulation if the FSM reached the accepted state
+                    if env_state[env_id] == 'H':
+                        env_done[env_id] = True
+                except Exception as e:
+                    # Stop the individual simulation if the FSM rejects the command
+                    if bb_client.get(f'action_{env_id}') != "":
                         env_done[env_id] = True
 
-            print("\n*************** Pass ***************")
-            # print("\n[External] Final State:", env_state)
+                # Stop the individual simulation if the FSM reached the maximum number of loops
+                env_state_history[env_id] += env_state[env_id]
+                if env_state_history[env_id].count(env_state[env_id]) >= (loop_allowed + 1):
+                    env_done[env_id] = True
 
-            final_rewards = get_reward(env_state)
+        bb_client.unregister_all_keys()
 
-            expected_rewards = []
-            for state in env_state:
-                if state == 'C':
-                    expected_rewards.append(0.025)
-                elif state == 'D':
-                    expected_rewards.append(0.075)
-                else:
-                    expected_rewards.append(0.0)
+        for env_id in range(num_envs):
+            trees[env_id].shutdown()
 
-            match_count_actual = 0
-            expected_match_count = 0
+        print("\n*************** Pass ***************")
+        print("\n[External] Final State:", env_state)
 
-            recorded_mismatch = []
-            calculation_mismatch = []
-            flag = False
+        # final_rewards = get_reward(env_state, bt_string_list)
 
-            for bt_string, env_state, expected_reward, actual_reward, value in zip(bt_string_list, env_state, expected_rewards, final_rewards, bt_value_list):
-                
-                if abs(actual_reward - value) < 1e-5:
-                    match_count_actual += 1
-                else:
-                    flag = True
+        # # expected_rewards = []
+        # # for state in env_state:
+        # #     if state == 'C':
+        # #         expected_rewards.append(0.025)
+        # #     elif state == 'D':
+        # #         expected_rewards.append(0.075)
+        # #     else:
+        # #         expected_rewards.append(0.0)
 
-                if abs(expected_reward - value) < 1e-5:
-                    expected_match_count += 1
-                else:
-                    flag = True
+        # match_count_actual = 0
+        # # expected_match_count = 0
 
-                if flag:
-                    recorded_mismatch.append((bt_string, env_state, expected_reward, actual_reward, value))
-                    flag = False
+        # recorded_mismatch = []
+        # calculation_mismatch = []
+        # flag = False
 
-                if abs(expected_reward - actual_reward) > 1e-5:
-                    calculation_mismatch.append((bt_string, env_state, expected_reward, actual_reward, value))
+        # # for bt_string, expected_reward, actual_reward, value in zip(bt_string_list, final_rewards, final_rewards, bt_value_list):   
+        # for bt_string, env_state, actual_reward, value in zip(bt_string_list, env_state, final_rewards, bt_value_list):
+                        
+        #     if abs(actual_reward - value) < 1e-5:
+        #         match_count_actual += 1
+        #     else:
+        #         flag = True
 
-            print(f"[INFO] Matching rewards: {match_count_actual}/{num_envs} -> {match_count_actual / num_envs:.2%} (with actual reward calculations)")
-            print(f"[INFO] Expected matches: {expected_match_count}/{num_envs} -> {expected_match_count / num_envs:.2%} (with expected reward calculations)")
+        #     # if abs(expected_reward - value) < 1e-5:
+        #     #     expected_match_count += 1
+        #     # else:
+        #     #     flag = True
 
-            if recorded_mismatch:
-                print("\n[WARNING] Mismatched BT strings and rewards:")
-                for i, (bt_string, env_state, expected_reward, actual_reward, value) in enumerate(recorded_mismatch):
-                    print(f"  [{i:4d}] BT String: {bt_string:<30} | Final State: {env_state:<8} | Expected Reward: {expected_reward:8.3f} | Actual Reward: {actual_reward:8.3f} | Recorded Value: {value:8.3f}")
+        #     if flag:
+        #         # recorded_mismatch.append((bt_string, env_state, expected_reward, actual_reward, value))
+        #         recorded_mismatch.append((bt_string, env_state, actual_reward, value))
+        #         flag = False
 
-            if calculation_mismatch:
-                print("\n[WARNING] Calculation mismatched BT strings and rewards:")
-                for i, (bt_string, env_state, expected_reward, actual_reward, value) in enumerate(calculation_mismatch):
-                    print(f"  [{i:4d}] BT String: {bt_string:<30} | Final State: {env_state:<8} | Expected Reward: {expected_reward:8.3f} | Actual Reward: {actual_reward:8.3f} | Recorded Value: {value:8.3f}")
+        #     # if abs(expected_reward - actual_reward) > 1e-5:
+        #     #     calculation_mismatch.append((bt_string, env_state, expected_reward, actual_reward, value))
+
+        # print(f"[INFO] Matching rewards: {match_count_actual}/{num_envs} -> {match_count_actual / num_envs:.2%} (with actual reward calculations)")
+        # # print(f"[INFO] Expected matches: {expected_match_count}/{num_envs} -> {expected_match_count / num_envs:.2%} (with expected reward calculations)")
+
+        # if recorded_mismatch:
+        #     print("\n[WARNING] Mismatched BT strings and rewards:")
+        #     # for i, (bt_string, env_state, expected_reward, actual_reward, value) in enumerate(recorded_mismatch):
+        #     for i, (bt_string, env_state, actual_reward, value) in enumerate(recorded_mismatch):
+        #         # print(f"  [{i:4d}] BT String: {bt_string:<30} | Final State: {env_state:<8} | Expected Reward: {expected_reward:8.3f} | Actual Reward: {actual_reward:8.3f} | Recorded Value: {value:8.3f}")
+        #         print(f"  [{i:4d}] BT String: {bt_string:<30} | Final State: {env_state:<8} | Actual Reward: {actual_reward:8.5f} | Recorded Value: {value:8.5f}")
+
+
+        # if calculation_mismatch:
+        #     print("\n[WARNING] Calculation mismatched BT strings and rewards:")
+        #     # for i, (bt_string, env_state, expected_reward, actual_reward, value) in enumerate(calculation_mismatch):
+        #     for i, (bt_string, env_state, actual_reward, value) in enumerate(calculation_mismatch):
+        #         # print(f"  [{i:4d}] BT String: {bt_string:<30} | Final State: {env_state:<8} | Expected Reward: {expected_reward:8.3f} | Actual Reward: {actual_reward:8.3f} | Recorded Value: {value:8.3f}")
+        #         print(f"  [{i:4d}] BT String: {bt_string:<30} | Final State: {env_state:<8} | Actual Reward: {actual_reward:8.5f} | Recorded Value: {value:8.5f}")
+    
+        # count += 1
         
-            count += 1
-            
-        except:
-            break
+    except Exception as e:
+        print(e)
+
