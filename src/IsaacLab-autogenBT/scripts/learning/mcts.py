@@ -270,7 +270,8 @@ class MCTS:
             if self.fitness_mode is not None:
                 pivots = self.pivot(self.non_terminated_node_list, mode=self.fitness_mode)
                 pivots = pivots + [root] * (self.env.num_envs - len(pivots))
-                self.selected_depth = [sum(1 for c in pivot.state if c not in ('(', ')')) for pivot in pivots]
+            
+            self.selected_depth = [sum(1 for c in pivot.state if c not in ('(', ')')) for pivot in pivots]
             # print(f'New pivots selected: {[node.state for node in pivots]}')
 
             # Backpropagate the results

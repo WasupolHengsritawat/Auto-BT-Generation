@@ -360,7 +360,7 @@ if __name__ == "__main__":
 
     # MMCGS Settings
     exploration_weight = 1.0    
-    fitness_mode = "less_nodes" 
+    fitness_mode = 'less_nodes'
     allow_duplicate_nodes = True
 
     epsilon = 0.0
