@@ -26,29 +26,35 @@ class PatrolNode(py_trees.behaviour.Behaviour):
         self.env_id = env_id
         self.verbose = verbose
 
-        self.blackboard = self.attach_blackboard_client(name=name)
-
-        # self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.READ)
-        self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.WRITE)
-
-        # Initialize blackboard variables if it not already initialized
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
         try:
-            self.blackboard.get(f"action_{self.env_id}")
-        except:
-            self.blackboard.set(f"action_{self.env_id}", '')
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+
+        self.action_publisher = self.node.create_publisher(StringStamped, f"/env_{self.env_id}/robot/action", 10)
+        
+        return True
 
     def update(self):
         """
         Main behavior logic.
         """
-        self.blackboard.set(f"action_{self.env_id}", self.blackboard.get(f"action_{self.env_id}") + "a")
-        return py_trees.common.Status.RUNNING
+        msg = StringStamped()
+        msg.header.stamp = self.node.get_clock().now().to_msg()
+        msg.data = 'a'
+        self.action_publisher.publish(msg)
+
+        return py_trees.common.Status.RUNNING 
 
     def terminate(self, new_status):
         """
         Stop the robot on termination.
         """
-        self.is_running = False
         if self.verbose: self.logger.debug(f"{self.name}: terminate({new_status})")
 
 class FindTargetNode(py_trees.behaviour.Behaviour):
@@ -57,29 +63,35 @@ class FindTargetNode(py_trees.behaviour.Behaviour):
         self.env_id = env_id
         self.verbose = verbose
 
-        self.blackboard = self.attach_blackboard_client(name=name)
-
-        # self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.READ)
-        self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.WRITE)
-
-        # Initialize blackboard variables if it not already initialized
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
         try:
-            self.blackboard.get(f"action_{self.env_id}")
-        except:
-            self.blackboard.set(f"action_{self.env_id}", '')
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
 
+        self.action_publisher = self.node.create_publisher(StringStamped, f"/env_{self.env_id}/robot/action", 10)
+        
+        return True
+        
     def update(self):
         """
         Main behavior logic.
         """
-        self.blackboard.set(f"action_{self.env_id}", self.blackboard.get(f"action_{self.env_id}") + "b")
-        return py_trees.common.Status.RUNNING
+        msg = StringStamped()
+        msg.header.stamp = self.node.get_clock().now().to_msg()
+        msg.data = 'b'
+        self.action_publisher.publish(msg)
+
+        return py_trees.common.Status.RUNNING 
 
     def terminate(self, new_status):
         """
         Stop the robot on termination.
         """
-        self.is_running = False
         if self.verbose: self.logger.debug(f"{self.name}: terminate({new_status})")
 
 class GoToSpawnNode(py_trees.behaviour.Behaviour):
@@ -89,16 +101,19 @@ class GoToSpawnNode(py_trees.behaviour.Behaviour):
         self.verbose = verbose
         self.is_running = False
 
-        self.blackboard = self.attach_blackboard_client(name=name)
-
-        # self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.READ)
-        self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.WRITE)
-
-        # Initialize blackboard variables if it not already initialized
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
         try:
-            self.blackboard.get(f"action_{self.env_id}")
-        except:
-            self.blackboard.set(f"action_{self.env_id}", '')
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+
+        self.action_publisher = self.node.create_publisher(StringStamped, f"/env_{self.env_id}/robot/action", 10)
+        
+        return True
         
     def update(self):
         """
@@ -108,8 +123,12 @@ class GoToSpawnNode(py_trees.behaviour.Behaviour):
             self.is_running = False
             return py_trees.common.Status.SUCCESS
 
-        self.blackboard.set(f"action_{self.env_id}", self.blackboard.get(f"action_{self.env_id}") + "e")
+        msg = StringStamped()
+        msg.header.stamp = self.node.get_clock().now().to_msg()
+        msg.data = 'e'
+        self.action_publisher.publish(msg)
         self.is_running = True
+
         return py_trees.common.Status.RUNNING
 
     def terminate(self, new_status):
@@ -125,16 +144,19 @@ class GoToNearestTarget(py_trees.behaviour.Behaviour):
         self.verbose = verbose
         self.is_running = False
 
-        self.blackboard = self.attach_blackboard_client(name=name)
-
-        # self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.READ)
-        self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.WRITE)
-
-        # Initialize blackboard variables if it not already initialized
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
         try:
-            self.blackboard.get(f"action_{self.env_id}")
-        except:
-            self.blackboard.set(f"action_{self.env_id}", '')
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+
+        self.action_publisher = self.node.create_publisher(StringStamped, f"/env_{self.env_id}/robot/action", 10)
+        
+        return True
 
     def update(self):
         """
@@ -144,8 +166,12 @@ class GoToNearestTarget(py_trees.behaviour.Behaviour):
             self.is_running = False
             return py_trees.common.Status.SUCCESS
 
-        self.blackboard.set(f"action_{self.env_id}", self.blackboard.get(f"action_{self.env_id}") + "c")
+        msg = StringStamped()
+        msg.header.stamp = self.node.get_clock().now().to_msg()
+        msg.data = 'c'
+        self.action_publisher.publish(msg)
         self.is_running = True
+        
         return py_trees.common.Status.RUNNING
 
     def terminate(self, new_status):
@@ -161,16 +187,19 @@ class PickObject(py_trees.behaviour.Behaviour):
         self.verbose = verbose
         self.is_running = False
 
-        self.blackboard = self.attach_blackboard_client(name=name)
-
-        # self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.READ)
-        self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.WRITE)
-
-        # Initialize blackboard variables if it not already initialized
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
         try:
-            self.blackboard.get(f"action_{self.env_id}")
-        except:
-            self.blackboard.set(f"action_{self.env_id}", '')
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+
+        self.action_publisher = self.node.create_publisher(StringStamped, f"/env_{self.env_id}/robot/action", 10)
+        
+        return True
 
     def update(self):
         """
@@ -180,8 +209,12 @@ class PickObject(py_trees.behaviour.Behaviour):
             self.is_running = False
             return py_trees.common.Status.SUCCESS
 
-        self.blackboard.set(f"action_{self.env_id}", self.blackboard.get(f"action_{self.env_id}") + "f")
+        msg = StringStamped()
+        msg.header.stamp = self.node.get_clock().now().to_msg()
+        msg.data = 'f'
+        self.action_publisher.publish(msg)
         self.is_running = True
+
         return py_trees.common.Status.RUNNING
 
     def terminate(self, new_status):
@@ -197,16 +230,19 @@ class DropObject(py_trees.behaviour.Behaviour):
         self.verbose = verbose
         self.is_running = False
 
-        self.blackboard = self.attach_blackboard_client(name=name)
-
-        # self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.READ)
-        self.blackboard.register_key(key=f"action_{self.env_id}", access=py_trees.common.Access.WRITE)
-
-        # Initialize blackboard variables if it not already initialized
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
         try:
-            self.blackboard.get(f"action_{self.env_id}")
-        except:
-            self.blackboard.set(f"action_{self.env_id}", '')
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+
+        self.action_publisher = self.node.create_publisher(StringStamped, f"/env_{self.env_id}/robot/action", 10)
+        
+        return True
         
     def update(self):
         """
@@ -216,8 +252,12 @@ class DropObject(py_trees.behaviour.Behaviour):
             self.is_running = False
             return py_trees.common.Status.SUCCESS
 
-        self.blackboard.set(f"action_{self.env_id}", self.blackboard.get(f"action_{self.env_id}") + "g")
+        msg = StringStamped()
+        msg.header.stamp = self.node.get_clock().now().to_msg()
+        msg.data = 'g'
+        self.action_publisher.publish(msg)
         self.is_running = True
+
         return py_trees.common.Status.RUNNING
 
     def terminate(self, new_status):
@@ -233,8 +273,24 @@ class AreObjectsExistOnInternalMap(py_trees.behaviour.Behaviour):
         super().__init__(name)
         self.env_id = env_id
         self.verbose = verbose
-        self.blackboard = self.attach_blackboard_client(name=name)
-        self.blackboard.register_key(key=f"env_state_{self.env_id}", access=py_trees.common.Access.READ)
+        self.state = None
+        
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
+        try:
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+
+        self.state_subscriber = self.node.create_subscription(String, f"/env_{self.env_id}/robot/state", self.state_callback, 10)
+
+        return True
+    
+    def state_callback(self, msg):
+        self.state = msg.data
 
     def update(self):
         """
@@ -243,7 +299,7 @@ class AreObjectsExistOnInternalMap(py_trees.behaviour.Behaviour):
         accepted_states = ['C', 'D', 'G']
 
         try:
-            if self.blackboard.get(f"env_state_{self.env_id}") in accepted_states:
+            if self.state in accepted_states:
                 return py_trees.common.Status.SUCCESS
             else:
                 return py_trees.common.Status.FAILURE   
@@ -262,8 +318,24 @@ class IsRobotAtTheSpawn(py_trees.behaviour.Behaviour):
         super().__init__(name)
         self.env_id = env_id
         self.verbose = verbose
-        self.blackboard = self.attach_blackboard_client(name=name)
-        self.blackboard.register_key(key=f"env_state_{self.env_id}", access=py_trees.common.Access.READ)
+        self.state = None
+        
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
+        try:
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+
+        self.state_subscriber = self.node.create_subscription(String, f"/env_{self.env_id}/robot/state", self.state_callback, 10)
+
+        return True
+    
+    def state_callback(self, msg):
+        self.state = msg.data
 
     def update(self):
         """
@@ -272,7 +344,7 @@ class IsRobotAtTheSpawn(py_trees.behaviour.Behaviour):
         accepted_states = ['A', 'F', 'G']
 
         try:
-            if self.blackboard.get(f"env_state_{self.env_id}") in accepted_states:
+            if self.state in accepted_states:
                 return py_trees.common.Status.SUCCESS
             else:
                 return py_trees.common.Status.FAILURE   
@@ -291,8 +363,24 @@ class AreObjectNearby(py_trees.behaviour.Behaviour):
         super().__init__(name)
         self.env_id = env_id
         self.verbose = verbose
-        self.blackboard = self.attach_blackboard_client(name=name)
-        self.blackboard.register_key(key=f"env_state_{self.env_id}", access=py_trees.common.Access.READ)
+        self.state = None
+        
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
+        try:
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+
+        self.state_subscriber = self.node.create_subscription(String, f"/env_{self.env_id}/robot/state", self.state_callback, 10)
+
+        return True
+    
+    def state_callback(self, msg):
+        self.state = msg.data
 
     def update(self):
         """
@@ -301,7 +389,7 @@ class AreObjectNearby(py_trees.behaviour.Behaviour):
         accepted_states = ['D']
 
         try:
-            if self.blackboard.get(f"env_state_{self.env_id}") in accepted_states:
+            if self.state in accepted_states:
                 return py_trees.common.Status.SUCCESS
             else:
                 return py_trees.common.Status.FAILURE   
@@ -320,8 +408,24 @@ class IsObjectInHand(py_trees.behaviour.Behaviour):
         super().__init__(name)
         self.env_id = env_id
         self.verbose = verbose
-        self.blackboard = self.attach_blackboard_client(name=name)
-        self.blackboard.register_key(key=f"env_state_{self.env_id}", access=py_trees.common.Access.READ)
+        self.state = None
+        
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
+        try:
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+
+        self.state_subscriber = self.node.create_subscription(String, f"/env_{self.env_id}/robot/state", self.state_callback, 10)
+
+        return True
+    
+    def state_callback(self, msg):
+        self.state = msg.data
 
     def update(self):
         """
@@ -330,7 +434,7 @@ class IsObjectInHand(py_trees.behaviour.Behaviour):
         accepted_states = ['E', 'F']
 
         try:
-            if self.blackboard.get(f"env_state_{self.env_id}") in accepted_states:
+            if self.state in accepted_states:
                 return py_trees.common.Status.SUCCESS
             else:
                 return py_trees.common.Status.FAILURE   
@@ -349,8 +453,24 @@ class AreXObjectsAtSpawn(py_trees.behaviour.Behaviour):
         super().__init__(name)
         self.env_id = env_id
         self.verbose = verbose
-        self.blackboard = self.attach_blackboard_client(name=name)
-        self.blackboard.register_key(key=f"env_state_{self.env_id}", access=py_trees.common.Access.READ)
+        self.state = None
+        
+    def setup(self, **kwargs):
+        """
+        One-time setup to initialize ROS2 publishers and subscribers.
+        """
+        try:
+            self.node = kwargs['node']
+        except KeyError as e:
+            error_message = "didn't find 'node' in setup's kwargs [{}][{}]".format(self.qualified_name)
+            raise KeyError(error_message) from e  # 'direct cause' traceability
+
+        self.state_subscriber = self.node.create_subscription(String, f"/env_{self.env_id}/robot/state", self.state_callback, 10)
+
+        return True
+    
+    def state_callback(self, msg):
+        self.state = msg.data
 
     def update(self):
         """
@@ -359,7 +479,7 @@ class AreXObjectsAtSpawn(py_trees.behaviour.Behaviour):
         accepted_states = ['H']
 
         try:
-            if self.blackboard.get(f"env_state_{self.env_id}") in accepted_states:
+            if self.state in accepted_states:
                 return py_trees.common.Status.SUCCESS
             else:
                 return py_trees.common.Status.FAILURE   

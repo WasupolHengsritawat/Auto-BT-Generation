@@ -599,19 +599,35 @@ class Simple_MultiBTEnv(MultiBTEnv):
 
         self.loop_allowed = loop_allowed
 
-        # self.reward_weight = [  25,     # Is object found
-        #                         50,     # Was robot been to object
-        #                         75,     # Is object picked
-        #                        100,     # Was robot been to final
-        #                        200,     # Is object delivered
-        #                         -0.25]  # Tree complexity penalty term
+        # self.reward_weight = [  250,     # Is object found
+        #                         500,     # Was robot been to object
+        #                         750,     # Is object picked
+        #                        1000,     # Was robot been to final
+        #                        2000,     # Is object delivered
+        #                        0]
+                                # -0.25]  # Tree complexity penalty term
 
-        self.reward_weight = [  0.025,     # Is object found
-                                0.050,     # Was robot been to object
-                                0.075,     # Is object picked
-                                0.100,     # Was robot been to final
-                                0.200,     # Is object delivered
-                               -0.002]  # Tree complexity penalty term
+        # self.reward_weight = [  0.025,     # Is object found
+        #                         0.050,     # Was robot been to object
+        #                         0.075,     # Is object picked
+        #                         0.100,     # Was robot been to final
+        #                         0.200,     # Is object delivered
+        #                         0.000]     # Tree complexity penalty term
+                            #    -0.002]  # Tree complexity penalty term
+
+        # self.reward_weight = [  0.25,     # Is object found
+        #                         0.50,     # Was robot been to object
+        #                         0.75,     # Is object picked
+        #                         1.000,     # Was robot been to final
+        #                         2.000,     # Is object delivered
+        #                         0.000]     # Tree complexity penalty term
+        
+        self.reward_weight = [  2.5,        # Is object found
+                                5.0,          # Was robot been to object
+                                7.5,        # Is object picked
+                                10.0,         # Was robot been to final
+                                20.0,         # Is object delivered
+                                0.000]      # Tree complexity penalty term
 
         # State Progress for Reward Calculation
         self.state_progress = {
@@ -621,20 +637,20 @@ class Simple_MultiBTEnv(MultiBTEnv):
             'D' : TaskStateProgress(position='Object', object_found=True , object_picked=False, object_delivered=False), # Arrived at object location
             'E' : TaskStateProgress(position='Object', object_found=True , object_picked=True , object_delivered=False), # Object Picked
             'F' : TaskStateProgress(position='Final' , object_found=True , object_picked=True , object_delivered=False), # Initial State with object in hand
-            'G' : TaskStateProgress(position='Final' , object_found=True , object_picked=False, object_delivered=False), # Initial State with known object location
+            'G' : TaskStateProgress(position='Start' , object_found=True , object_picked=False, object_delivered=False), # Initial State with known object location
             'H' : TaskStateProgress(position='Final' , object_found=True , object_picked=True , object_delivered=True)   # Final State
         }
 
         # BT blackboard Initialization
         self.bb_client = py_trees.blackboard.Client(name="External")
     
-    def evaluate_bt_in_sim(self):
+    def evaluate_bt_in_sim(self, sim_initial_state_value = None):
         obs, rews, dones, infos = [], [], [], []
 
         # Modify each BT and run it
         bt_with_evaluation_node = []
         for env_id in range(self.num_envs):
-            bt_with_evaluation_node.append('(1E' + self.current_bt[env_id] + ')')   # add evaluation node
+            bt_with_evaluation_node.append('(1H' + self.current_bt[env_id] + ')')   # add evaluation node
 
         # Behavior Tree Setup
         trees = []
@@ -654,8 +670,14 @@ class Simple_MultiBTEnv(MultiBTEnv):
 
         # Environment Finite State Machine Setup
         env_fsm = [SearchAndDeliverMachine() for _ in range(self.num_envs)]
+
+        # Set initial state if provided
+        if sim_initial_state_value is not None:
+            for fsm in env_fsm:
+                fsm.current_state_value = sim_initial_state_value
+
         env_state = [fsm.current_state.id for fsm in env_fsm]
-        env_state_history = [fsm.current_state.id for fsm in env_fsm]
+        env_state_value_history = [[fsm.current_state.value] for fsm in env_fsm]
         env_done = [False for _ in range(self.num_envs)]
         bb_shared_data_last = ["" for _ in range(self.num_envs)]
 
@@ -685,7 +707,7 @@ class Simple_MultiBTEnv(MultiBTEnv):
                         env_state[env_id] = env_fsm[env_id].current_state.id
 
                         # Stop the individual simulation if the FSM reached the accepted state
-                        if env_state[env_id] == 'D':
+                        if env_state[env_id] == 'H':
                             env_done[env_id] = True
                 except Exception as e:
                     # Stop the individual simulation if the FSM rejects the command
@@ -693,8 +715,8 @@ class Simple_MultiBTEnv(MultiBTEnv):
                         env_done[env_id] = True
 
                 # Stop the individual simulation if the FSM reached the maximum number of loops
-                env_state_history[env_id] += env_state[env_id]
-                if env_state_history[env_id].count(env_state[env_id]) >= (self.loop_allowed + 1):
+                env_state_value_history[env_id].append(env_fsm[env_id].current_state.value)
+                if env_state_value_history[env_id].count(env_fsm[env_id].current_state.value) >= (self.loop_allowed + 1):
                     env_done[env_id] = True
         
         rews = self._get_reward(env_state)
@@ -705,6 +727,10 @@ class Simple_MultiBTEnv(MultiBTEnv):
             trees[env_id].shutdown()
 
         trees.clear()
+
+        # Use info to store final state value
+        for env_id in range(self.num_envs):
+            infos.append(env_state_value_history[env_id])
 
         return obs, rews, dones, infos
     
@@ -770,6 +796,8 @@ def create_tree(env_id, tree_string, verbose = False):
         if len(tree_string) == 1:
             return behavior_dict[tree_string[0]](0)
         
+        is_decorator = False
+        
         # Select Condition Node as Parent Node
         condition_node = tree_string[1]
         if condition_node == '0':
@@ -778,12 +806,19 @@ def create_tree(env_id, tree_string, verbose = False):
             parent = py_trees.composites.Selector(f"Selector_{cond_num}", memory=False)
         elif condition_node == '2':
             parent = py_trees.composites.Parallel(f"Parallel_{cond_num}", policy=py_trees.common.ParallelPolicy.SuccessOnAll(synchronise=False))
+        elif condition_node == '3':
+            parent = py_trees.decorators.Inverter(f'Inverter_{cond_num}', behavior_dict[tree_string[2]](0))
+            is_decorator = True
     
         cond_num += 1
         record = False
 
         child_num = 0
         for n in tree_string[2:]:
+            
+            if is_decorator:
+                break
+    
             if record:
                 subtree_string += n
                 if n == '(':

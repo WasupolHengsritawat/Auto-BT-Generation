@@ -1,0 +1,9 @@
+digraph pastafarianism {
+ordering=out;
+graph [fontname="times-roman"];
+node [fontname="times-roman"];
+edge [fontname="times-roman"];
+Inverter_0 [label="Inverter_0", shape=ellipse, style=filled, fillcolor=ghostwhite, fontsize=9, fontcolor=black];
+AreObjectExistsOnInternalMap_0 [label="AreObjectExistsOnInternalMap_0", shape=ellipse, style=filled, fillcolor=gray, fontsize=9, fontcolor=black];
+Inverter_0 -> AreObjectExistsOnInternalMap_0;
+}

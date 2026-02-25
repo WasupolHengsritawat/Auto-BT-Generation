@@ -53,18 +53,34 @@ from cachetools import LRUCache
 #                 15 : None, #stop node
 #                 }
 
-                # Specials
-node_dict = {   0 : None,
-                1 : '0', #patrol_node
-                2 : '1', #find_target_node
-                3 : '2', #go_to_nearest_target
-                # Behaviors
-                4 : 'a', #patrol_node
-                5 : 'b', #find_target_node
-                6 : 'c', #go_to_nearest_target
-                # Conditions
-                7 : 'D', #are_object_existed_on_internal_map
-                }
+#                 # Specials
+# node_dict = {   0 : None,
+#                 1 : '0', #patrol_node
+#                 2 : '1', #find_target_node
+#                 3 : '2', #go_to_nearest_target
+#                 # Behaviors
+#                 4 : 'a', #patrol_node
+#                 5 : 'b', #find_target_node
+#                 6 : 'c', #go_to_nearest_target
+#                 # Conditions
+#                 7 : 'D', #are_object_existed_on_internal_map
+#                 }
+
+node_dict = { 
+    # Special
+    0: None,  
+    # Flow Controls 
+    1 : '0', #sequence_node
+    2 : '1', #fallback_node
+    3 : '2', #parallel_node
+    # Behaviors
+    4 : 'a', #patrol_node
+    5 : 'b', #find_target_node
+    6 : 'c', #go_to_nearest_target
+    7 : 'e', #go_to_spawn_node
+    8 : 'f', #picking_object_node
+    9 : 'g', #drop_object_node
+}
 
 # === Inverted character -> type index ===
 char_to_node_type = {v: k for k, v in node_dict.items() if v is not None}

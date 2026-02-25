@@ -1,0 +1,13 @@
+digraph pastafarianism {
+ordering=out;
+graph [fontname="times-roman"];
+node [fontname="times-roman"];
+edge [fontname="times-roman"];
+Sequence_0 [label="Sequence_0", shape=box, style=filled, fillcolor=orange, fontsize=9, fontcolor=black];
+AreObjectExistsOnInternalMap_0 [label="AreObjectExistsOnInternalMap_0", shape=ellipse, style=filled, fillcolor=gray, fontsize=9, fontcolor=black];
+Sequence_0 -> AreObjectExistsOnInternalMap_0;
+AreObjectNearby_1 [label="AreObjectNearby_1", shape=ellipse, style=filled, fillcolor=gray, fontsize=9, fontcolor=black];
+Sequence_0 -> AreObjectNearby_1;
+IsObjectInHand_2 [label="IsObjectInHand_2", shape=ellipse, style=filled, fillcolor=gray, fontsize=9, fontcolor=black];
+Sequence_0 -> IsObjectInHand_2;
+}

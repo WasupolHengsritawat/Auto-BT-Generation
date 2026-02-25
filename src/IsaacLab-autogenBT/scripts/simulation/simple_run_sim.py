@@ -35,7 +35,7 @@ from simple_behavior import (
 from env_state_machine import SearchAndDeliverMachine
 
 ######## Hyperparameters ########
-num_envs = 3
+num_envs = 1
 loop_allowed = 4
 
 # bt_string_array = ['(1H(0(1F(0(1E(0(1D(2ab))c))f))(1Be)g))'] * num_envs
@@ -65,25 +65,21 @@ loop_allowed = 4
 
 # bt_string_array = ['(2(1)(1)(1)b(0a(1)bc))'] * num_envs
 
-bt_string_array = ['(2b(0D(2)(2)(2)(2)(2)(2)))', '(2Dba(2)(2)(2)(2)(2)c)', '(0)']
+#######
+# bt_string_array = ['(2b(0D(2)(2)(2)(2)(2)(2)))', '(2Dba(2)(2)(2)(2)(2)c)', '(0)']
+#######
+
+bt_string_array = ['']
+# bt_string_array = ['(1(0(0B(3D)(3E)(3F)(3H))(2a(2)b))(0(0(3B)D(3E)(3F)(3H))c)(0(0(3B)DE(3F)(3H))f)(0(0(3B)(3D)(3E)F(3H))e)(0(0B(3D)(3E)F(3H))(0gb)))']
+# bt_string_array = ['(1(0(0B(3D)(3E)(3F)(3H))(2ba))(0(0(3B)D(3E)(3F)(3H))c)(0(0(3B)DE(3F)(3H))f)(0(0(3B)DEF(3H))e))']
+
+
+
 # bt_string_array = ['(2Dba(2)(2)(2)(2)(2)c)'] * num_envs
 
 # bt_string_array = ['(1E(0c(2ab)))'] * num_envs
 # bt_string_array = ['(1H)'] * num_envs
 #################################
-
-class TaskState:
-    def __init__(self, position: str, object_found: bool, object_picked: bool, object_delivered: bool):
-        self.position = position
-        self.object_found = object_found
-        self.object_picked = object_picked
-        self.object_delivered = object_delivered
-
-    def _is_object_found(self): return self.object_found
-    def _is_robot_at_object(self): return self.position == 'Object' or self.position == 'Final'
-    def _is_object_picked(self): return self.object_picked
-    def _is_robot_at_final(self): return self.position == 'Final'
-    def _is_object_delivered(self): return self.object_delivered
 
 def subtract_prefix(s: str, prefix: str) -> str:
     if s.startswith(prefix):
@@ -122,6 +118,8 @@ def create_tree(env_id, tree_string, verbose = False):
         if len(tree_string) == 1:
             return behavior_dict[tree_string[0]](0)
         
+        is_decorator = False
+        
         # Select Condition Node as Parent Node
         condition_node = tree_string[1]
         if condition_node == '0':
@@ -130,12 +128,19 @@ def create_tree(env_id, tree_string, verbose = False):
             parent = py_trees.composites.Selector(f"Selector_{cond_num}", memory=False)
         elif condition_node == '2':
             parent = py_trees.composites.Parallel(f"Parallel_{cond_num}", policy=py_trees.common.ParallelPolicy.SuccessOnAll(synchronise=False))
+        elif condition_node == '3':
+            parent = py_trees.decorators.Inverter(f'Inverter_{cond_num}', behavior_dict[tree_string[2]](0))
+            is_decorator = True
     
         cond_num += 1
         record = False
 
         child_num = 0
         for n in tree_string[2:]:
+            
+            if is_decorator:
+                break
+    
             if record:
                 subtree_string += n
                 if n == '(':
@@ -176,6 +181,7 @@ if __name__ == '__main__':
     for env_id in range(num_envs):
         # BT initialization
         root = create_tree(env_id, bt_string_array[env_id], verbose=False)
+        py_trees.display.render_dot_tree(root)
         tree = py_trees.trees.BehaviourTree(root)
         tree.setup(timeout=15)
         trees.append(tree)
@@ -207,6 +213,8 @@ if __name__ == '__main__':
 
             # Execute a BT tick
             trees[env_id].tick()
+            status = trees[env_id].root.status
+            print(status)
 
             # Update the action in the blackboard
             bb_client.set(f"action_{env_id}", subtract_prefix(bb_client.get(f"action_{env_id}"), bb_shared_data_last[env_id]))

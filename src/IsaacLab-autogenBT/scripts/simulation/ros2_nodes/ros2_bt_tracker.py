@@ -28,7 +28,7 @@ class BTStatusTrackerNode(Node):
                 10
             )
 
-        self.get_logger().info(f"BTStatusTrackerNode tracking {num_envs} environments.")
+        # self.get_logger().info(f"BTStatusTrackerNode tracking {num_envs} environments.")
 
     def make_callback(self, env_id):
         """
@@ -49,9 +49,17 @@ class BTStatusTrackerNode(Node):
         :return: Status string.
         """
         status_map = {
-            0: 'FAILURE',
             1: 'INVALID',
             2: 'RUNNING',
-            3: 'SUCCESS'
+            3: 'SUCCESS',
+            4: 'FAILURE',
         }
         return status_map.get(self.root_statuses.get(env_id), 'UNKNOWN')
+    
+    def reset_status(self, env_id: int):
+        """
+        Reset the root status for a specific environment.
+
+        :param env_id: The environment ID.
+        """
+        self.root_statuses[env_id] = None

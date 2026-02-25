@@ -84,7 +84,7 @@ def get_valid_action(bt_string, env, used_behavior_nodes):
     return all_actions
 
 class MCTSNode:
-    def __init__(self, state, env, policy_net, used_behavior_nodes = [], id = 0, parent_edge=None):
+    def __init__(self, state, env, policy_net = None, used_behavior_nodes = [], id = 0, parent_edge=None):
         """
         Represents a single state (node) in the MCTS tree for Behavior Tree construction.
 
@@ -99,6 +99,8 @@ class MCTSNode:
         self.policy_net = policy_net        # RvNN model for policy and value
         self.is_terminated = False          # Flag to indicate if this node is terminal
         self.parent_edge = parent_edge      # Parent node
+        self.reward = 0.0
+        self.visits = 0
         self.value = None
         self.used_behavior_nodes = used_behavior_nodes
         self.evaluated_bt = None           # Store the BT used to evaluate this node (if modelfree)
@@ -111,19 +113,23 @@ class MCTSNode:
         # Run policy network in inference mode without tracking gradients to avoid
         # accumulating autograd graphs during many predictions (memory leak).
         import torch as _torch
-        with _torch.no_grad():
-            action_probs, pred_rew = self.policy_net.predict(state)
+        if policy_net is not None:
+            with _torch.no_grad():
+                action_probs, pred_rew = self.policy_net.predict(state)
 
-        # Ensure probs are detached from GPU
-        action_probs = action_probs.detach().cpu().numpy()
+            # Ensure probs are detached from GPU
+            action_probs = action_probs.detach().cpu().numpy()
 
         # Initialize edges for each action
         self.edges = []
         for nt, loc in self.all_actions:
-            if loc == 0:
-                prior=float(action_probs[nt])
+            if policy_net is not None:
+                if loc == 0:
+                    prior=float(action_probs[nt])
+                else:
+                    prior=float(action_probs[3 + nt + (self.env.num_node_types - 1) * (loc - 1)])
             else:
-                prior=float(action_probs[3 + nt + (self.env.num_node_types - 1) * (loc - 1)])
+                prior=1.0 / len(self.all_actions)
 
             self.edges.append(MCTSEdge(
                     parent=self, 
@@ -153,8 +159,10 @@ class MCTS:
     def __init__(self, env, 
                  policy_net=None, 
                  num_simulations=50, 
+                 num_eval=1,
                  num_pivots = 5, 
                  exploration_weight=1.0, 
+                 power_mean_constant=1.0,
                  fitness_mode = None, 
                  q_epsilon = 1e-3,
                  allow_duplicate_nodes = True, 
@@ -182,6 +190,8 @@ class MCTS:
         self.q_epsilon = q_epsilon
         self.traj_branch_histories = [[] for _ in range(self.env.num_envs)]
         self.allow_duplicate_nodes = allow_duplicate_nodes
+        self.num_eval = num_eval
+        self.power_mean_constant = power_mean_constant
 
         self.selected_depth = [0 for _ in range(self.env.num_envs)]
         self.node_depth_dict = {0: []}
@@ -190,8 +200,18 @@ class MCTS:
 
         if policy_net is not None:
             self.policy_net = policy_net.to(device)
+        else:
+            self.policy_net = None
 
-    def run_search(self, root_state, temperature=1.0, dirichlet_noise_at_root=True, PUCT=True, verbose=False, export_path=None):
+    def run_search(
+            self, 
+            root_state, 
+            sim_initial_state_value = None,
+            temperature=1.0, 
+            dirichlet_noise_at_root=True, 
+            PUCT=True, 
+            verbose=False, 
+            export_path=None):
         """
         Perform Monte Carlo Tree Search (MCTS) from a shared root Behavior Tree (BT) state.
 
@@ -214,7 +234,9 @@ class MCTS:
             - nt_prob (np.ndarray): Normalized visit-based probability distribution over node types.
             - loc_prob (np.ndarray): Normalized visit-based probability distribution over node locations.
         """
+        self.sim_initial_state_value = sim_initial_state_value
         self.transposition_nodes = []
+
         # reset trajectory branch histories to avoid unbounded growth across searches
         self.traj_branch_histories = [[] for _ in range(self.env.num_envs)]
 
@@ -224,11 +246,13 @@ class MCTS:
         else:
             used_behavior_nodes_at_root = []
             
+        # Initialize the root node
         root = MCTSNode(state=root_state, env=self.env, policy_net=self.policy_net, used_behavior_nodes=used_behavior_nodes_at_root)
         self.node_depth_dict = {0: [root]}
         self.non_terminated_node_list = []
         # >> print(f"Root possible actions: {root.all_actions}")
 
+        # Initialize pivots for each environment
         pivots = [root for _ in range(self.env.num_envs)]
         self.selected_depth = [sum(1 for c in root.state if c not in ('(', ')')) for _ in range(self.env.num_envs)]
 
@@ -263,7 +287,7 @@ class MCTS:
 
             # Evaluate the expanded nodes
             # print('Evaluating...')
-            rewards = self.evaluate(leave_nodes)
+            rewards = self.evaluate(leave_nodes, num_eval=self.num_eval)
             if verbose: evaluate_time = time.time()
 
             # Pivot new roots
@@ -460,17 +484,25 @@ class MCTS:
                     else:
                         self.non_terminated_node_list.append(edges[env_id].child)
 
-    def evaluate(self, nodes):
+    def evaluate(self, nodes, num_eval=1):
         """
         Evaluates the expanded nodes using the policy network.
 
         :param nodes: Nodes to evaluate.
         :return: List of rewards for each node.
         """
-        if self.model_based:
-            return self._evaluate_modelbased(nodes)
-        
-        return self._evaluate_modelfree(nodes)
+        rews_list = []
+        for _ in range(num_eval):
+            if self.model_based:
+                rews = self._evaluate_modelbased(nodes)
+            else:
+                rews = self._evaluate_modelfree(nodes)
+
+            rews_list.append(rews)
+            
+        avg_list = [sum(column) / len(column) for column in zip(*rews_list)]
+
+        return avg_list
 
     def _evaluate_modelfree(self, nodes):
         """
@@ -501,26 +533,32 @@ class MCTS:
                 # Get the action probablities from the policy network
                 # Inference: prevent autograd graph allocation
                 import torch as _torch
-                with _torch.no_grad():
-                    action_probs, _ = self.policy_net.predict(state)
+                if self.policy_net is not None:
+                    with _torch.no_grad():
+                        action_probs, _ = self.policy_net.predict(state)
+                   
+                    # Convert torch tensors to numpy arrays
+                    action_probs = action_probs.detach().cpu().numpy()
 
-                # Convert torch tensors to numpy arrays
-                action_probs = action_probs.detach().cpu().numpy()
-  
-                # Get all possible actions
-                bt_string = state
-                all_actions = get_valid_action(bt_string, self.env, used_behavior_nodes[env_id])
+                    # Get all possible actions
+                    bt_string = state
+                    all_actions = get_valid_action(bt_string, self.env, used_behavior_nodes[env_id])
 
-                # Select the best action according to its joint probability
-                probs = []
-                for nt, loc in all_actions:
-                    if loc == 0:
-                        probs.append(float(action_probs[nt]))
-                    else:
-                        probs.append(float(action_probs[3 + nt + (self.env.num_node_types - 1) * (loc - 1)]))
+                    # Select the best action according to its joint probability
+                    probs = []
+                    for nt, loc in all_actions:
+                        if loc == 0:
+                            probs.append(float(action_probs[nt]))
+                        else:
+                            probs.append(float(action_probs[3 + nt + (self.env.num_node_types - 1) * (loc - 1)]))
 
-                best_ind = np.where(probs == np.max(probs))[0]
-                selected_ind = np.random.choice(best_ind)
+                    best_ind = np.where(probs == np.max(probs))[0]
+                    selected_ind = np.random.choice(best_ind)
+                else:
+                    # Randomly select an action
+                    bt_string = state
+                    all_actions = get_valid_action(bt_string, self.env, used_behavior_nodes[env_id])
+                    selected_ind = np.random.choice(len(all_actions))
 
                 nt, loc = all_actions[selected_ind]
 
@@ -547,11 +585,11 @@ class MCTS:
             nodes[env_id].evaluated_bt = states[env_id]
 
         # Get the reward by running the BT in IsaacSim Simulation
-        _, rews, _, infos =  self.env.evaluate_bt_in_sim()
+        _, rews, _, infos =  self.env.evaluate_bt_in_sim(self.sim_initial_state_value)
 
         # Update the value for each node
         for env_id in range(self.env.num_envs):
-            nodes[env_id].value = rews[env_id]
+            nodes[env_id].reward = rews[env_id]
 
         return rews
 
@@ -573,12 +611,10 @@ class MCTS:
             with _torch.no_grad():
                 nt_probs, loc_probs, pred_rew = self.policy_net.predict(state)
             rew = float(pred_rew.detach().cpu().item())
-
-            nodes[env_id].reward = rew
             rews.append(rew)
 
             # Update the value for each node
-            nodes[env_id].value = rew
+            nodes[env_id].reward = rew
 
         return rews
     
@@ -598,7 +634,7 @@ class MCTS:
         return pivots
     
     def _random_fitness(self, nodes):
-        values = np.array([node.value for node in nodes])
+        values = np.array([node.reward for node in nodes])
 
         # Generate a random key to break ties
         rand_key = np.random.random(len(nodes))
@@ -609,7 +645,7 @@ class MCTS:
         return ind
     
     def _less_nodes_fitness(self, nodes):
-        values = np.array([node.value for node in nodes])
+        values = np.array([node.reward for node in nodes])
         num_nodes = [sum(1 for c in node.state if c not in ('(', ')')) for node in nodes]
 
         # Sort by: (1) values descending, (2) numnode ascending
@@ -627,12 +663,12 @@ class MCTS:
         for env_id in range(self.env.num_envs):
             node = nodes[env_id]        # leaf node
             reward = rewards[env_id]    # reward for the leaf node
+
+            # Establish leaf node statistics before backpropagation
+            if node.value is None:
+                node.value = reward
    
             while True:
-                # If node.parent_edge is None, we reached the root
-                if node.parent_edge is None:
-                    break
-                
                 if len(node.parent_edge) > 1:
                     # If the node has multiple parent edges (transposition node), update only the traversed edge
                     try:
@@ -643,13 +679,25 @@ class MCTS:
                     # Find the traversed edge
                     traversed_edge = node.parent_edge[0]
 
-                # Update the edge statistics
                 traversed_edge.visits += 1
-                traversed_edge.cum_reward += reward
-                traversed_edge.q = traversed_edge.cum_reward / traversed_edge.visits
+                node.visits += 1
+
+                # Update edge statistics
+                # traversed_edge.cum_reward += reward
+                # traversed_edge.q = traversed_edge.cum_reward / traversed_edge.visits
+
+                traversed_edge.q = node.value
+
 
                 # Update the node to its parent
                 node = traversed_edge.parent
+
+                # If node.parent_edge is None, we reached the root
+                if node.parent_edge is None:
+                    break
+            
+                # Update the node value using power mean of its children's Q values
+                node.value = sum([(edge.visits/node.visits) * (edge.q ** self.power_mean_constant) for edge in node.edges]) ** (1 / self.power_mean_constant)
 
     def export_tree(self, root, save_path="mcts_tree.json"):
         """
@@ -667,7 +715,7 @@ class MCTS:
             nodes.append({
                 "id": node.id,
                 "state": node.state,
-                "value": node.value,
+                "value": node.reward,
                 "evaluated_bt": node.evaluated_bt,
                 "is_terminal": node.is_terminated
             })
@@ -815,9 +863,9 @@ class MCTS:
             node = queue.popleft()
             parent_size = bt_size(node.state)
 
-            # If cached, populate node.value immediately
+            # If cached, populate node.reward immediately
             if node.state in eval_cache:
-                node.value = eval_cache[node.state]
+                node.reward = eval_cache[node.state]
                 node.evaluated_bt = node.state
                 evaluated.add(node.id)
 
@@ -826,7 +874,7 @@ class MCTS:
                 nodes_json.append({
                     "id": node.id,
                     "state": node.state,
-                    "value": node.value if node.id in evaluated else None,
+                    "value": node.reward if node.id in evaluated else None,
                     "evaluated_bt": node.evaluated_bt if node.id in evaluated else None,
                     "is_terminal": node.is_terminated
                 })
@@ -919,7 +967,7 @@ class MCTS:
                         for depth_nodes in self.node_depth_dict.values():
                             for n_node in depth_nodes:
                                 if n_node.state == st and getattr(n_node, "value", None) is None:
-                                    n_node.value = eval_cache[st]
+                                    n_node.reward = eval_cache[st]
                                     n_node.evaluated_bt = st
                                     evaluated.add(n_node.id)
 

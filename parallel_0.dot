@@ -1,0 +1,25 @@
+digraph pastafarianism {
+ordering=out;
+graph [fontname="times-roman"];
+node [fontname="times-roman"];
+edge [fontname="times-roman"];
+Parallel_0 [label="Parallel_0\nSuccessOnAll", shape=parallelogram, style=filled, fillcolor=gold, fontsize=9, fontcolor=black];
+Parallel_1 [label="Parallel_1\nSuccessOnAll", shape=parallelogram, style=filled, fillcolor=gold, fontsize=9, fontcolor=black];
+Parallel_0 -> Parallel_1;
+PickObject_0 [label="PickObject_0", shape=ellipse, style=filled, fillcolor=gray, fontsize=9, fontcolor=black];
+Parallel_1 -> PickObject_0;
+DropObject_1 [label="DropObject_1", shape=ellipse, style=filled, fillcolor=gray, fontsize=9, fontcolor=black];
+Parallel_1 -> DropObject_1;
+GoToSpawnNode_2 [label="GoToSpawnNode_2", shape=ellipse, style=filled, fillcolor=gray, fontsize=9, fontcolor=black];
+Parallel_1 -> GoToSpawnNode_2;
+Selector_2 [label="Selector_2", shape=octagon, style=filled, fillcolor=cyan, fontsize=9, fontcolor=black];
+Parallel_1 -> Selector_2;
+Sequence_2 [label="Sequence_2", shape=box, style=filled, fillcolor=orange, fontsize=9, fontcolor=black];
+Parallel_1 -> Sequence_2;
+"Selector_2*" [label="Selector_2*", shape=octagon, style=filled, fillcolor=cyan, fontsize=9, fontcolor=black];
+Parallel_1 -> "Selector_2*";
+FindTarget_3 [label="FindTarget_3", shape=ellipse, style=filled, fillcolor=gray, fontsize=9, fontcolor=black];
+Parallel_1 -> FindTarget_3;
+PatrolNode_4 [label="PatrolNode_4", shape=ellipse, style=filled, fillcolor=gray, fontsize=9, fontcolor=black];
+Parallel_1 -> PatrolNode_4;
+}

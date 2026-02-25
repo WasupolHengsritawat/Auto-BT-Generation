@@ -1,18 +1,21 @@
 from statemachine import StateMachine, State, Event
+from collections import namedtuple
+
+Situation = namedtuple('Situation', ['B', 'D', 'E', 'F', 'H'])
 
 class SearchAndDeliverMachine(StateMachine):
     """
     A state machine for a robot that searches for objects and delivers them.
     """
     # Define States
-    A = State('Initial State', initial=True)
-    B = State('Patroling')
-    C = State('Searching -> Object found')
-    D = State('Arrived at object location')
-    E = State('Object Picked')
-    F = State('Initial State with object in hand')
-    G = State('Initial State with known object location')
-    H = State('Final State', final=True)
+    A = State('Initial State',                            value = Situation(True,  False, False, False, False), initial=True)                   # Situation: {'B': True,  'D': False, 'E': False, 'F': False, 'H': False}
+    B = State('Patroling',                                value = Situation(False, False, False, False, False))                                 # Situation: {'B': False, 'D': False, 'E': False, 'F': False, 'H': False}
+    C = State('Searching -> Object found',                value = Situation(False, True,  False, False, False))                                 # Situation: {'B': False, 'D': True,  'E': False, 'F': False, 'H': False}
+    D = State('Arrived at object location',               value = Situation(False, True,  True,  False, False))                                 # Situation: {'B': False, 'D': True,  'E': True,  'F': False, 'H': False}
+    E = State('Object Picked',                            value = Situation(False, False, False, True,  False))                                 # Situation: {'B': False, 'D': False, 'E': False, 'F': True,  'H': False}
+    F = State('Initial State with object in hand',        value = Situation(True,  False, False, True , False))                                 # Situation: {'B': True,  'D': False, 'E': False, 'F': True,  'H': False}
+    G = State('Initial State with known object location', value = Situation(True,  True,  False, False, False))                                 # Situation: {'B': True,  'D': True,  'E': False, 'F': False, 'H': False}
+    H = State('Final State',                              value = Situation(False, False, False, False, True ), final=True)                     # Situation: {'B': False, 'D': False, 'E': False, 'F': False, 'H': True }
 
     # Define Events
     a  = Event(A.to(B)       | B.to.itself() | C.to.itself() | D.to(C)       | E.to.itself() | F.to(E)      | G.to(C)      , name='Patrol')

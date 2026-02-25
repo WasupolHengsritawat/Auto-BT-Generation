@@ -3,10 +3,12 @@
 ###
 import os
 import subprocess
+import signal
+import time
 
 processes = []
 
-def run_simple_BTs(bt_string_array, number_of_target_to_success = 5, verbose=False):
+def run_simple_BTs(bt_string_array, verbose=False):
     """
     Launch BTs as separate subprocesses.
     
@@ -32,15 +34,21 @@ def run_simple_BTs(bt_string_array, number_of_target_to_success = 5, verbose=Fal
     
     return processes
 
-def stop_simple_BTs(verbose=False):
-    """
-    Stop all running BT processes by terminating them gracefully.
-    """
+def stop_simple_BTs(verbose=False, timeout=5.0):
     global processes
     for process in processes:
-        if verbose: print(f"Terminating process with PID: {process.pid}")
-        process.terminate()  # Send SIGTERM
-    # Optionally, wait for each process to exit
+        if process.poll() is None:  # If still running
+            if verbose:
+                print(f"[INFO] Terminating PID {process.pid}")
+            
+            # Use process.terminate() instead of os.killpg
+            process.terminate() 
+            
+    # Optional: Wait briefly to ensure they are gone
     for process in processes:
-        process.wait()
-    if verbose: print("All BT processes have been terminated.")
+        try:
+            process.wait(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            process.kill() # Force kill if terminate didn't work
+    
+    processes = [] # Clear the list

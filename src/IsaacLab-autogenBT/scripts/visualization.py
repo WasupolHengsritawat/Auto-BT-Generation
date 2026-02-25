@@ -10,11 +10,18 @@ import dash_bootstrap_components as dbc
 script_dir = os.path.dirname(os.path.abspath(__file__))
 logs_dir = os.path.abspath(os.path.join(script_dir, "..", "logs"))
 
-date_time = "2025-12-09_12-42-00"
-model_name = "rvnn_iter000"
-count = 1
+date_time = "2026-02-10_21-48-33"
+# model_name = "rvnn_iter000"
+situation = 0
+count = 0
 
-json_path = os.path.join(logs_dir, date_time, model_name, f"mcts_tree_{count}.json")
+# json_path = os.path.join(logs_dir, date_time, model_name, f"mcts_tree_{count}.json")
+json_path = os.path.join(
+    logs_dir, 
+    date_time, 
+    f"situation_{situation}", 
+    # "bt_1",
+    f"mcts_tree_{count}.json")
 # ------------------------------------------------
 
 # Load JSON

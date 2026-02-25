@@ -201,14 +201,35 @@ def modify_bt(node_dict, current_bt, node_type, node_location):
         
     return current_bt
 
-def dataset_generation(node_dict, nodes_limit, num_search_agents, num_search, policy_net, exploration_weight, num_node_to_explore = 10, epsilon = 0.7, allow_duplicate_nodes=True, fitness_mode="random", device='cuda:0', verbose = False, log_file=None):
+def dataset_generation(
+        node_dict, 
+        nodes_limit, 
+        num_search_agents, 
+        num_search, 
+        policy_net, 
+        exploration_weight, 
+        num_node_to_explore = 10, 
+        epsilon = 0.7, 
+        allow_duplicate_nodes=True, 
+        fitness_mode="random", 
+        device='cuda:0', 
+        verbose = False, 
+        log_file=None
+    ):
     policy_net = policy_net.to(device)
 
     env = Simple_MultiBTEnv(node_dict, 
                             nodes_limit, 
                             num_envs=num_search_agents,
                             verbose=False)
-    mcts = MCTS(env, policy_net, num_simulations=num_search, exploration_weight=exploration_weight, allow_duplicate_nodes=allow_duplicate_nodes, fitness_mode=fitness_mode, model_based=False, device=device)
+    mcts = MCTS(env, 
+                policy_net, 
+                num_simulations=num_search, 
+                exploration_weight=exploration_weight, 
+                allow_duplicate_nodes=allow_duplicate_nodes, 
+                fitness_mode=fitness_mode, 
+                model_based=False, 
+                device=device)
 
     bt_string = ''
 
@@ -333,18 +354,40 @@ if __name__ == "__main__":
     #                 14 : None, #stop node
     #                 }
     
-                    # Specials
-    node_dict = {   0 : None,
-                    1 : '(0)', #sequence_node
-                    2 : '(1)', #fallback_node
-                    3 : '(2)', #parallel_node
-                    # Behaviors
-                    4 : 'a', #patrol_node
-                    5 : 'b', #find_target_node
-                    6 : 'c', #go_to_nearest_target
-                    # Conditions
-                    7 : 'D', #are_object_existed_on_internal_map
-                    }
+    #                 # Specials
+    # node_dict = {   0 : None,
+    #                 1 : '(0)', #sequence_node
+    #                 2 : '(1)', #fallback_node
+    #                 3 : '(2)', #parallel_node
+    #                 # Behaviors
+    #                 4 : 'a', #patrol_node
+    #                 5 : 'b', #find_target_node
+    #                 6 : 'c', #go_to_nearest_target
+    #                 # Conditions
+    #                 7 : 'D', #are_object_existed_on_internal_map
+    #                 }
+
+    node_dict = { 
+        # Special
+        0: None,  
+        # Flow Controls 
+        1 : '(0)', #sequence_node
+        2 : '(1)', #fallback_node
+        3 : '(2)', #parallel_node
+        # Behaviors
+        4 : 'a', #patrol_node
+        5 : 'b', #find_target_node
+        6 : 'c', #go_to_nearest_target
+        7 : 'e', #go_to_spawn_node
+        8 : 'f', #picking_object_node
+        9 : 'g', #drop_object_node
+        # # Conditions
+        # 10 : 'B', #is_robot_at_the_spawn_node
+        # 11 : 'D', #are_object_existed_on_internal_map
+        # 12 : 'E', #are_object_nearby_node
+        # 13 : 'F', #is_object_in_hand_node
+        # 14 : 'H'  #are_five_objects_at_spawn
+    }
     
     # Maximum of nodes in the BT
     nodes_limit = 10
@@ -360,7 +403,7 @@ if __name__ == "__main__":
 
     # MMCGS Settings
     exploration_weight = 1.0    
-    fitness_mode = 'less_nodes'
+    fitness_mode = None
     allow_duplicate_nodes = True
 
     epsilon = 0.0
